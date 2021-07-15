@@ -1,0 +1,8 @@
+#mainHerdDouble: mainHerdDouble.cpp
+#	g++ mainHerdDouble.cpp -o mainHerdDouble -std=c++17 -O2 -larmadillo
+
+#test: test.cpp
+#	g++ test.cpp -o test -std=c++17 -O2 -larmadillo
+
+ifopt: ifopt.cpp
+	g++ ifopt.cpp -o ifopt
