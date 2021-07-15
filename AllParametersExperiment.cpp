@@ -14,8 +14,8 @@ double dt = 0.25;
 double Rs = 1000;
 double rho_P = 1;
 
-int rP[2] = {14,-1};
-int rS[2] = {22,-36};
+vec rP(2);
+vec rS(2);
 
 int wW=20; // World width
 int lW=30; //World length
@@ -29,6 +29,8 @@ double uma;
 double rhoA_safe;
 
 void calControlLimits() {
+    rP = {14,-1};
+    rS = {22,-36};
     if (C_d != 0)
     {
         uma = C_d * vma * vma; //temporary safe distances (not based on the quadratic drag term
@@ -102,7 +104,7 @@ double RA01 = RA0;
 double rA0[2],thetaA0;
 mat rA(2,NA, fill::zeros);
 mat vA(2,NA, fill::zeros);
-double XA0[4][NA];
+mat XA0(4,NA);
 double rA_follow[2][NA];
 double RA;
 double rho_S;
@@ -128,10 +130,10 @@ void InitializeAttackers() {
 
     for (size_t i = 0; i < NA; i++)
     {
-        XA0[0][i] = rA(0,i);
-        XA0[1][i] = rA(1,i);
-        XA0[2][i] = vA(0,i);
-        XA0[3][i] = vA(1,i);
+        XA0(0,i) = rA(0,i);
+        XA0(1,i) = rA(1,i);
+        XA0(2,i) = vA(0,i);
+        XA0(3,i) = vA(1,i);
     }
     
     for (size_t i = 0; i < NA; i++)
@@ -146,17 +148,17 @@ void InitializeAttackers() {
     
     for (size_t i = 0; i < NA; i++)
     {
-        rAcm0[0] += XA0[0][i];
-        rAcm0[1] += XA0[1][i];
-        vAcm0[0] += XA0[2][i];
-        vAcm0[1] += XA0[3][i];
+        rAcm0[0] += XA0(0,i);
+        rAcm0[1] += XA0(1,i);
+        vAcm0[0] += XA0(2,i);
+        vAcm0[1] += XA0(3,i);
     }
     rAcm0[0] = rAcm0[0] / NA;
     rAcm0[1] = rAcm0[1] / NA;
     vAcm0[0] = vAcm0[0] / NA;
     vAcm0[1] = vAcm0[1] / NA;
 
-    double thetaAcm0 = atan2(rAcm0[1]-rP[1],rAcm0[0]-rP[0]);
+    double thetaAcm0 = atan2(rAcm0[1]-rP(1),rAcm0[0]-rP(0));
     rho_Acon = 1.3*RA0;  //radius of the connectivity region
     
     rho_S= 13;   //radius of the safe area

@@ -27,7 +27,7 @@ void AllocateMemory() {
     {
         for (size_t j = 0; j < NA; j++)
         {
-            XA(i,j) = XA0[i][j];
+            XA(i,j) = XA0(i,j);
         }
         
     }
@@ -135,7 +135,9 @@ void initial_contorl() {
     }
     output defender_graph_open = findCommGraphAndFormDist(ND+1, 4, RDF_open);
     R_DD_string = 1.5 * defender_graph_close.Rij_tilde(0,1);
+    cout << "R_DD_string: " << R_DD_string << endl;
     RDF_closed = 1.1 * rho_sn;
+    cout << "RDF_closed " << RDF_closed << endl;
     WDString = arma::zeros<mat>(ND, ND);
 }
 

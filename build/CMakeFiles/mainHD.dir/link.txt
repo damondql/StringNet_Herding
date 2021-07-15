@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o -o mainHD  -O2 -larmadillo 

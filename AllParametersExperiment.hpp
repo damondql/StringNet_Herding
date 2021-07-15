@@ -21,8 +21,8 @@ extern double rho_P;    //Radius of the protected area
 
 
 //Initial Positions of the protected and safe area
-extern int rP [2];
-extern int rS [2];
+extern arma::vec rP;
+extern arma::vec rS;
 extern double rho_S;
 
 // Attackers

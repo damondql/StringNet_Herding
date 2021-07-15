@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/damon/Documents/Aero/EIGEN3_INCLUDE_DIR -I/home/damon/Documents/Aero/ifopt_INCLUDE_DIRS -I/home/damon/softwares/eigen-master -isystem /usr/include/eigen3
+CXX_INCLUDES = -I/home/damon/Documents/Lab/Aero/summer-research-1/ARMADILLO_INCLUDE_DIRS -I/home/damon/Documents/Lab/Aero/summer-research-1/EIGEN3_INCLUDE_DIR -I/home/damon/Documents/Lab/Aero/summer-research-1/ifopt_INCLUDE_DIRS -I/home/damon/softwares/eigen-master -isystem /usr/include/eigen3
 
 CXX_FLAGS = 
 
