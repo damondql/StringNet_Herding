@@ -63,8 +63,7 @@ CMAKE_BINARY_DIR = /home/damon/Documents/Lab/Aero/summer-research-1/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/mainHD.dir/all
-all: CMakeFiles/findShortestPath.dir/all
+all: CMakeFiles/test1.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -72,61 +71,34 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/mainHD.dir/clean
-clean: CMakeFiles/findShortestPath.dir/clean
+clean: CMakeFiles/test1.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/mainHD.dir
+# Target rules for target CMakeFiles/test1.dir
 
 # All Build rule for target.
-CMakeFiles/mainHD.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mainHD.dir/build.make CMakeFiles/mainHD.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mainHD.dir/build.make CMakeFiles/mainHD.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles --progress-num=3,4 "Built target mainHD"
-.PHONY : CMakeFiles/mainHD.dir/all
+CMakeFiles/test1.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test1.dir/build.make CMakeFiles/test1.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test1.dir/build.make CMakeFiles/test1.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles --progress-num=1,2 "Built target test1"
+.PHONY : CMakeFiles/test1.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/mainHD.dir/rule: cmake_check_build_system
+CMakeFiles/test1.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles 2
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/mainHD.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/test1.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles 0
-.PHONY : CMakeFiles/mainHD.dir/rule
+.PHONY : CMakeFiles/test1.dir/rule
 
 # Convenience name for target.
-mainHD: CMakeFiles/mainHD.dir/rule
-.PHONY : mainHD
+test1: CMakeFiles/test1.dir/rule
+.PHONY : test1
 
 # clean rule for target.
-CMakeFiles/mainHD.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mainHD.dir/build.make CMakeFiles/mainHD.dir/clean
-.PHONY : CMakeFiles/mainHD.dir/clean
-
-#=============================================================================
-# Target rules for target CMakeFiles/findShortestPath.dir
-
-# All Build rule for target.
-CMakeFiles/findShortestPath.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/findShortestPath.dir/build.make CMakeFiles/findShortestPath.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/findShortestPath.dir/build.make CMakeFiles/findShortestPath.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles --progress-num=1,2 "Built target findShortestPath"
-.PHONY : CMakeFiles/findShortestPath.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/findShortestPath.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles 2
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/findShortestPath.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles 0
-.PHONY : CMakeFiles/findShortestPath.dir/rule
-
-# Convenience name for target.
-findShortestPath: CMakeFiles/findShortestPath.dir/rule
-.PHONY : findShortestPath
-
-# clean rule for target.
-CMakeFiles/findShortestPath.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/findShortestPath.dir/build.make CMakeFiles/findShortestPath.dir/clean
-.PHONY : CMakeFiles/findShortestPath.dir/clean
+CMakeFiles/test1.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test1.dir/build.make CMakeFiles/test1.dir/clean
+.PHONY : CMakeFiles/test1.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

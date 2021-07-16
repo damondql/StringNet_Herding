@@ -1,6 +1,9 @@
-#include "AllParametersExperiment.cpp"
+
+// #include "AllParametersExperiment.cpp"
 #include "symDerivative.cpp"
 #include "findCommGraphAndFormDist.cpp"
+#include "defInitDesirePos.cpp"
+// #include "findCoordOnPath.cpp"
 #include <armadillo>
 
 using namespace std;
@@ -31,11 +34,11 @@ void AllocateMemory() {
         }
         
     }
-    for (size_t i = 0; i < XD0.size(); i++)
+    for (size_t i = 0; i < XD0.n_rows; i++)
     {
-        for (size_t j = 0; j < XD0[0].size(); j++)
+        for (size_t j = 0; j < XD0.n_cols; j++)
         {
-            XD(i,j) = XD0[i][j];
+            XD(i,j) = XD0(i,j);
         }
         
     }
@@ -116,14 +119,13 @@ void initial_contorl() {
     arr_norm_F_AO=minEAO;
     std::complex<double> comp = {rA(0,0)-rP[0],rA(1,0) - rP[1]};
     RPA=sqrt(std::norm(comp));
-    cout << "RPA: " << RPA << endl;
     epsilon=M_PI/100;
     RAD=RAD_max;
     RA0_des=0;
     Rii0 = RA0*sqrt(2*(1-cos(2*M_PI/NA)));
     Rii1=Rii0*sqrt(2*(1-cos(180-2*M_PI/NA)));
-    output attacker_graph = findCommGraphAndFormDist(NA,1,RA);
-    output defender_graph_close = findCommGraphAndFormDist(ND+1, 2, rho_sn);
+    CommGraph attacker_graph = findCommGraphAndFormDist(NA,1,RA);
+    CommGraph defender_graph_close = findCommGraphAndFormDist(ND+1, 2, rho_sn);
     double RDF_open = 0;
     if (flagExp == 1) {
         RDF_open = 4.4;
@@ -133,12 +135,11 @@ void initial_contorl() {
     } else {
         RDF_open = rho_sn + 20;
     }
-    output defender_graph_open = findCommGraphAndFormDist(ND+1, 4, RDF_open);
+    CommGraph defender_graph_open = findCommGraphAndFormDist(ND+1, 4, RDF_open);
     R_DD_string = 1.5 * defender_graph_close.Rij_tilde(0,1);
-    cout << "R_DD_string: " << R_DD_string << endl;
     RDF_closed = 1.1 * rho_sn;
-    cout << "RDF_closed " << RDF_closed << endl;
     WDString = arma::zeros<mat>(ND, ND);
+    cout  << "RDF_closed: " << RDF_closed << endl;
 }
 
 
@@ -148,4 +149,15 @@ int main() {
     AllocateMemory();
     measurements(2);
     initial_contorl();
+    arma::vec rAcm = {5.9807,-33.2064};
+    arma::vec rP = {14,-1};
+    path_elem p = findShortestPath(rAcm, rP);
+    p.rV.print("rV: ");
+    p.S.print("S: ");
+    double q = 16.0949;
+    CoorOnPath A = findCoordOnPath(q, p);
+    A.rp.print("rDFc0: ");
+    A.thetap.print("thetaAcom0: ");
+    YA.print("YA:");
+    defInitDesiredPos(YA, XD0, NA, ND, RDF_open, v_maxA[0], 105);
 }

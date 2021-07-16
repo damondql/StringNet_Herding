@@ -1,8 +1,6 @@
-CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: \
- /home/damon/Documents/Lab/Aero/summer-research-1/mainHerdDouble.cpp \
- /usr/include/stdc-predef.h \
- /home/damon/Documents/Lab/Aero/summer-research-1/symDerivative.cpp \
- /usr/include/c++/9/iostream \
+CMakeFiles/test1.dir/defInitDesirePos.cpp.o: \
+ /home/damon/Documents/Lab/Aero/summer-research-1/defInitDesirePos.cpp \
+ /usr/include/stdc-predef.h /usr/include/c++/9/iostream \
  /usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/os_defines.h \
  /usr/include/features.h /usr/include/x86_64-linux-gnu/sys/cdefs.h \
@@ -137,34 +135,8 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: \
  /usr/include/c++/9/bits/locale_facets.tcc \
  /usr/include/c++/9/bits/basic_ios.tcc \
  /usr/include/c++/9/bits/ostream.tcc /usr/include/c++/9/istream \
- /usr/include/c++/9/bits/istream.tcc /usr/include/c++/9/math.h \
- /usr/include/c++/9/cmath /usr/include/math.h \
- /usr/include/x86_64-linux-gnu/bits/math-vector.h \
- /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
- /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h \
- /usr/include/x86_64-linux-gnu/bits/fp-logb.h \
- /usr/include/x86_64-linux-gnu/bits/fp-fast.h \
- /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h \
- /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
- /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h \
- /usr/include/x86_64-linux-gnu/bits/iscanonical.h \
- /usr/include/c++/9/complex /usr/include/c++/9/sstream \
- /usr/include/c++/9/bits/sstream.tcc /usr/include/c++/9/vector \
- /usr/include/c++/9/bits/stl_construct.h \
- /usr/include/c++/9/bits/stl_uninitialized.h \
- /usr/include/c++/9/bits/stl_vector.h \
- /usr/include/c++/9/bits/stl_bvector.h /usr/include/c++/9/bits/vector.tcc \
- /usr/include/c++/9/algorithm /usr/include/c++/9/utility \
- /usr/include/c++/9/bits/stl_relops.h /usr/include/c++/9/bits/stl_algo.h \
- /usr/include/c++/9/bits/algorithmfwd.h \
- /usr/include/c++/9/bits/stl_heap.h /usr/include/c++/9/bits/stl_tempbuf.h \
- /usr/include/c++/9/bits/uniform_int_dist.h /usr/include/c++/9/limits \
- /usr/include/c++/9/complex.h /usr/include/c++/9/ccomplex \
- /usr/include/complex.h /usr/include/x86_64-linux-gnu/bits/mathdef.h \
- /usr/include/x86_64-linux-gnu/bits/cmathcalls.h \
- /home/damon/Documents/Lab/Aero/summer-research-1/symDerivative.hpp \
- /home/damon/Documents/Lab/Aero/summer-research-1/findCommGraphAndFormDist.cpp \
- /usr/include/armadillo /usr/include/armadillo_bits/config.hpp \
+ /usr/include/c++/9/bits/istream.tcc /usr/include/armadillo \
+ /usr/include/armadillo_bits/config.hpp \
  /usr/include/armadillo_bits/compiler_check.hpp \
  /usr/include/c++/9/cstddef /usr/include/c++/9/cstring \
  /usr/include/string.h /usr/include/strings.h /usr/include/c++/9/climits \
@@ -175,12 +147,32 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: \
  /usr/include/linux/limits.h \
  /usr/include/x86_64-linux-gnu/bits/posix2_lim.h \
  /usr/include/x86_64-linux-gnu/bits/xopen_lim.h \
- /usr/include/x86_64-linux-gnu/bits/uio_lim.h /usr/include/c++/9/ctime \
- /usr/include/c++/9/fstream /usr/include/c++/9/bits/codecvt.h \
+ /usr/include/x86_64-linux-gnu/bits/uio_lim.h /usr/include/c++/9/cmath \
+ /usr/include/math.h /usr/include/x86_64-linux-gnu/bits/math-vector.h \
+ /usr/include/x86_64-linux-gnu/bits/libm-simd-decl-stubs.h \
+ /usr/include/x86_64-linux-gnu/bits/flt-eval-method.h \
+ /usr/include/x86_64-linux-gnu/bits/fp-logb.h \
+ /usr/include/x86_64-linux-gnu/bits/fp-fast.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
+ /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h \
+ /usr/include/x86_64-linux-gnu/bits/iscanonical.h \
+ /usr/include/c++/9/ctime /usr/include/c++/9/fstream \
+ /usr/include/c++/9/bits/codecvt.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/9/bits/c++io.h \
- /usr/include/c++/9/bits/fstream.tcc /usr/include/c++/9/map \
- /usr/include/c++/9/bits/stl_tree.h \
+ /usr/include/c++/9/bits/fstream.tcc /usr/include/c++/9/sstream \
+ /usr/include/c++/9/bits/sstream.tcc /usr/include/c++/9/limits \
+ /usr/include/c++/9/algorithm /usr/include/c++/9/utility \
+ /usr/include/c++/9/bits/stl_relops.h /usr/include/c++/9/bits/stl_algo.h \
+ /usr/include/c++/9/bits/algorithmfwd.h \
+ /usr/include/c++/9/bits/stl_heap.h /usr/include/c++/9/bits/stl_tempbuf.h \
+ /usr/include/c++/9/bits/stl_construct.h \
+ /usr/include/c++/9/bits/uniform_int_dist.h /usr/include/c++/9/complex \
+ /usr/include/c++/9/vector /usr/include/c++/9/bits/stl_uninitialized.h \
+ /usr/include/c++/9/bits/stl_vector.h \
+ /usr/include/c++/9/bits/stl_bvector.h /usr/include/c++/9/bits/vector.tcc \
+ /usr/include/c++/9/map /usr/include/c++/9/bits/stl_tree.h \
  /usr/include/c++/9/ext/aligned_buffer.h \
  /usr/include/c++/9/bits/stl_map.h /usr/include/c++/9/tuple \
  /usr/include/c++/9/array /usr/include/c++/9/bits/uses_allocator.h \
@@ -825,8 +817,10 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: \
  /usr/include/armadillo_bits/newarp_UpperHessenbergEigen_meat.hpp \
  /usr/include/armadillo_bits/newarp_UpperHessenbergQR_meat.hpp \
  /usr/include/armadillo_bits/compiler_setup_post.hpp \
- /home/damon/Documents/Lab/Aero/summer-research-1/defInitDesirePos.cpp \
  /home/damon/Documents/Lab/Aero/summer-research-1/findCoordOnPath.cpp \
  /home/damon/Documents/Lab/Aero/summer-research-1/AllParametersExperiment.cpp \
  /home/damon/Documents/Lab/Aero/summer-research-1/AllParametersExperiment.hpp \
- /home/damon/Documents/Lab/Aero/summer-research-1/findShortestPath.cpp
+ /usr/include/c++/9/math.h \
+ /home/damon/Documents/Lab/Aero/summer-research-1/findShortestPath.cpp \
+ /home/damon/Documents/Lab/Aero/summer-research-1/motionPlanForDefOpenForm.cpp \
+ /home/damon/Documents/Lab/Aero/summer-research-1/findPathSpeeds.cpp

@@ -3,7 +3,7 @@
 
 CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
   /usr/include/stdc-predef.h \
-  ../AllParametersExperiment.cpp \
+  ../symDerivative.cpp \
   /usr/include/c++/9/iostream \
   /usr/include/x86_64-linux-gnu/c++/9/bits/c++config.h \
   /usr/include/x86_64-linux-gnu/c++/9/bits/os_defines.h \
@@ -173,7 +173,6 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
   /usr/include/c++/9/bits/ostream.tcc \
   /usr/include/c++/9/istream \
   /usr/include/c++/9/bits/istream.tcc \
-  ../AllParametersExperiment.hpp \
   /usr/include/c++/9/math.h \
   /usr/include/c++/9/cmath \
   /usr/include/math.h \
@@ -186,12 +185,31 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
   /usr/include/x86_64-linux-gnu/bits/mathcalls.h \
   /usr/include/x86_64-linux-gnu/bits/mathcalls-narrow.h \
   /usr/include/x86_64-linux-gnu/bits/iscanonical.h \
+  /usr/include/c++/9/complex \
+  /usr/include/c++/9/sstream \
+  /usr/include/c++/9/bits/sstream.tcc \
   /usr/include/c++/9/vector \
   /usr/include/c++/9/bits/stl_construct.h \
   /usr/include/c++/9/bits/stl_uninitialized.h \
   /usr/include/c++/9/bits/stl_vector.h \
   /usr/include/c++/9/bits/stl_bvector.h \
   /usr/include/c++/9/bits/vector.tcc \
+  /usr/include/c++/9/algorithm \
+  /usr/include/c++/9/utility \
+  /usr/include/c++/9/bits/stl_relops.h \
+  /usr/include/c++/9/bits/stl_algo.h \
+  /usr/include/c++/9/bits/algorithmfwd.h \
+  /usr/include/c++/9/bits/stl_heap.h \
+  /usr/include/c++/9/bits/stl_tempbuf.h \
+  /usr/include/c++/9/bits/uniform_int_dist.h \
+  /usr/include/c++/9/limits \
+  /usr/include/c++/9/complex.h \
+  /usr/include/c++/9/ccomplex \
+  /usr/include/complex.h \
+  /usr/include/x86_64-linux-gnu/bits/mathdef.h \
+  /usr/include/x86_64-linux-gnu/bits/cmathcalls.h \
+  ../symDerivative.hpp \
+  ../findCommGraphAndFormDist.cpp \
   /usr/include/armadillo \
   /usr/include/armadillo_bits/config.hpp \
   /usr/include/armadillo_bits/compiler_check.hpp \
@@ -215,18 +233,6 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
   /usr/include/x86_64-linux-gnu/c++/9/bits/basic_file.h \
   /usr/include/x86_64-linux-gnu/c++/9/bits/c++io.h \
   /usr/include/c++/9/bits/fstream.tcc \
-  /usr/include/c++/9/sstream \
-  /usr/include/c++/9/bits/sstream.tcc \
-  /usr/include/c++/9/limits \
-  /usr/include/c++/9/algorithm \
-  /usr/include/c++/9/utility \
-  /usr/include/c++/9/bits/stl_relops.h \
-  /usr/include/c++/9/bits/stl_algo.h \
-  /usr/include/c++/9/bits/algorithmfwd.h \
-  /usr/include/c++/9/bits/stl_heap.h \
-  /usr/include/c++/9/bits/stl_tempbuf.h \
-  /usr/include/c++/9/bits/uniform_int_dist.h \
-  /usr/include/c++/9/complex \
   /usr/include/c++/9/map \
   /usr/include/c++/9/bits/stl_tree.h \
   /usr/include/c++/9/ext/aligned_buffer.h \
@@ -890,19 +896,16 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
   /usr/include/armadillo_bits/newarp_UpperHessenbergEigen_meat.hpp \
   /usr/include/armadillo_bits/newarp_UpperHessenbergQR_meat.hpp \
   /usr/include/armadillo_bits/compiler_setup_post.hpp \
-  ../symDerivative.cpp \
-  /usr/include/c++/9/complex.h \
-  /usr/include/c++/9/ccomplex \
-  /usr/include/complex.h \
-  /usr/include/x86_64-linux-gnu/bits/mathdef.h \
-  /usr/include/x86_64-linux-gnu/bits/cmathcalls.h \
-  ../symDerivative.hpp \
-  ../findCommGraphAndFormDist.cpp
+  ../defInitDesirePos.cpp \
+  ../findCoordOnPath.cpp \
+  ../AllParametersExperiment.cpp \
+  ../AllParametersExperiment.hpp \
+  ../findShortestPath.cpp
 
 
-/usr/include/c++/9/ccomplex:
+../findShortestPath.cpp:
 
-/usr/include/c++/9/complex.h:
+../findCoordOnPath.cpp:
 
 /usr/include/armadillo_bits/compiler_setup_post.hpp:
 
@@ -993,6 +996,10 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/include/armadillo_bits/op_any_meat.hpp:
 
 /usr/include/armadillo_bits/op_unique_meat.hpp:
+
+../AllParametersExperiment.cpp:
+
+/usr/include/armadillo_bits/op_chol_meat.hpp:
 
 /usr/include/armadillo_bits/op_orth_null_meat.hpp:
 
@@ -1174,10 +1181,6 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/armadillo_bits/fn_histc.hpp:
 
-../symDerivative.hpp:
-
-/usr/include/armadillo_bits/fn_cumprod.hpp:
-
 /usr/include/armadillo_bits/fn_trimat.hpp:
 
 /usr/include/armadillo_bits/glue_polyval_meat.hpp:
@@ -1254,12 +1257,6 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/armadillo_bits/fn_trans.hpp:
 
-/usr/include/complex.h:
-
-/usr/include/armadillo_bits/op_sort_meat.hpp:
-
-/usr/include/armadillo_bits/fn_diagmat.hpp:
-
 /usr/include/armadillo_bits/fn_sum.hpp:
 
 /usr/include/armadillo_bits/fn_inv.hpp:
@@ -1310,7 +1307,9 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/armadillo_bits/strip.hpp:
 
-/usr/include/x86_64-linux-gnu/bits/posix_opt.h:
+/usr/include/armadillo_bits/ProxyCube.hpp:
+
+/usr/include/armadillo_bits/Proxy.hpp:
 
 /usr/include/armadillo_bits/fn_trace.hpp:
 
@@ -1344,14 +1343,6 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/armadillo_bits/newarp_SparseGenMatProd_bones.hpp:
 
-/usr/include/armadillo_bits/spop_symmat_meat.hpp:
-
-/usr/include/c++/9/bits/atomic_lockfree_defines.h:
-
-/usr/include/c++/9/sstream:
-
-/usr/include/c++/9/typeinfo:
-
 /usr/include/armadillo_bits/op_cx_scalar_meat.hpp:
 
 /usr/include/c++/9/bits/stl_vector.h:
@@ -1359,30 +1350,6 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/include/c++/9/map:
 
 /usr/include/armadillo_bits/spop_misc_bones.hpp:
-
-/usr/include/armadillo_bits/op_chi2rnd_meat.hpp:
-
-/usr/include/c++/9/bits/uniform_int_dist.h:
-
-/usr/include/armadillo_bits/fn_cor.hpp:
-
-/usr/include/c++/9/climits:
-
-/usr/include/x86_64-linux-gnu/bits/mathdef.h:
-
-/usr/include/armadillo_bits/podarray_bones.hpp:
-
-/usr/include/c++/9/bits/stl_heap.h:
-
-/usr/include/c++/9/bits/alloc_traits.h:
-
-/usr/include/armadillo_bits/eGlue_bones.hpp:
-
-/usr/include/c++/9/bits/stl_relops.h:
-
-/usr/include/armadillo_bits/op_dot_bones.hpp:
-
-/usr/include/c++/9/bits/sstream.tcc:
 
 /usr/include/features.h:
 
@@ -1402,6 +1369,14 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/c++/9/string:
 
+/usr/include/armadillo_bits/fn_cor.hpp:
+
+/usr/include/c++/9/climits:
+
+/usr/include/armadillo_bits/op_chi2rnd_meat.hpp:
+
+/usr/include/c++/9/bits/uniform_int_dist.h:
+
 /usr/include/c++/9/cstring:
 
 /usr/include/armadillo_bits/spop_var_bones.hpp:
@@ -1414,7 +1389,35 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/hdf5/serial/H5Epublic.h:
 
+/usr/include/armadillo_bits/fn_cumprod.hpp:
+
+../symDerivative.hpp:
+
+/usr/include/c++/9/ccomplex:
+
+/usr/include/c++/9/bits/stl_heap.h:
+
+/usr/include/c++/9/bits/alloc_traits.h:
+
+/usr/include/c++/9/complex.h:
+
+/usr/include/armadillo_bits/eGlue_bones.hpp:
+
+/usr/include/c++/9/bits/stl_relops.h:
+
+/usr/include/armadillo_bits/op_dot_bones.hpp:
+
 /usr/include/c++/9/vector:
+
+/usr/include/c++/9/bits/sstream.tcc:
+
+/usr/include/c++/9/sstream:
+
+/usr/include/c++/9/typeinfo:
+
+/usr/include/armadillo_bits/spop_symmat_meat.hpp:
+
+/usr/include/c++/9/bits/atomic_lockfree_defines.h:
 
 /usr/include/x86_64-linux-gnu/bits/iscanonical.h:
 
@@ -1540,14 +1543,6 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
 
-/usr/include/armadillo_bits/ProxyCube.hpp:
-
-/usr/include/c++/9/bits/exception_defines.h:
-
-/usr/include/armadillo_bits/mtGlue_meat.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
-
 /usr/include/c++/9/bits/streambuf.tcc:
 
 /usr/include/c++/9/backward/binders.h:
@@ -1557,6 +1552,12 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/include/c++/9/bits/stl_function.h:
 
 /usr/include/x86_64-linux-gnu/bits/fp-logb.h:
+
+/usr/include/c++/9/bits/exception_defines.h:
+
+/usr/include/armadillo_bits/mtGlue_meat.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
 
 /usr/include/c++/9/bits/functional_hash.h:
 
@@ -1586,6 +1587,36 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
 
+/usr/include/armadillo_bits/fn_resize.hpp:
+
+/usr/include/armadillo_bits/SizeMat_bones.hpp:
+
+/usr/include/armadillo_bits/spglue_relational_bones.hpp:
+
+/usr/include/c++/9/bits/stl_iterator_base_types.h:
+
+/usr/include/stdc-predef.h:
+
+/usr/include/x86_64-linux-gnu/asm/errno.h:
+
+/usr/include/armadillo_bits/gmm_misc_bones.hpp:
+
+/usr/include/x86_64-linux-gnu/sys/select.h:
+
+/usr/include/hdf5/serial/H5Opublic.h:
+
+/usr/include/armadillo_bits/op_max_bones.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
+
+/usr/include/armadillo_bits/spglue_minus_meat.hpp:
+
+/usr/include/armadillo_bits/op_log_det_meat.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h:
+
+/usr/include/x86_64-linux-gnu/sys/types.h:
+
 /usr/include/x86_64-linux-gnu/bits/long-double.h:
 
 /usr/include/armadillo_bits/glue_kron_meat.hpp:
@@ -1595,6 +1626,12 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/include/x86_64-linux-gnu/bits/byteswap.h:
 
 /usr/include/limits.h:
+
+/usr/include/armadillo_bits/SpProxy.hpp:
+
+/usr/include/c++/9/bits/basic_ios.tcc:
+
+/usr/include/c++/9/bits/cxxabi_forced.h:
 
 /usr/include/armadillo_bits/op_sp_minus_bones.hpp:
 
@@ -1612,25 +1649,11 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/x86_64-linux-gnu/sys/cdefs.h:
 
-/usr/include/x86_64-linux-gnu/asm/errno.h:
-
-/usr/include/x86_64-linux-gnu/bits/cmathcalls.h:
-
-/usr/include/armadillo_bits/Row_meat.hpp:
-
-/usr/include/c++/9/bits/istream.tcc:
-
-/usr/include/armadillo_bits/gmm_misc_bones.hpp:
-
 /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:
 
 /usr/include/armadillo_bits/fn_regspace.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
-
-../findCommGraphAndFormDist.cpp:
-
-/usr/include/armadillo_bits/SpBase_bones.hpp:
 
 /usr/include/c++/9/initializer_list:
 
@@ -1682,47 +1705,9 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/floatn-common.h:
 
-/usr/include/unistd.h:
-
-/usr/include/armadillo_bits/op_repmat_meat.hpp:
-
-/usr/include/c++/9/bits/codecvt.h:
-
-/usr/include/armadillo_bits/newarp_UpperHessenbergQR_bones.hpp:
-
-/usr/include/x86_64-linux-gnu/sys/select.h:
-
-/usr/include/hdf5/serial/H5Opublic.h:
-
-/usr/include/armadillo_bits/op_max_bones.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/stdint-uintn.h:
-
-/usr/include/armadillo_bits/spglue_minus_meat.hpp:
-
-/usr/include/armadillo_bits/op_log_det_meat.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h:
-
-/usr/include/x86_64-linux-gnu/sys/types.h:
-
-/usr/include/armadillo_bits/fn_resize.hpp:
-
-/usr/include/armadillo_bits/SizeMat_bones.hpp:
-
-/usr/include/armadillo_bits/spglue_relational_bones.hpp:
-
-../symDerivative.cpp:
-
 /usr/include/c++/9/bits/ostream.tcc:
 
-/usr/include/c++/9/bits/stl_iterator_base_types.h:
-
-/usr/include/stdc-predef.h:
-
-/usr/include/armadillo_bits/op_chol_meat.hpp:
-
-../AllParametersExperiment.cpp:
+../symDerivative.cpp:
 
 /usr/include/armadillo_bits/fn_log_normpdf.hpp:
 
@@ -1748,12 +1733,6 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/armadillo_bits/glue_trapz_bones.hpp:
 
-/usr/include/c++/9/ext/atomicity.h:
-
-/usr/include/armadillo_bits/op_index_max_bones.hpp:
-
-/usr/include/c++/9/cwchar:
-
 /usr/include/armadillo_bits/eOp_meat.hpp:
 
 /usr/include/c++/9/bits/erase_if.h:
@@ -1765,6 +1744,12 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/include/c++/9/cmath:
 
 /usr/include/x86_64-linux-gnu/c++/9/bits/os_defines.h:
+
+/usr/include/armadillo_bits/Row_meat.hpp:
+
+/usr/include/c++/9/bits/istream.tcc:
+
+/usr/include/x86_64-linux-gnu/bits/cmathcalls.h:
 
 /usr/lib/gcc/x86_64-linux-gnu/9/include/stddef.h:
 
@@ -1795,12 +1780,6 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/include/armadillo_bits/fn_randi.hpp:
 
 /usr/include/armadillo_bits/newarp_SymEigsSolver_bones.hpp:
-
-/usr/include/c++/9/bits/basic_ios.tcc:
-
-/usr/include/c++/9/bits/cxxabi_forced.h:
-
-/usr/include/armadillo_bits/SpProxy.hpp:
 
 /usr/include/armadillo_bits/xvec_htrans_meat.hpp:
 
@@ -1841,14 +1820,6 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/lib/gcc/x86_64-linux-gnu/9/include/stdint.h:
 
 /usr/include/armadillo_bits/debug.hpp:
-
-/usr/include/armadillo_bits/operator_cube_plus.hpp:
-
-/usr/include/wchar.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
-
-/usr/include/c++/9/atomic:
 
 /usr/include/c++/9/bits/move.h:
 
@@ -1894,9 +1865,19 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/armadillo_bits/restrictors.hpp:
 
+/usr/include/armadillo_bits/SpBase_bones.hpp:
+
+../findCommGraphAndFormDist.cpp:
+
 /usr/include/armadillo_bits/subview_field_meat.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/time64.h:
+
+/usr/include/armadillo_bits/fn_pinv.hpp:
+
+/usr/include/armadillo_bits/unwrap_cube.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/types.h:
 
 /usr/include/hdf5/serial/H5Zpublic.h:
 
@@ -1911,10 +1892,6 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/include/armadillo_bits/spdiagview_bones.hpp:
 
 /usr/include/c++/9/bits/memoryfwd.h:
-
-/usr/include/armadillo_bits/glue_min_bones.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/cpu-set.h:
 
 /usr/include/armadillo_bits/spglue_relational_meat.hpp:
 
@@ -1932,6 +1909,14 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/c++/9/random:
 
+/usr/include/armadillo_bits/op_sort_meat.hpp:
+
+/usr/include/armadillo_bits/fn_diagmat.hpp:
+
+/usr/include/complex.h:
+
+/usr/include/armadillo_bits/distr_param.hpp:
+
 /usr/include/c++/9/cwctype:
 
 /usr/include/armadillo_bits/span.hpp:
@@ -1941,6 +1926,12 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/include/x86_64-linux-gnu/bits/endianness.h:
 
 /usr/include/armadillo_bits/op_roots_bones.hpp:
+
+/usr/include/c++/9/cwchar:
+
+/usr/include/c++/9/ext/atomicity.h:
+
+/usr/include/armadillo_bits/op_index_max_bones.hpp:
 
 /usr/include/x86_64-linux-gnu/c++/9/bits/basic_file.h:
 
@@ -2046,14 +2037,6 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/c++/9/bits/locale_facets.h:
 
-/usr/include/armadillo_bits/spop_diagmat_meat.hpp:
-
-/usr/include/armadillo_bits/subview_cube_each_meat.hpp:
-
-/usr/include/armadillo_bits/diagview_bones.hpp:
-
-/usr/include/c++/9/bits/locale_classes.h:
-
 /usr/include/armadillo_bits/fn_hist.hpp:
 
 /usr/include/armadillo_bits/Cube_bones.hpp:
@@ -2069,6 +2052,8 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/include/armadillo_bits/arrayops_bones.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/locale.h:
+
+../defInitDesirePos.cpp:
 
 /usr/include/armadillo_bits/fn_sylvester.hpp:
 
@@ -2098,6 +2083,10 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/c++/9/bits/postypes.h:
 
+/usr/include/armadillo_bits/podarray_bones.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/mathdef.h:
+
 /usr/include/armadillo_bits/fn_trimat_ind.hpp:
 
 /usr/include/c++/9/bits/stl_tree.h:
@@ -2105,6 +2094,28 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/include/x86_64-linux-gnu/bits/waitstatus.h:
 
 /usr/include/armadillo_bits/op_orth_null_bones.hpp:
+
+/usr/include/armadillo_bits/operator_cube_plus.hpp:
+
+/usr/include/wchar.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
+
+/usr/include/c++/9/atomic:
+
+/usr/include/unistd.h:
+
+/usr/include/x86_64-linux-gnu/bits/cpu-set.h:
+
+/usr/include/armadillo_bits/glue_min_bones.hpp:
+
+/usr/include/armadillo_bits/op_repmat_meat.hpp:
+
+/usr/include/c++/9/bits/codecvt.h:
+
+/usr/include/armadillo_bits/newarp_UpperHessenbergQR_bones.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/posix_opt.h:
 
 /usr/include/armadillo_bits/op_chol_bones.hpp:
 
@@ -2198,6 +2209,10 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/superlu/superlu_enum_consts.h:
 
+/usr/include/armadillo_bits/unwrap_spmat.hpp:
+
+/usr/include/armadillo_bits/arma_forward.hpp:
+
 /usr/include/armadillo_bits/arma_static_check.hpp:
 
 /usr/include/armadillo_bits/hdf5_name.hpp:
@@ -2233,8 +2248,6 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/include/x86_64-linux-gnu/bits/uio_lim.h:
 
 /usr/include/armadillo_bits/op_flip_bones.hpp:
-
-/usr/include/armadillo_bits/distr_param.hpp:
 
 /usr/include/armadillo_bits/constants.hpp:
 
@@ -2376,6 +2389,14 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/armadillo_bits/subview_cube_bones.hpp:
 
+/usr/include/armadillo_bits/spop_diagmat_meat.hpp:
+
+/usr/include/armadillo_bits/subview_cube_each_meat.hpp:
+
+/usr/include/c++/9/bits/locale_classes.h:
+
+/usr/include/armadillo_bits/diagview_bones.hpp:
+
 /usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
 
 /usr/include/armadillo_bits/wall_clock_bones.hpp:
@@ -2402,9 +2423,9 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/armadillo_bits/subview_each_meat.hpp:
 
-/usr/include/armadillo_bits/Gen_bones.hpp:
-
 /usr/include/c++/9/ios:
+
+/usr/include/armadillo_bits/Gen_bones.hpp:
 
 /usr/include/armadillo_bits/Glue_bones.hpp:
 
@@ -2489,6 +2510,12 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/include/armadillo_bits/subview_elem2_bones.hpp:
 
 /usr/include/armadillo_bits/op_pinv_bones.hpp:
+
+/usr/include/armadillo_bits/diagmat_proxy.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:
+
+/usr/include/armadillo_bits/op_dotext_bones.hpp:
 
 /usr/include/armadillo_bits/op_reverse_bones.hpp:
 
@@ -2598,12 +2625,6 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/armadillo_bits/glue_toeplitz_bones.hpp:
 
-/usr/include/armadillo_bits/fn_pinv.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/types.h:
-
-/usr/include/armadillo_bits/unwrap_cube.hpp:
-
 /usr/include/armadillo_bits/eOpCube_bones.hpp:
 
 /usr/include/armadillo_bits/glue_histc_bones.hpp:
@@ -2681,15 +2702,3 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/include/armadillo_bits/diskio_bones.hpp:
 
 /usr/include/armadillo_bits/newarp_UpperHessenbergEigen_bones.hpp:
-
-/usr/include/armadillo_bits/arma_forward.hpp:
-
-/usr/include/armadillo_bits/unwrap_spmat.hpp:
-
-/usr/include/armadillo_bits/Proxy.hpp:
-
-/usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:
-
-/usr/include/armadillo_bits/op_dotext_bones.hpp:
-
-/usr/include/armadillo_bits/diagmat_proxy.hpp:

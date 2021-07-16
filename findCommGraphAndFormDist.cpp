@@ -3,15 +3,15 @@
 using namespace std;
 using namespace arma;
 
-struct output {
+struct CommGraph {
     mat W;
     mat Rij_tilde;
 };
 
-output findCommGraphAndFormDist(double N, double shapeld, double R0);
+CommGraph findCommGraphAndFormDist(double N, double shapeld, double R0);
 
-output findCommGraphAndFormDist(double N, double shapeld, double R0) {
-    output result;
+CommGraph findCommGraphAndFormDist(double N, double shapeld, double R0) {
+    CommGraph result;
     if (shapeld == 0)
     {
         double Rij0 = R0;

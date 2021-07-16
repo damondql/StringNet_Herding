@@ -1,3 +1,5 @@
+#pragma once
+
 #include "iostream"
 #include "AllParametersExperiment.hpp" 
 #include <math.h>
@@ -172,12 +174,20 @@ double ND = 3;
 double N;
 double rho_sn;
 
-std::vector<double> v_maxD,v_maxDC,u_maxD,u_maxD1,u_maxD2,u_maxDr1,u_maxDr2;
+arma::vec v_maxD,v_maxDC,u_maxD,u_maxD1,u_maxD2,u_maxDr1,u_maxDr2;
 double rho_safe,dthetai,alphaD_v;
 double rhoAD_safe,rhoD_safe;
 double umd1,umd2,umdf_s1,umdf_s2,umd,umdf_h1,vmd,vmdc,vmdf_s,umd_e1,umd_e2;
 obstacle obs;
 void defenders() {
+    v_maxD.resize(ND);
+    v_maxD.resize(ND);
+    v_maxDC.resize(ND);
+    u_maxD.resize(ND);
+    u_maxD1.resize(ND);
+    u_maxD2.resize(ND);
+    u_maxDr1.resize(ND);
+    u_maxDr2.resize(ND);
     N = NA + ND;
     alphaD_v=0.5;
     umdf_h1=uma;
@@ -198,7 +208,7 @@ void defenders() {
         rho_safe = rhoD_safe;
         vmdc=sqrt((sqrt(pow(umd,2)/(1/pow(rho_safe,2)+pow(C_d,2)))));
     } else {
-        u_maxD.push_back(0.4*vmd);    // Ask here: what is the purpose of doing this since it will be assign value below
+        u_maxD(0)=(0.4*vmd);    // Ask here: what is the purpose of doing this since it will be assign value below
         rhoD_safe=pow((vmd+vmd),2)/(2*umd);
         rhoAD_safe=pow((vma+vmd),2)/(2*uma);
         rho_safe = rhoD_safe;
@@ -207,13 +217,13 @@ void defenders() {
     vmdf_s=sqrt((umdf_s1+umdf_s2)/C_d);
     for (size_t i = 0; i < ND; i++)
     {
-        v_maxD.push_back(vmd);
-        v_maxDC.push_back(vmdc);
-        u_maxD.push_back(umd);
-        u_maxD1.push_back(umd1);
-        u_maxD2.push_back(umd2);
-        u_maxDr1.push_back(umdf_s1);
-        u_maxDr2.push_back(umdf_s2);
+        v_maxD(0) = vmd;
+        v_maxDC(0) = vmdc;
+        u_maxD(0) = umd;
+        u_maxD1(0) = umd1;
+        u_maxD2(0) = umd2;
+        u_maxDr1(0) = umdf_s1;
+        u_maxDr2(0) = umdf_s2;
     }
     obs.rho_safe = rho_safe;
     dthetai=acos(1-pow((2*rho_D),2)/(2*pow(rho_safe,2)));   //angular shift for two agents colliding on a ciruclar arc segment
@@ -541,7 +551,7 @@ void calVfield_defenders() {
 //Initialize the defenders
 double rD0[2] = {-150,-300};
 std::vector<std::vector<double>> rD;
-std::vector<std::vector<double>> XD0;
+arma::mat XD0;
 std::vector<std::vector<double>> rSD_goal;
 mat XD;
 void rD_value() {
@@ -549,12 +559,14 @@ void rD_value() {
     rD = {{11.9907, 9.3724,	16.1838,},
           {-10.7580, -7.1278, -5.8411}};
    
-    XD0.resize(4, std::vector<double>(rD[0].size(), 0));
+    XD0.resize(4, rD[0].size());
+    XD0.zeros();
     XD.set_size(4, rD[0].size());
+    XD.zeros();
     for (size_t i = 0; i < rD[0].size(); i++)
     {
-        XD0[0][i]=rD[0][i];
-        XD0[1][i]=rD[1][i];
+        XD0(0,i)=rD[0][i];
+        XD0(1,i)=rD[1][i];
         XD(0,i)=rD[0][i];
         XD(1,i)=rD[1][i];
     }

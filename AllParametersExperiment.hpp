@@ -58,7 +58,7 @@ extern int dRA0;
 extern double rho_sn;
 
 // Defenders
-extern std::vector<double> v_maxD,v_maxDC,u_maxD,u_maxD1,u_maxD2,u_maxDr1,u_maxDr2;
+extern arma::vec v_maxD,v_maxDC,u_maxD,u_maxD1,u_maxD2,u_maxDr1,u_maxDr2;
 extern double rho_safe,dthetai,alphaD_v;
 extern double rhoAD_safe,rhoD_safe;
 extern double umd1,umd2,umdf_s1,umdf_s2,umd,umdf_h1,vmd,vmdc,vmdf_s,umd_e1,umd_e2;

@@ -1,1 +1,1 @@
-/usr/bin/c++ -rdynamic CMakeFiles/test.dir/test.cpp.o -o test 
+/usr/bin/c++ -rdynamic CMakeFiles/test.dir/defInitDesirePos.cpp.o -o test  -O2 -larmadillo 

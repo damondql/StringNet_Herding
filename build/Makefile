@@ -117,78 +117,41 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named mainHD
+# Target rules for targets named test1
 
 # Build rule for target.
-mainHD: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mainHD
-.PHONY : mainHD
+test1: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test1
+.PHONY : test1
 
 # fast build rule for target.
-mainHD/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mainHD.dir/build.make CMakeFiles/mainHD.dir/build
-.PHONY : mainHD/fast
+test1/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test1.dir/build.make CMakeFiles/test1.dir/build
+.PHONY : test1/fast
 
-#=============================================================================
-# Target rules for targets named findShortestPath
-
-# Build rule for target.
-findShortestPath: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 findShortestPath
-.PHONY : findShortestPath
-
-# fast build rule for target.
-findShortestPath/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/findShortestPath.dir/build.make CMakeFiles/findShortestPath.dir/build
-.PHONY : findShortestPath/fast
-
-findShortestPath.o: findShortestPath.cpp.o
-.PHONY : findShortestPath.o
+defInitDesirePos.o: defInitDesirePos.cpp.o
+.PHONY : defInitDesirePos.o
 
 # target to build an object file
-findShortestPath.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/findShortestPath.dir/build.make CMakeFiles/findShortestPath.dir/findShortestPath.cpp.o
-.PHONY : findShortestPath.cpp.o
+defInitDesirePos.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test1.dir/build.make CMakeFiles/test1.dir/defInitDesirePos.cpp.o
+.PHONY : defInitDesirePos.cpp.o
 
-findShortestPath.i: findShortestPath.cpp.i
-.PHONY : findShortestPath.i
-
-# target to preprocess a source file
-findShortestPath.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/findShortestPath.dir/build.make CMakeFiles/findShortestPath.dir/findShortestPath.cpp.i
-.PHONY : findShortestPath.cpp.i
-
-findShortestPath.s: findShortestPath.cpp.s
-.PHONY : findShortestPath.s
-
-# target to generate assembly for a file
-findShortestPath.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/findShortestPath.dir/build.make CMakeFiles/findShortestPath.dir/findShortestPath.cpp.s
-.PHONY : findShortestPath.cpp.s
-
-mainHerdDouble.o: mainHerdDouble.cpp.o
-.PHONY : mainHerdDouble.o
-
-# target to build an object file
-mainHerdDouble.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mainHD.dir/build.make CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o
-.PHONY : mainHerdDouble.cpp.o
-
-mainHerdDouble.i: mainHerdDouble.cpp.i
-.PHONY : mainHerdDouble.i
+defInitDesirePos.i: defInitDesirePos.cpp.i
+.PHONY : defInitDesirePos.i
 
 # target to preprocess a source file
-mainHerdDouble.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mainHD.dir/build.make CMakeFiles/mainHD.dir/mainHerdDouble.cpp.i
-.PHONY : mainHerdDouble.cpp.i
+defInitDesirePos.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test1.dir/build.make CMakeFiles/test1.dir/defInitDesirePos.cpp.i
+.PHONY : defInitDesirePos.cpp.i
 
-mainHerdDouble.s: mainHerdDouble.cpp.s
-.PHONY : mainHerdDouble.s
+defInitDesirePos.s: defInitDesirePos.cpp.s
+.PHONY : defInitDesirePos.s
 
 # target to generate assembly for a file
-mainHerdDouble.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mainHD.dir/build.make CMakeFiles/mainHD.dir/mainHerdDouble.cpp.s
-.PHONY : mainHerdDouble.cpp.s
+defInitDesirePos.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/test1.dir/build.make CMakeFiles/test1.dir/defInitDesirePos.cpp.s
+.PHONY : defInitDesirePos.cpp.s
 
 # Help Target
 help:
@@ -198,14 +161,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... findShortestPath"
-	@echo "... mainHD"
-	@echo "... findShortestPath.o"
-	@echo "... findShortestPath.i"
-	@echo "... findShortestPath.s"
-	@echo "... mainHerdDouble.o"
-	@echo "... mainHerdDouble.i"
-	@echo "... mainHerdDouble.s"
+	@echo "... test1"
+	@echo "... defInitDesirePos.o"
+	@echo "... defInitDesirePos.i"
+	@echo "... defInitDesirePos.s"
 .PHONY : help
 
 
