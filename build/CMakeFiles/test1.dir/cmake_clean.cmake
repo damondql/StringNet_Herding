@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/test1.dir/defInitDesirePos.cpp.o"
-  "CMakeFiles/test1.dir/defInitDesirePos.cpp.o.d"
+  "CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.o"
+  "CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.o.d"
   "test1"
   "test1.pdb"
 )

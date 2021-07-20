@@ -47,24 +47,45 @@ struct motionPlan
     mat XD_des;
 };
 
-// motionPlan motionPlanForDefOpenForm(mat XD, mat XD_des, int ND, int flagPlotPaths, int figNumber) {
-//     double umd = 0.8 * u_maxD(0);
-//     double vmd = sqrt(umd/C_d);
-//     std::vector<std::vector<path_elem>> Path(ND, std::vector<path_elem>(ND));
-//     for (int jj = 0; jj < ND; jj++)
-//     {
-//         for (int j = 0; j < ND; j++)
-//         {
-//             Path[jj][j] = findShortestPath(XD.submat(0,j,1,j), XD_des.submat(0,jj,1,jj));
-
-//         }
+motionPlan motionPlanForDefOpenForm(mat XD, mat XD_des, int ND, int flagPlotPaths, int figNumber) {
+    double umd = 0.8 * u_maxD(0);
+    double vmd = sqrt(umd/C_d);
+    std::vector<std::vector<path_elem>> Path(ND, std::vector<path_elem>(ND));
+    std::vector<std::vector<pathVel_elem>> pathVel(ND, std::vector<pathVel_elem>(ND));
+    mat optT(ND, ND, fill::zeros);
+    for (int jj = 0; jj < ND; jj++)
+    {
+        for (int j = 0; j < ND; j++)
+        {
+            Path[jj][j] = findShortestPath(XD.submat(0,j,1,j), XD_des.submat(0,jj,1,jj));
+            pathVel[jj][j] = findPathSpeeds(Path[jj][j], v_maxDC(j), umd, vmd);
+            optT(jj, j) = pathVel[jj][j].T(1); // obs free, T  is only size 2
+        }
+    }
+    std::vector<path_elem> Path0;
+    for (int jj = 0; jj < ND; jj++) {
+        for (int j = 0; j < ND; j++)
+        {
+            Path0.push_back(Path[j][jj]);
+        }
+    }
+    mat Pbar;
+    Pbar = zeros<mat>(pow(ND,2), pow(ND,2));
+    for (int j = 0; j < pow(ND,2); j++)
+    {
+        for (int jj = j + 1; jj < pow(ND,2); jj++)
+        {
+            
+        }
         
-//     }
+    }
     
-// }
+
+}
+
 int main(){
     vec XD = {11.9907,-10.7580};
-    vec XD_des = {14.4743,-18.3983};
+    vec XD_des = {14.808227436999694,-18.0334291835457};
     path_elem P =  findShortestPath(XD, XD_des);
     pathVel_elem pV = findPathSpeeds(P,0.3924,0.0786,0.4432);
     pV.T.print("T:");

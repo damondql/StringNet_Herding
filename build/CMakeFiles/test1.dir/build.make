@@ -69,28 +69,28 @@ include CMakeFiles/test1.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/test1.dir/flags.make
 
-CMakeFiles/test1.dir/defInitDesirePos.cpp.o: CMakeFiles/test1.dir/flags.make
-CMakeFiles/test1.dir/defInitDesirePos.cpp.o: ../defInitDesirePos.cpp
-CMakeFiles/test1.dir/defInitDesirePos.cpp.o: CMakeFiles/test1.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/test1.dir/defInitDesirePos.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test1.dir/defInitDesirePos.cpp.o -MF CMakeFiles/test1.dir/defInitDesirePos.cpp.o.d -o CMakeFiles/test1.dir/defInitDesirePos.cpp.o -c /home/damon/Documents/Lab/Aero/summer-research-1/defInitDesirePos.cpp
+CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.o: CMakeFiles/test1.dir/flags.make
+CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.o: ../motionPlanForDefOpenForm.cpp
+CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.o: CMakeFiles/test1.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.o -MF CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.o.d -o CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.o -c /home/damon/Documents/Lab/Aero/summer-research-1/motionPlanForDefOpenForm.cpp
 
-CMakeFiles/test1.dir/defInitDesirePos.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/test1.dir/defInitDesirePos.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/damon/Documents/Lab/Aero/summer-research-1/defInitDesirePos.cpp > CMakeFiles/test1.dir/defInitDesirePos.cpp.i
+CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/damon/Documents/Lab/Aero/summer-research-1/motionPlanForDefOpenForm.cpp > CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.i
 
-CMakeFiles/test1.dir/defInitDesirePos.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/test1.dir/defInitDesirePos.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/damon/Documents/Lab/Aero/summer-research-1/defInitDesirePos.cpp -o CMakeFiles/test1.dir/defInitDesirePos.cpp.s
+CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/damon/Documents/Lab/Aero/summer-research-1/motionPlanForDefOpenForm.cpp -o CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.s
 
 # Object files for target test1
 test1_OBJECTS = \
-"CMakeFiles/test1.dir/defInitDesirePos.cpp.o"
+"CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.o"
 
 # External object files for target test1
 test1_EXTERNAL_OBJECTS =
 
-test1: CMakeFiles/test1.dir/defInitDesirePos.cpp.o
+test1: CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.o
 test1: CMakeFiles/test1.dir/build.make
 test1: CMakeFiles/test1.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable test1"

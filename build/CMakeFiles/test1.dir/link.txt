@@ -1,1 +1,1 @@
-/usr/bin/c++ -rdynamic CMakeFiles/test1.dir/defInitDesirePos.cpp.o -o test1  -O2 -larmadillo 
+/usr/bin/c++ -rdynamic CMakeFiles/test1.dir/motionPlanForDefOpenForm.cpp.o -o test1  -O2 -larmadillo 
