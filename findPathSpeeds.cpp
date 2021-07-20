@@ -12,7 +12,7 @@ struct pathVel_elem
     double v_bar;
     double s_bar1;
     double s_bar2;
-    mat T;
+    vec T;
     double T_bar1;
     double T_bar2;
     double u_maxD;
