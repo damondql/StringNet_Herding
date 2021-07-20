@@ -59,6 +59,29 @@ interSec_elem pathIntersections(path_elem Path1, path_elem Path2) {
         double cL1 = r1(1) - mL1 * r1(0);
         vec dr_hat = dr/L1;
 
+        for (int j = 0; j < NS2; j+=2)
+        {
+            double Sj0 = Path2.S(j);
+            vec r21 = rV2.col(j);
+            vec r22 = rV2.col(j+1);
+            double drx2 = r22(0) - r21(1);
+            double dry2 = r22(1) - r21(1);
+            double theta2 = atan2(dry2, drx2);
+            if(theta2 < 0) {
+                theta2 = theta2 + 2 * M_PI;
+            }
+            double dtheta = theta2 - theta1;
+            if (dtheta < 0) {
+                dtheta = dtheta + 2 * M_PI;
+            }
+            double mL2 = tan(theta2);
+            double cL2 = r21(1) - mL2*r21(0); 
+            double L2 = norm(r21-r22);
+
+
+        }
+        
+
     }
     
 
