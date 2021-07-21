@@ -1,4 +1,7 @@
+#pragma once
 #include <armadillo>
+#include <iostream>
+#include <fstream>
 #include <istream>
 #include "AllParametersExperiment.cpp"
 #include "lambdaInterSecCircLine.cpp"
@@ -126,18 +129,30 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
             lambda21=(ybar21-r21(1))/dry2;//norm([xbar21,ybar21]'-r21)/L2;
             lambda22=(ybar22-r21(1))/dry2;//norm([xbar22,ybar22]'-r21)/L2;
         }
-        // cout << "lambda1: " << lambda1 << endl;
-        // cout << "lambda11: " << lambda11 << endl;
-        // cout << "lambda12: " << lambda12 << endl;
-        // cout << "lambda2: " << lambda2 << endl;
-        // cout << "lambda21: " << lambda21 << endl;
-        // cout << "lambda22: " << lambda22 << endl;
+        // if (lambda1 < 1e-6 && lambda1 > -1e-6)
+        // {
+        //     lambda1 = 0;
+        // }
+        // if (lambda2 < 1e-6 && lambda2 > -1e-6)
+        // {
+        //     lambda2 = 0;
+        // }
+        
+        cout << "lambda1: " << lambda1 << endl;
+        cout << "lambda11: " << lambda11 << endl;
+        cout << "lambda12: " << lambda12 << endl;
+        cout << "lambda2: " << lambda2 << endl;
+        cout << "lambda21: " << lambda21 << endl;
+        cout << "lambda22: " << lambda22 << endl;
+        cout << "1-lamda1: " << 1-lambda1 << endl;
         vec xy_int = {x_int, y_int};
         double lam11,lam12,lam21,lam22;
-        if (lambda2 >= 1)
+        if (lambda2 >= 1.0)
         {
-            if (lambda1 > 0 && lambda1 < 1)
+            cout << "Process: lambda2 >=1 !!!" <<endl;
+            if (lambda1 > 0.0 && lambda1 < 1.0)
             {
+                cout << "Process:0 < lambda1 < 1 !!!" <<endl;
                 if (arma::norm(r22 - xy_int) < 2*rho_D/fabs(sin(dtheta)))
                 {
                     result.Flag = 1;
@@ -185,8 +200,9 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
                     
                 }
                 
-            } else if (lambda1 <= 0)
+            } else if (lambda1 <= 0.0)
             {
+                cout << "Process: lambda1 <=0 !!!" <<endl;
                 if (arma::norm(r22 - r1) < 2*rho_D)
                 {
                     lam11 = 0;
@@ -210,12 +226,13 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
                     result.Flag = 1;  
                 } 
                 
-            } else if (lambda1 >= 1)
-            {
+            } else if (lambda1 >= 1.0)
+            {   
+                cout << "Process: lambda1 >=1 !!!" <<endl;
                 if (arma::norm(r22 - r2) < 2 * rho_D)
                 {
                     lam12 = 1;
-                    lam21 = 1;
+                    lam22 = 1;
                     mat a = r21 - xy_int;
                     a = a.t();
                     mat b = r1 - xy_int;
@@ -239,11 +256,13 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
             
             
             
-        } else if (lambda2 > 0 && lambda2 < 1)
+        } else if (lambda2 > 0.0 && lambda2 < 1.0)
         {
-            if (lambda1 > 0 && lambda1 < 1)
+            cout << "Process: 0 < lambda2 < 1  !!!" <<endl;
+            if (lambda1 > 0.0 && lambda1 < 1.0)
             {
-                if (lambda11 < 0)
+                cout << "Process: 0 < lambda1 < 1 !!!" <<endl;
+                if (lambda11 < 0.0)
                 {
                     double aa = arma::norm(r1 - xy_int);
                     double bb = aa*cos(dtheta)+sqrt(4*pow((rho_D),2)-pow(aa,2)*pow(sin(dtheta),2));
@@ -257,20 +276,20 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
                         lambda22 = min(lambda22, lambda2 + bb/L2);
                     }
                 }
-                if(lambda12 > 1) {
+                if(lambda12 > 1.0) {
                     double aa = arma::norm(r2 - xy_int);
                     double bb = aa*cos(dtheta)+sqrt(4*pow((rho_D),2)-pow(aa,2)*pow(sin(dtheta),2));
                     mat a = r2 - xy_int;
                     a = a.t();
                     mat b = r21 - xy_int;
                     mat c = a * b;
-                    if (c(0,0) > 0) {
+                    if (c(0,0) > 0.0) {
                         lambda21 = max(lambda21, lambda2 - bb/L2);
                     } else {
                         lambda22 = min(lambda22, lambda2 + bb/L2);
                     }
                 }
-                if(lambda21 < 0) {
+                if(lambda21 < 0.0) {
                     double aa = arma::norm(r21 - xy_int);
                     double bb = aa*cos(dtheta)+sqrt(4*pow((rho_D),2)-pow(aa,2)*pow(sin(dtheta),2));
                     mat a = r21 - xy_int;
@@ -283,7 +302,7 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
                         lambda12 = min(lambda12, lambda1 + bb/L1);
                     }
                 }
-                if(lambda21 > 1) {
+                if(lambda22 > 1.0) {
                     double aa = arma::norm(r22 - xy_int);
                     double bb = aa*cos(dtheta)+sqrt(4*pow((rho_D),2)-pow(aa,2)*pow(sin(dtheta),2));
                     mat a = r22 - xy_int;
@@ -300,8 +319,10 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
                 lam12 = min(1.0, lambda12);
                 lam21 = max(lambda21,0.0);
                 lam22 = min(1.0, lambda22);
-            } else if (lambda1 <= 0)
+                result.Flag = 1;
+            } else if (lambda1 <= 0.0)
             {
+                cout << "Process: lambda1 <= 0 !!!" <<endl;
                 if (arma::norm(r1 - xy_int) < 2 * rho_D/fabs(sin(dtheta)))
                 {
                     result.Flag = 1;
@@ -357,8 +378,9 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
                     
                 }
                 
-            } else if (lambda1 >=1)
-            {
+            } else if (lambda1 >=1.0)
+            {   
+                cout << "Process: lambda1 >= 1 !!!" <<endl;
                 if (arma::norm(r2 - xy_int) < 2 * rho_D/fabs(sin(dtheta)))
                 {
                     result.Flag = 1;
@@ -416,8 +438,10 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
             
             
         } else { //lambda2 < 0
-            if (lambda1 > 0 && lambda1 < 1)
+            cout << "Process: lambda2 < 0 !!!" <<endl;
+            if (lambda1 > 0.0 && lambda1 < 1.0)
             {
+                cout << "Process: 0 < lambda1 < 1 !!!" <<endl;
                 if (arma::norm(r21 - xy_int) < 2*rho_D/fabs(sin(dtheta))) {
                     result.Flag = 1;
                     lam21 = 0;
@@ -466,8 +490,9 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
                     }
                     
                 }
-            } else if (lambda1 <= 0)
+            } else if (lambda1 <= 0.0)
             {
+                cout << "Process: lambda1 <= 0 !!!" <<endl;
                 if (arma::norm(r21 - r1) < 2 * rho_D)
                 {
                     lam21 = 0;
@@ -489,8 +514,9 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
                         lam12 = min(1.0, lambda1 + bb/L1);
                     }
                     result.Flag = 1;
-                } else if (lambda1 >= 1)
+                } else if (lambda1 >= 1.0)
                 {
+                    cout << "Process: lambda1 >= 1 !!!" <<endl;
                     if (arma::norm(r2 - r21) < 2 * rho_D)
                     {
                         lam21 = 0;
@@ -545,26 +571,121 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
 }
 
 
-int main() {
-    vec r1 = {11.9907,-10.7580};
-    vec r2 = {14.2886993964913,-18.7322447905543};
-    double mL1 = -3.47008132496898;
-    double mL2 = 3.50827716760234;
-    double cL1 = 30.8507041433055;
-    double cL2 = -52.8246990335694;
-    double theta1 = 4.99296463600723;
-    double theta2 = 4.43471265033328;
-    double drx = 2.29799939649127;
-    double dry = -7.97424479055432;
-    double drx2 = -1.98163515021751;
-    double dry2 = -6.95212535202634;
-    double dtheta = 5.72493332150564;
-    double L1 = 8.29875781101948;
-    double L2 = 7.22903346090367;
-    vec r21 = {11.9907000000000,
-                -10.7580000000000};
-    vec r22 = {10.0090648497825,
-               -17.7101253520263};
-    lineIntersec a = interSecLineLine(r1,r2, mL1,cL1, theta1, drx, dry, L1,
-                                      r21, r22, mL2, cL2, theta2, drx2, dry2, L2, dtheta);
-}
+// int main() {
+//     // vec r1 = {11.9907,-10.7580};
+//     // vec r2 = {14.3142742593192,
+//     //         -18.2808998346075};
+//     // double mL1 = -3.23764123502204;
+//     // double mL2 = -2.25685625521036;
+//     // double cL1 = 28.0635847567788;
+//     // double cL2 = 14.0243595663336;
+//     // double theta1 = 5.01196050370651;
+//     // double theta2 = 5.12948525219316;
+//     // double drx = 2.32357425931916;
+//     // double dry = -7.52289983460749;
+//     // double drx2 = 4.94187425931916;
+//     // double dry2 = -11.1530998346075;
+//     // double dtheta = 0.117524748486650;
+//     // double L1 = 7.87356458410725;
+//     // double L2 = 12.1989244245402;
+//     // vec r21 = {9.37240000000000,
+//     //             -7.12780000000000};
+//     // vec r22 = {14.3142742593192,
+//     //             -18.2808998346075};
+
+//     vec r1, r2, r21, r22;
+//     r1.load("../LineV/r1.txt");
+//     r2.load("../LineV/r2.txt");
+//     r21.load("../LineV/r21.txt");
+//     r22.load("../LineV/r22.txt");
+
+//     std::ifstream fin("../LineV/cL1.txt");
+//     double cL1;
+//     fin >> cL1;
+//     std::cout << "cL1: "<<cL1 << std::endl;
+//     fin.close();
+
+//     fin.open("../LineV/cL2.txt");
+//     double cL2;
+//     fin >> cL2;
+//     std::cout << "cL2: "<<cL2 << std::endl;
+//     fin.close();
+
+//     fin.open("../LineV/drx.txt");
+//     double drx;
+//     fin >> drx;
+//     std::cout << "drx: "<< drx << std::endl;
+//     fin.close();
+
+//     fin.open("../LineV/drx2.txt");
+//     double drx2;
+//     fin >> drx2;
+//     std::cout << "drx2: "<<drx2 << std::endl;
+//     fin.close();
+
+//     fin.open("../LineV/dry.txt");
+//     double dry;
+//     fin >> dry;
+//     std::cout << "dry: "<<dry << std::endl;
+//     fin.close();
+
+//     fin.open("../LineV/dry2.txt");
+//     double dry2;
+//     fin >> dry2;
+//     std::cout << "dry2: "<<dry2 << std::endl;
+//     fin.close();
+
+//     fin.open("../LineV/dtheta.txt");
+//     double dtheta;
+//     fin >> dtheta;
+//     std::cout << "dtheata: "<<dtheta << std::endl;
+//     fin.close();
+        
+//     fin.open("../LineV/L1.txt");
+//     double L1;
+//     fin >> L1;
+//     std::cout << "L1: "<<L1 << std::endl;
+//     fin.close();
+
+//     fin.open("../LineV/L2.txt");
+//     double L2;
+//     fin >> L2;
+//     std::cout << "L2: "<<L2 << std::endl;
+//     fin.close();
+
+//     fin.open("../LineV/mL1.txt");
+//     double mL1;
+//     fin >> mL1;
+//     std::cout << "mL1: "<<mL1 << std::endl;
+//     fin.close();
+
+//     fin.open("../LineV/mL2.txt");
+//     double mL2;
+//     fin >> mL2;
+//     std::cout << "mL2: "<<mL2 << std::endl;
+//     fin.close();
+
+//     fin.open("../LineV/theta1.txt");
+//     double theta1;
+//     fin >> theta1;
+//     std::cout << "theta1: "<<theta1 << std::endl;
+//     fin.close();
+
+//     fin.open("../LineV/theta2.txt");
+//     double theta2;
+//     fin >> theta2;
+//     std::cout << "theta2: "<<theta2 << std::endl;
+//     fin.close();    
+
+
+
+//     lineIntersec a = interSecLineLine(r1,r2, mL1,cL1, theta1, drx, dry, L1,
+//                                       r21, r22, mL2, cL2, theta2, drx2, dry2, L2, dtheta);
+//     cout << "Flag: " << a.Flag << endl;
+//     cout << "Pbar1: " <<a.Pbar1 << endl;
+//     cout << "Pbar2: " <<a.Pbar2 << endl;
+//     a.Pos1.print("Pos1: ");
+//     a.Pos2.print("Pos2: ");
+//     a.S10.print("S10: ");
+//     a.S20.print("S20: ");
+// }

@@ -3,6 +3,7 @@
 #include <istream>
 #include "findShortestPath.cpp"
 #include "findPathSpeeds.cpp"
+#include "pathIntersections.cpp"
 using namespace std;
 using namespace arma;
 
@@ -19,13 +20,13 @@ struct tanG_prime_elem
     mat obsVertPos_all;
 };
 
-struct interSec_elem
-{
-    int Flag;
-    int Pbar1;
-    int Pbar2;
-    int flag0;
-};
+// struct interSec_elem
+// {
+//     int Flag;
+//     int Pbar1;
+//     int Pbar2;
+//     int flag0;
+// };
 
 
 struct motionPlan
@@ -71,11 +72,14 @@ motionPlan motionPlanForDefOpenForm(mat XD, mat XD_des, int ND, int flagPlotPath
     }
     mat Pbar;
     Pbar = zeros<mat>(pow(ND,2), pow(ND,2));
+    std::vector<std::vector<interSec_elem>> interSec(pow(ND,2), std::vector<interSec_elem>(pow(ND,2)));
     for (int j = 0; j < pow(ND,2); j++)
     {
         for (int jj = j + 1; jj < pow(ND,2); jj++)
         {
-            
+            interSec[j][jj] = pathIntersections(Path0[j], Path0[jj]);
+            Pbar(j,jj) = interSec[j][jj].Pbar1;
+            Pbar(jj,j) = interSec[j][jj].Pbar2;
         }
         
     }
