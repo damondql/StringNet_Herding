@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/mip1.dir/mip1_c++.cpp.o -o mip1   -L/opt/gurobi912/linux64/lib  -Wl,-rpath,/opt/gurobi912/linux64/lib /opt/gurobi912/linux64/lib/libgurobi_c++.a -lgurobi91 -O2 -larmadillo 

@@ -117,41 +117,41 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named test2
+# Target rules for targets named mip1
 
 # Build rule for target.
-test2: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test2
-.PHONY : test2
+mip1: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mip1
+.PHONY : mip1
 
 # fast build rule for target.
-test2/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test2.dir/build.make CMakeFiles/test2.dir/build
-.PHONY : test2/fast
+mip1/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mip1.dir/build.make CMakeFiles/mip1.dir/build
+.PHONY : mip1/fast
 
-interSecLineLine.o: interSecLineLine.cpp.o
-.PHONY : interSecLineLine.o
+mip1_c++.o: mip1_c++.cpp.o
+.PHONY : mip1_c++.o
 
 # target to build an object file
-interSecLineLine.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test2.dir/build.make CMakeFiles/test2.dir/interSecLineLine.cpp.o
-.PHONY : interSecLineLine.cpp.o
+mip1_c++.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mip1.dir/build.make CMakeFiles/mip1.dir/mip1_c++.cpp.o
+.PHONY : mip1_c++.cpp.o
 
-interSecLineLine.i: interSecLineLine.cpp.i
-.PHONY : interSecLineLine.i
+mip1_c++.i: mip1_c++.cpp.i
+.PHONY : mip1_c++.i
 
 # target to preprocess a source file
-interSecLineLine.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test2.dir/build.make CMakeFiles/test2.dir/interSecLineLine.cpp.i
-.PHONY : interSecLineLine.cpp.i
+mip1_c++.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mip1.dir/build.make CMakeFiles/mip1.dir/mip1_c++.cpp.i
+.PHONY : mip1_c++.cpp.i
 
-interSecLineLine.s: interSecLineLine.cpp.s
-.PHONY : interSecLineLine.s
+mip1_c++.s: mip1_c++.cpp.s
+.PHONY : mip1_c++.s
 
 # target to generate assembly for a file
-interSecLineLine.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test2.dir/build.make CMakeFiles/test2.dir/interSecLineLine.cpp.s
-.PHONY : interSecLineLine.cpp.s
+mip1_c++.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mip1.dir/build.make CMakeFiles/mip1.dir/mip1_c++.cpp.s
+.PHONY : mip1_c++.cpp.s
 
 # Help Target
 help:
@@ -161,10 +161,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... test2"
-	@echo "... interSecLineLine.o"
-	@echo "... interSecLineLine.i"
-	@echo "... interSecLineLine.s"
+	@echo "... mip1"
+	@echo "... mip1_c++.o"
+	@echo "... mip1_c++.i"
+	@echo "... mip1_c++.s"
 .PHONY : help
 
 

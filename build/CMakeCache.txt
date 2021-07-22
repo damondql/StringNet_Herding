@@ -215,6 +215,27 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
+//enable C++ compilation
+CXX:BOOL=ON
+
+//Path to a library.
+GUROBI_CXX_LIBRARY:FILEPATH=GUROBI_CXX_LIBRARY-NOTFOUND
+
+//The directory containing a CMake configuration file for GUROBI.
+GUROBI_DIR:PATH=GUROBI_DIR-NOTFOUND
+
+//Path to a file.
+GUROBI_INCLUDE_DIRS:PATH=GUROBI_INCLUDE_DIRS-NOTFOUND
+
+//Path to a library.
+GUROBI_LIBRARY:FILEPATH=GUROBI_LIBRARY-NOTFOUND
+
+//Value Computed by CMake
+gurobi-template_BINARY_DIR:STATIC=/home/damon/Documents/Lab/Aero/summer-research-1/build
+
+//Value Computed by CMake
+gurobi-template_SOURCE_DIR:STATIC=/home/damon/Documents/Lab/Aero/summer-research-1
+
 //The directory containing a CMake configuration file for ifopt.
 ifopt_DIR:PATH=/usr/local/share/ifopt/cmake
 
