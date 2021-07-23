@@ -27,26 +27,41 @@ struct interSec_elem
 };
 
 interSec_elem pathIntersections(path_elem Path1, path_elem Path2) {
+    // cout << "into pathIntersection function" << endl;
     interSec_elem result;
     int NS1 = 1;
     int NS2 = 1; 
+    // cout << "000000000000000000000" <<endl;
     result.Flag = zeros<mat>(NS1, NS2);
+    // cout << "0.1" << endl;
     result.Pbar1 = 0;
     result.Pbar2 = 0;
-    vec rV1 = Path1.rV;
-    vec rV2 = Path2.rV;
+    // cout <<"0.2" << endl;
+    mat rV1 = Path1.rV;
+    mat rV2 = Path2.rV;
+    // rV1.print("rV1: ");
+    // rV2.print("rV2: ");
     int segType1 = Path1.segType;
     int segType2 = Path2.segType;
     result.flag0 = 0;
+    // cout <<"0.3" << endl;
     vec r1(2);
     vec r2(2);
-    vec dr;
-
+    vec dr(2);
+    // cout << "11111111111111111111" << endl;
+    result.Pos1.set_size(NS1, NS2);
+    result.Pos2.set_size(NS1, NS2);
+    result.S10.set_size(NS1, NS2);
+    result.S20.set_size(NS1,NS2);
+    result.rV11.resize(2);
+    result.rV12.resize(2);
+    result.rV21.resize(2);
+    result.rV22.resize(2);
     for (int i = 0; i < NS1; i+=2)
     {
         double Si0 = Path1.S(i);
         r1 = rV1.col(i);
-        r2 = rV2.col(i+1);
+        r2 = rV1.col(i+1);
         dr = r2 - r1;
         double L1 = arma::norm(dr,2);
         double drx = dr(0);
@@ -65,7 +80,7 @@ interSec_elem pathIntersections(path_elem Path1, path_elem Path2) {
             double Sj0 = Path2.S(j);
             vec r21 = rV2.col(j);
             vec r22 = rV2.col(j+1);
-            double drx2 = r22(0) - r21(1);
+            double drx2 = r22(0) - r21(0);
             double dry2 = r22(1) - r21(1);
             double theta2 = atan2(dry2, drx2);
             if(theta2 < 0) {
@@ -78,8 +93,35 @@ interSec_elem pathIntersections(path_elem Path1, path_elem Path2) {
             double mL2 = tan(theta2);
             double cL2 = r21(1) - mL2*r21(0); 
             double L2 = arma::norm(r21-r22);
+            // cout << "222222222222222222222222222" << endl;
+            // r1.print("r1: ");
+            // r2.print("r2: ");
+            // r21.print("r21: ");
+            // r22.print("r22: ");
+            // std::cout << "mL1: "<<mL1 << std::endl;
+            // std::cout << "cL1: "<<cL1 << std::endl;
+            // std::cout << "theta1: "<<theta1 << std::endl;
+            // std::cout << endl;
+            // std::cout << "drx: "<<drx << std::endl;
+            // std::cout << "dry: "<<dry << std::endl;
+            // std::cout << "L1: "<<L1 << std::endl;
+            // std::cout << endl;
+            std::cout << "mL2: "<<mL2 << std::endl;
+            std::cout << "cL2: "<<cL2 << std::endl;
+            std::cout << "theta2: "<<theta2 << std::endl;
+            std::cout << endl;
+            // std::cout << "drx2: "<<drx2 << std::endl;
+            // std::cout << "dry2: "<<dry2 << std::endl;
+            // std::cout << "L2: "<<L2 << std::endl;
+            // std::cout << "dthata: "<<dtheta << std::endl;
 
             lineIntersec interSec0 = interSecLineLine(r1,r2,mL1,cL1,theta1,drx,dry,L1,r21,r22,mL2,cL2,theta2,drx2,dry2,L2,dtheta);
+            // cout << "Pbar1: " << interSec0.Pbar1 << endl;
+            // cout << "Pbar2: " << interSec0.Pbar2 << endl;
+            // cout << endl;
+            // cout << "3333333333333333333" << endl;
+            // cout << "lineLine Intersec Pbar1: " << interSec0.Pbar1 << endl;
+            // cout << "lineline Intersec Pbar2: " << interSec0.Pbar2 << endl;
             if (interSec0.Flag != 0)
             {
                 result.Flag(i,j) = interSec0.Flag;
@@ -95,8 +137,8 @@ interSec_elem pathIntersections(path_elem Path1, path_elem Path2) {
         
 
     }
-
-    for (int j = 0; j < NS2; j+=2)
+    // cout << "4444444444444444444444444444" << endl;
+    for (int j = 1; j < NS2; j+=2)
     {
         double Sj0 = Path2.S(j);
         r1 = rV2.col(j);
@@ -111,10 +153,11 @@ interSec_elem pathIntersections(path_elem Path1, path_elem Path2) {
         }
         double mL1 = tan(theta1);
         double cL1 = r1(1) - mL1 * r1(0);
-        double dr_hat = dr / (arma::norm(dr));
+        vec dr_hat = dr / (arma::norm(dr));
 
 
     }
+    // cout << "55555555555555555555555555" << endl;
     int countS1 = -1;
     for (int i = 0; i < NS1; i++)
     {
@@ -165,6 +208,7 @@ interSec_elem pathIntersections(path_elem Path1, path_elem Path2) {
 
     }
     
-    
+    // cout << "pathIntersection Pbar1: "<<result.Pbar1 << endl;
+    // cout << "pathIntersection Pbar2: " << result.Pbar2 << endl;
     return result;
 }

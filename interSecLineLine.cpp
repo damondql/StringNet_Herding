@@ -129,30 +129,34 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
             lambda21=(ybar21-r21(1))/dry2;//norm([xbar21,ybar21]'-r21)/L2;
             lambda22=(ybar22-r21(1))/dry2;//norm([xbar22,ybar22]'-r21)/L2;
         }
-        // if (lambda1 < 1e-6 && lambda1 > -1e-6)
-        // {
-        //     lambda1 = 0;
-        // }
-        // if (lambda2 < 1e-6 && lambda2 > -1e-6)
-        // {
-        //     lambda2 = 0;
-        // }
+        if (lambda1 < 1e-6 && lambda1 > -1e-6)
+        {
+            lambda1 = 0;
+        } else if (lambda1 < 1+1e-6 && lambda1 > 1-1e-6) {
+            lambda1 = 1;
+        }
+        if (lambda2 < 1e-6 && lambda2 > -1e-6)
+        {
+            lambda2 = 0;
+        } else if (lambda2 < 1+1e-6 && lambda2 > 1-1e-6) {
+            lambda2 = 1;
+        }
         
-        cout << "lambda1: " << lambda1 << endl;
-        cout << "lambda11: " << lambda11 << endl;
-        cout << "lambda12: " << lambda12 << endl;
-        cout << "lambda2: " << lambda2 << endl;
-        cout << "lambda21: " << lambda21 << endl;
-        cout << "lambda22: " << lambda22 << endl;
-        cout << "1-lamda1: " << 1-lambda1 << endl;
+        // cout << "lambda1: " << lambda1 << endl;
+        // cout << "lambda11: " << lambda11 << endl;
+        // cout << "lambda12: " << lambda12 << endl;
+        // cout << "lambda2: " << lambda2 << endl;
+        // cout << "lambda21: " << lambda21 << endl;
+        // cout << "lambda22: " << lambda22 << endl;
+        // cout << "1-lamda1: " << 1-lambda1 << endl;
         vec xy_int = {x_int, y_int};
         double lam11,lam12,lam21,lam22;
         if (lambda2 >= 1.0)
         {
-            cout << "Process: lambda2 >=1 !!!" <<endl;
+            // cout << "Process: lambda2 >=1 !!!" <<endl;
             if (lambda1 > 0.0 && lambda1 < 1.0)
             {
-                cout << "Process:0 < lambda1 < 1 !!!" <<endl;
+                // cout << "Process:0 < lambda1 < 1 !!!" <<endl;
                 if (arma::norm(r22 - xy_int) < 2*rho_D/fabs(sin(dtheta)))
                 {
                     result.Flag = 1;
@@ -202,7 +206,7 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
                 
             } else if (lambda1 <= 0.0)
             {
-                cout << "Process: lambda1 <=0 !!!" <<endl;
+                // cout << "Process: lambda1 <=0 !!!" <<endl;
                 if (arma::norm(r22 - r1) < 2*rho_D)
                 {
                     lam11 = 0;
@@ -228,7 +232,7 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
                 
             } else if (lambda1 >= 1.0)
             {   
-                cout << "Process: lambda1 >=1 !!!" <<endl;
+                // cout << "Process: lambda1 >=1 !!!" <<endl;
                 if (arma::norm(r22 - r2) < 2 * rho_D)
                 {
                     lam12 = 1;
@@ -258,10 +262,10 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
             
         } else if (lambda2 > 0.0 && lambda2 < 1.0)
         {
-            cout << "Process: 0 < lambda2 < 1  !!!" <<endl;
+            // cout << "Process: 0 < lambda2 < 1  !!!" <<endl;
             if (lambda1 > 0.0 && lambda1 < 1.0)
             {
-                cout << "Process: 0 < lambda1 < 1 !!!" <<endl;
+                // cout << "Process: 0 < lambda1 < 1 !!!" <<endl;
                 if (lambda11 < 0.0)
                 {
                     double aa = arma::norm(r1 - xy_int);
@@ -322,7 +326,7 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
                 result.Flag = 1;
             } else if (lambda1 <= 0.0)
             {
-                cout << "Process: lambda1 <= 0 !!!" <<endl;
+                // cout << "Process: lambda1 <= 0 !!!" <<endl;
                 if (arma::norm(r1 - xy_int) < 2 * rho_D/fabs(sin(dtheta)))
                 {
                     result.Flag = 1;
@@ -380,7 +384,7 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
                 
             } else if (lambda1 >=1.0)
             {   
-                cout << "Process: lambda1 >= 1 !!!" <<endl;
+                // cout << "Process: lambda1 >= 1 !!!" <<endl;
                 if (arma::norm(r2 - xy_int) < 2 * rho_D/fabs(sin(dtheta)))
                 {
                     result.Flag = 1;
@@ -438,10 +442,10 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
             
             
         } else { //lambda2 < 0
-            cout << "Process: lambda2 < 0 !!!" <<endl;
+            // cout << "Process: lambda2 <= 0 !!!" <<endl;
             if (lambda1 > 0.0 && lambda1 < 1.0)
             {
-                cout << "Process: 0 < lambda1 < 1 !!!" <<endl;
+                // cout << "Process: 0 < lambda1 < 1 !!!" <<endl;
                 if (arma::norm(r21 - xy_int) < 2*rho_D/fabs(sin(dtheta))) {
                     result.Flag = 1;
                     lam21 = 0;
@@ -492,7 +496,7 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
                 }
             } else if (lambda1 <= 0.0)
             {
-                cout << "Process: lambda1 <= 0 !!!" <<endl;
+                // cout << "Process: lambda1 <= 0 !!!" <<endl;
                 if (arma::norm(r21 - r1) < 2 * rho_D)
                 {
                     lam21 = 0;
@@ -516,7 +520,7 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
                     result.Flag = 1;
                 } else if (lambda1 >= 1.0)
                 {
-                    cout << "Process: lambda1 >= 1 !!!" <<endl;
+                    // cout << "Process: lambda1 >= 1 !!!" <<endl;
                     if (arma::norm(r2 - r21) < 2 * rho_D)
                     {
                         lam21 = 0;
@@ -567,6 +571,8 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
         
         
     }
+    // cout << "in interSecLineLine function Pbar1: " << result.Pbar1 << endl;
+    // cout << "in interSecLineLine function Pbar2: " << result.Pbar2 << endl;
     return result;
 }
 
@@ -594,84 +600,84 @@ lineIntersec interSecLineLine(vec r1, vec r2, double mL1, double cL1, double the
 //     //             -18.2808998346075};
 
 //     vec r1, r2, r21, r22;
-//     r1.load("../LineV/r1.txt");
-//     r2.load("../LineV/r2.txt");
-//     r21.load("../LineV/r21.txt");
-//     r22.load("../LineV/r22.txt");
+//     r1.load("../../../../../Downloads/swarm_matlab/LineV/r1.txt");
+//     r2.load("../../../../../Downloads/swarm_matlab/LineV/r2.txt");
+//     r21.load("../../../../../Downloads/swarm_matlab/LineV/r21.txt");
+//     r22.load("../../../../../Downloads/swarm_matlab/LineV/r22.txt");
 
-//     std::ifstream fin("../LineV/cL1.txt");
+//     std::ifstream fin("../../../../../Downloads/swarm_matlab/LineV/cL1.txt");
 //     double cL1;
 //     fin >> cL1;
 //     std::cout << "cL1: "<<cL1 << std::endl;
 //     fin.close();
 
-//     fin.open("../LineV/cL2.txt");
+//     fin.open("../../../../../Downloads/swarm_matlab/LineV/cL2.txt");
 //     double cL2;
 //     fin >> cL2;
 //     std::cout << "cL2: "<<cL2 << std::endl;
 //     fin.close();
 
-//     fin.open("../LineV/drx.txt");
+//     fin.open("../../../../../Downloads/swarm_matlab/LineV/drx.txt");
 //     double drx;
 //     fin >> drx;
 //     std::cout << "drx: "<< drx << std::endl;
 //     fin.close();
 
-//     fin.open("../LineV/drx2.txt");
+//     fin.open("../../../../../Downloads/swarm_matlab/LineV/drx2.txt");
 //     double drx2;
 //     fin >> drx2;
 //     std::cout << "drx2: "<<drx2 << std::endl;
 //     fin.close();
 
-//     fin.open("../LineV/dry.txt");
+//     fin.open("../../../../../Downloads/swarm_matlab/LineV/dry.txt");
 //     double dry;
 //     fin >> dry;
 //     std::cout << "dry: "<<dry << std::endl;
 //     fin.close();
 
-//     fin.open("../LineV/dry2.txt");
+//     fin.open("../../../../../Downloads/swarm_matlab/LineV/dry2.txt");
 //     double dry2;
 //     fin >> dry2;
 //     std::cout << "dry2: "<<dry2 << std::endl;
 //     fin.close();
 
-//     fin.open("../LineV/dtheta.txt");
+//     fin.open("../../../../../Downloads/swarm_matlab/LineV/dtheta.txt");
 //     double dtheta;
 //     fin >> dtheta;
 //     std::cout << "dtheata: "<<dtheta << std::endl;
 //     fin.close();
         
-//     fin.open("../LineV/L1.txt");
+//     fin.open("../../../../../Downloads/swarm_matlab/LineV/L1.txt");
 //     double L1;
 //     fin >> L1;
 //     std::cout << "L1: "<<L1 << std::endl;
 //     fin.close();
 
-//     fin.open("../LineV/L2.txt");
+//     fin.open("../../../../../Downloads/swarm_matlab/LineV/L2.txt");
 //     double L2;
 //     fin >> L2;
 //     std::cout << "L2: "<<L2 << std::endl;
 //     fin.close();
 
-//     fin.open("../LineV/mL1.txt");
+//     fin.open("../../../../../Downloads/swarm_matlab/LineV/mL1.txt");
 //     double mL1;
 //     fin >> mL1;
 //     std::cout << "mL1: "<<mL1 << std::endl;
 //     fin.close();
 
-//     fin.open("../LineV/mL2.txt");
+//     fin.open("../../../../../Downloads/swarm_matlab/LineV/mL2.txt");
 //     double mL2;
 //     fin >> mL2;
 //     std::cout << "mL2: "<<mL2 << std::endl;
 //     fin.close();
 
-//     fin.open("../LineV/theta1.txt");
+//     fin.open("../../../../../Downloads/swarm_matlab/LineV/theta1.txt");
 //     double theta1;
 //     fin >> theta1;
 //     std::cout << "theta1: "<<theta1 << std::endl;
 //     fin.close();
 
-//     fin.open("../LineV/theta2.txt");
+//     fin.open("../../../../../Downloads/swarm_matlab/LineV/theta2.txt");
 //     double theta2;
 //     fin >> theta2;
 //     std::cout << "theta2: "<<theta2 << std::endl;

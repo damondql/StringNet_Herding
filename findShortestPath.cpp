@@ -25,7 +25,7 @@ path_elem findShortestPath(arma::vec rI, arma::vec rF) {
     std::complex<double> comp = {rI(0)-rF(0), rI(1) - rF(1)};
     resultP.P = sqrt(norm(comp));
     resultP.S = {0, resultP.P};
-    resultP.rV.print("rV:");
-    resultP.S.print("S:");
+    // resultP.rV.print("rV:");
+    // resultP.S.print("S:");
     return resultP;
 }

@@ -1,14 +1,4 @@
-/* Copyright 2021, Gurobi Optimization, LLC */
-
-/* This example formulates and solves the following simple QP model:
-
-     minimize    x^2 + x*y + y^2 + y*z + z^2 + 2 x
-     subject to  x + 2 y + 3 z >= 4
-                 x +   y       >= 1
-                 x, y, z non-negative
-
-   It solves it once as a continuous model, and once as an integer model.
-*/
+#pragma once
 
 #include "gurobi_c++.h"
 #include <armadillo>
@@ -52,11 +42,11 @@ goal_assign defGoalAssignMIQP(mat optT, mat Pbar, int ND)
      GRBVar h = model.addVar(0.0, 1.0, 0.0, GRB_CONTINUOUS, "h");
      GRBVar i = model.addVar(0.0, 1.0, 0.0, GRB_CONTINUOUS, "i");
 
-     cout << "finish variable" <<endl;
+    //  cout << "finish variable" <<endl;
      std::vector<GRBVar> variables;
      
      variables = {a,b,c,d,e,f,g,h,i};
-     cout <<"make varibles vector" << endl;
+    //  cout <<"make varibles vector" << endl;
      // Set objective
      GRBQuadExpr obj = 0;
      // obj += Pbar(0,0)*a*a + Pbar(0,1)*a*b + Pbar(0,2)*a*c + Pbar(0,3)*a*d + Pbar(0,4)*a*e + Pbar(0,5)*a*f + Pbar(0,6)*a*g + Pbar(0,7)*a*h + Pbar(0,8)*
@@ -72,7 +62,7 @@ goal_assign defGoalAssignMIQP(mat optT, mat Pbar, int ND)
      {
           obj += optT(i,0) * variables[i];
      }
-     cout << "finish obj" << endl;
+    //  cout << "finish obj" << endl;
 
 
      model.setObjective(obj);
@@ -207,18 +197,18 @@ goal_assign defGoalAssignMIQP(mat optT, mat Pbar, int ND)
      return result;
 }
 
-int main() {
-     int ND = 3;
-     mat optT;
-     optT.load("../defV/optT.txt");
-     mat Pbar;
-     Pbar.load("../defV/Pbar.txt");
-     optT.print("optT: ");
-     Pbar.print("Pbar: ");
-     goal_assign a = defGoalAssignMIQP(optT, Pbar, ND);
-     a.assign.print("assign: ");
-     cout << "cost: " << a.cost << endl;
-     cout << "maxOptT: " << a.maxOptT << endl;
+// int main() {
+//      int ND = 3;
+//      mat optT;
+//      optT.load("../defV/optT.txt");
+//      mat Pbar;
+//      Pbar.load("../defV/Pbar.txt");
+//      optT.print("optT: ");
+//      Pbar.print("Pbar: ");
+//      goal_assign a = defGoalAssignMIQP(optT, Pbar, ND);
+//      a.assign.print("assign: ");
+//      cout << "cost: " << a.cost << endl;
+//      cout << "maxOptT: " << a.maxOptT << endl;
 
 
-}
+// }
