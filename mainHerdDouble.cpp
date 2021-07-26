@@ -1,4 +1,3 @@
-
 // #include "AllParametersExperiment.cpp"
 #include "symDerivative.cpp"
 #include "findCommGraphAndFormDist.cpp"
@@ -126,7 +125,7 @@ void initial_contorl() {
     Rii1=Rii0*sqrt(2*(1-cos(180-2*M_PI/NA)));
     CommGraph attacker_graph = findCommGraphAndFormDist(NA,1,RA);
     CommGraph defender_graph_close = findCommGraphAndFormDist(ND+1, 2, rho_sn);
-    double RDF_open = 0;
+    // double RDF_open = 0;
     if (flagExp == 1) {
         RDF_open = 4.4;
     } else if (flagGazeboExp == 1)
@@ -139,9 +138,66 @@ void initial_contorl() {
     R_DD_string = 1.5 * defender_graph_close.Rij_tilde(0,1);
     RDF_closed = 1.1 * rho_sn;
     WDString = arma::zeros<mat>(ND, ND);
-    cout  << "RDF_closed: " << RDF_closed << endl;
+    // cout  << "RDF_closed: " << RDF_closed << endl;
 }
 
+DesiredPos motionP_result;
+
+void getMoitonPlan(){
+    motionP_result =  defInitDesiredPos(YA, XD0, NA, ND, RDF_open, v_maxA[0], 105);
+    motionP_result.dDf.phi += M_PI;
+    motionP_result.mP.startTime += ones<mat>(ND,1) * 25;
+    // XD.print("XD:");
+    arma::mat tempM;
+    tempM.reshape(XD.n_rows, XD.n_cols+1);
+    tempM.submat(0,0,XD.n_rows-1,XD.n_cols-1) = XD;
+    tempM.submat(0,tempM.n_cols-1,motionP_result.dDf.rDFc0.n_rows-1, tempM.n_cols-1) = motionP_result.dDf.rDFc0;
+    tempM.submat(motionP_result.dDf.rDFc0.n_rows,tempM.n_cols-1, tempM.n_rows-1,tempM.n_cols-1) = zeros<mat>(2,1);
+    XD = tempM;
+    // XD.print("XD:");
+    tempM.resize(X.n_rows,1);
+    tempM.submat(0,0,XA.n_rows-1,0) = XA.as_col();
+    tempM.submat(XA.n_rows,0,tempM.n_rows-1,0) = XD.as_col();
+    // tempM.print("tempM:");
+    X.col(0) = tempM;
+    // X.submat(0,0,19,9).print("X sub:");
+
+}
+
+void calDistance(){
+    vec indDef = regspace(1,ND+1);
+    int na = motionP_result.mP.assign.n_elem;
+    int nid = indDef.n_elem;
+    vec tempV(indDef.n_elem);
+    int indx_num = na + regspace(na+1,nid).n_elem;
+    vec indx(indx_num);
+    indx.subvec(0,na-1) = motionP_result.mP.assign;
+    indx.subvec(na,indx_num-1) = regspace(na+1,nid);
+    // indx.print("indx:");
+    for (int i = 0; i < tempV.n_elem; i++)
+    {
+        tempV(indx(i)-1) = indDef(i);
+    }
+    indDef = tempV;
+    // cout << "na: " << na <<endl;
+    // cout<< "nid: " <<nid <<endl;
+    vec RDjDl(ND);
+    if (ND >1)
+    {
+        for (int j = 0; j < ND-1; j++)
+        {
+            for (int i = j+1 ; i < ND; i++)
+            {
+                
+            }
+            
+        }
+        
+    }
+    
+
+
+}
 
 
 int main() {
@@ -149,15 +205,34 @@ int main() {
     AllocateMemory();
     measurements(2);
     initial_contorl();
-    arma::vec rAcm = {5.9807,-33.2064};
-    arma::vec rP = {14,-1};
-    path_elem p = findShortestPath(rAcm, rP);
-    p.rV.print("rV: ");
-    p.S.print("S: ");
-    double q = 16.0949;
-    CoorOnPath A = findCoordOnPath(q, p);
-    A.rp.print("rDFc0: ");
-    A.thetap.print("thetaAcom0: ");
-    YA.print("YA:");
-    defInitDesiredPos(YA, XD0, NA, ND, RDF_open, v_maxA[0], 105);
+    // arma::vec rAcm = {5.9807,-33.2064};
+    // arma::vec rP = {14,-1};
+    // path_elem p = findShortestPath(rAcm, rP);
+    // p.rV.print("rV: ");
+    // p.S.print("S: ");
+    // double q = 16.0949;
+    // CoorOnPath A = findCoordOnPath(q, p);
+    // A.rp.print("rDFc0: ");
+    // A.thetap.print("thetaAcom0: ");
+    // v_maxD.print("v_maxD: ");
+    // v_maxDC.print("v_maxDC: ");
+    // u_maxD.print("u_maxD: ");
+    // cout << "rho_P:" << rho_P << endl;
+    // cout << "rho_safe:" << rho_safe << endl;
+    // cout << "rho_sn:" << rho_sn << endl;
+    // cout << "rho_Acon:" << rho_Acon << endl;
+    // YA.print("YA:");
+    YA(0,0) = 6.15469799011143;
+    YA(1,0) = -33.3348469481075;
+    YA(2,0) = -0.116564575844461;
+    YA(3,0) = 0.207257244260275;
+    YA.print("YA: ");
+    XD0 = {{11.9907000000000,9.37240000000000,16.1838000000000},
+{-10.7580000000000,-7.12780000000000,-5.84110000000000},
+{0,0,0},
+{0,0,0}};
+//     XD0.print("XD0: ");
+    // cout << "RDF_open:" << RDF_open << endl;
+    getMoitonPlan();
+    calDistance();
 }

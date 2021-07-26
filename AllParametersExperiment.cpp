@@ -217,13 +217,13 @@ void defenders() {
     vmdf_s=sqrt((umdf_s1+umdf_s2)/C_d);
     for (size_t i = 0; i < ND; i++)
     {
-        v_maxD(0) = vmd;
-        v_maxDC(0) = vmdc;
-        u_maxD(0) = umd;
-        u_maxD1(0) = umd1;
-        u_maxD2(0) = umd2;
-        u_maxDr1(0) = umdf_s1;
-        u_maxDr2(0) = umdf_s2;
+        v_maxD(i) = vmd;
+        v_maxDC(i) = vmdc;
+        u_maxD(i) = umd;
+        u_maxD1(i) = umd1;
+        u_maxD2(i) = umd2;
+        u_maxDr1(i) = umdf_s1;
+        u_maxDr2(i) = umdf_s2;
     }
     obs.rho_safe = rho_safe;
     dthetai=acos(1-pow((2*rho_D),2)/(2*pow(rho_safe,2)));   //angular shift for two agents colliding on a ciruclar arc segment

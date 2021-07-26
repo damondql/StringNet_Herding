@@ -200,9 +200,9 @@ goal_assign defGoalAssignMIQP(mat optT, mat Pbar, int ND)
 // int main() {
 //      int ND = 3;
 //      mat optT;
-//      optT.load("../defV/optT.txt");
+//      optT.load("../../../../../Downloads/swarm_matlab/defV/optT.txt");
 //      mat Pbar;
-//      Pbar.load("../defV/Pbar.txt");
+//      Pbar.load("../../../../../Downloads/swarm_matlab/defV/Pbar.txt");
 //      optT.print("optT: ");
 //      Pbar.print("Pbar: ");
 //      goal_assign a = defGoalAssignMIQP(optT, Pbar, ND);

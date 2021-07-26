@@ -106,10 +106,10 @@ interSec_elem pathIntersections(path_elem Path1, path_elem Path2) {
             // std::cout << "dry: "<<dry << std::endl;
             // std::cout << "L1: "<<L1 << std::endl;
             // std::cout << endl;
-            std::cout << "mL2: "<<mL2 << std::endl;
-            std::cout << "cL2: "<<cL2 << std::endl;
-            std::cout << "theta2: "<<theta2 << std::endl;
-            std::cout << endl;
+            // std::cout << "mL2: "<<mL2 << std::endl;
+            // std::cout << "cL2: "<<cL2 << std::endl;
+            // std::cout << "theta2: "<<theta2 << std::endl;
+            // std::cout << endl;
             // std::cout << "drx2: "<<drx2 << std::endl;
             // std::cout << "dry2: "<<dry2 << std::endl;
             // std::cout << "L2: "<<L2 << std::endl;

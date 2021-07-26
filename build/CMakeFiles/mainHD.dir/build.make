@@ -92,6 +92,8 @@ mainHD_EXTERNAL_OBJECTS =
 
 mainHD: CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o
 mainHD: CMakeFiles/mainHD.dir/build.make
+mainHD: /opt/gurobi912/linux64/lib/libgurobi_c++.a
+mainHD: /opt/gurobi912/linux64/lib/libgurobi91.so
 mainHD: CMakeFiles/mainHD.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable mainHD"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/mainHD.dir/link.txt --verbose=$(VERBOSE)

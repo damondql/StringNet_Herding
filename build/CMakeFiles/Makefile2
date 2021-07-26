@@ -63,7 +63,7 @@ CMAKE_BINARY_DIR = /home/damon/Documents/Lab/Aero/summer-research-1/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/test3.dir/all
+all: CMakeFiles/mainHD.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -71,34 +71,34 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/test3.dir/clean
+clean: CMakeFiles/mainHD.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/test3.dir
+# Target rules for target CMakeFiles/mainHD.dir
 
 # All Build rule for target.
-CMakeFiles/test3.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test3.dir/build.make CMakeFiles/test3.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test3.dir/build.make CMakeFiles/test3.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles --progress-num=1,2 "Built target test3"
-.PHONY : CMakeFiles/test3.dir/all
+CMakeFiles/mainHD.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mainHD.dir/build.make CMakeFiles/mainHD.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mainHD.dir/build.make CMakeFiles/mainHD.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles --progress-num=1,2 "Built target mainHD"
+.PHONY : CMakeFiles/mainHD.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/test3.dir/rule: cmake_check_build_system
+CMakeFiles/mainHD.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles 2
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/test3.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/mainHD.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles 0
-.PHONY : CMakeFiles/test3.dir/rule
+.PHONY : CMakeFiles/mainHD.dir/rule
 
 # Convenience name for target.
-test3: CMakeFiles/test3.dir/rule
-.PHONY : test3
+mainHD: CMakeFiles/mainHD.dir/rule
+.PHONY : mainHD
 
 # clean rule for target.
-CMakeFiles/test3.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test3.dir/build.make CMakeFiles/test3.dir/clean
-.PHONY : CMakeFiles/test3.dir/clean
+CMakeFiles/mainHD.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mainHD.dir/build.make CMakeFiles/mainHD.dir/clean
+.PHONY : CMakeFiles/mainHD.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

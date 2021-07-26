@@ -1,1 +1,1 @@
-/usr/bin/c++ -rdynamic CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o -o mainHD  -O2 -larmadillo 
+/usr/bin/c++ -rdynamic CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o -o mainHD   -L/opt/gurobi912/linux64/lib  -Wl,-rpath,/opt/gurobi912/linux64/lib /opt/gurobi912/linux64/lib/libgurobi_c++.a -lgurobi91 -O2 -larmadillo 
