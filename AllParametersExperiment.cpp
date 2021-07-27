@@ -302,47 +302,46 @@ double kDDesv=1;
 ///////////////////////////////////
 //Convex polygonal Obstalces///////
 ///////////////////////////////////
-cube rVO(2,4,2);
+cube rVO(2,4,0);
 
 double NO = rVO.n_slices;
 double NVOk;
-double rOc[2] = {0,0};
-std::vector<double> dVO;
+vec rOc(2,fill::zeros);
+vec dVO;
 
-std::vector<double> R_bar_AcOc, R_u_AcOc, A_Ac_Oc, B_Ac_Oc, C_Ac_Oc, D_Ac_Oc;
+vec R_bar_AcOc, R_u_AcOc, A_Ac_Oc, B_Ac_Oc, C_Ac_Oc, D_Ac_Oc;
 void FormationOri() {
-    rVO.slice(0) = {{60,160,160,60},
-                    {310,310,390,390}};
-    rVO.slice(1) = {{-300,-190,-190,-300},
-                    {350,350,560,560}};
-    cout << "set rV0 vaule success" << endl;
+    // rVO.slice(0) = {{60,160,160,60},
+    //                 {310,310,390,390}};
+    // rVO.slice(1) = {{-300,-190,-190,-300},
+    //                 {350,350,560,560}};
+    // cout << "set rV0 vaule success" << endl;
     alphaDFr=alphaDFv/(2-alphaDFv);
     kDFr2=(umd2+C_d*pow(vmd,2))/pow((vmd+vma),(alphaDFv));
     for (size_t k = 0; k < NO; k++)
     {
         NVOk = rVO.n_cols;
         for (size_t i = 0; i < rVO.n_cols;i++) {
-            rOc[0] += rVO(0,i,k);
-            rOc[1] += rVO(1,i,k);
+            rOc(0) += rVO(0,i,k);
+            rOc(1) += rVO(1,i,k);
         }
-        rOc[0] = rOc[0] / NVOk;
-        rOc[1] = rOc[1] / NVOk;
+        rOc(0) = rOc(0) / NVOk;
+        rOc(1) = rOc(1) / NVOk;
         for (size_t j = 0; j < NVOk; j++) {
-            double a = rOc[0] - rVO(0,j,k);
-            double b = rOc[1] - rVO(1,j,k);
+            double a = rOc(0) - rVO(0,j,k);
+            double b = rOc(1) - rVO(1,j,k);
             std::complex<double> comp = {a,b};
-            dVO.push_back(sqrt(std::norm(comp)));
+            dVO(j)=sqrt(std::norm(comp));
         }
         
-        std::vector<double>::iterator result = std::max_element(dVO.begin(), dVO.end());
-        double max_dVO = result[0];
-        R_bar_AcOc.push_back(rho_Acon + max_dVO + 5);
-        R_u_AcOc.push_back(rho_Acon + max_dVO +155);
+        double max_dVO = dVO.max();
+        R_bar_AcOc(k)= (rho_Acon + max_dVO + 5);
+        R_u_AcOc(k)=(rho_Acon + max_dVO +155);
         double dR_AcOc_cube=pow((R_u_AcOc[k]-R_bar_AcOc[k]),3);
-        A_Ac_Oc.push_back(2/dR_AcOc_cube);
-        B_Ac_Oc.push_back(-3*(R_u_AcOc[k]+R_bar_AcOc[k])/dR_AcOc_cube);
-        C_Ac_Oc.push_back(6*R_u_AcOc[k]*R_bar_AcOc[k]/dR_AcOc_cube);
-        D_Ac_Oc.push_back(pow(R_u_AcOc[k],2)*(R_u_AcOc[k]-3*R_bar_AcOc[k])/dR_AcOc_cube);
+        A_Ac_Oc(k) = (2/dR_AcOc_cube);
+        B_Ac_Oc(k) = (-3*(R_u_AcOc[k]+R_bar_AcOc[k])/dR_AcOc_cube);
+        C_Ac_Oc(k) = (6*R_u_AcOc[k]*R_bar_AcOc[k]/dR_AcOc_cube);
+        D_Ac_Oc(k) = (pow(R_u_AcOc[k],2)*(R_u_AcOc[k]-3*R_bar_AcOc[k])/dR_AcOc_cube);
 
         rOc[0] = 0;
         rOc[1] = 0;
@@ -435,9 +434,13 @@ void calVfield_formation() {
     
 }
 
-std::vector<std::vector<double>> R_m_AO, R_bar_AO, R_u_AO, R_v_AO;
-std::vector<std::vector<double>> A_A_O, B_A_O, C_A_O, D_A_O;
-std::vector<std::vector<double>> A_bar_A_O, B_bar_A_O, C_bar_A_O, D_bar_A_O;
+// std::vector<std::vector<double>> R_m_AO, R_bar_AO, R_u_AO, R_v_AO;
+// std::vector<std::vector<double>> A_A_O, B_A_O, C_A_O, D_A_O;
+// std::vector<std::vector<double>> A_bar_A_O, B_bar_A_O, C_bar_A_O, D_bar_A_O;
+
+mat R_m_AO, R_bar_AO, R_u_AO, R_v_AO;
+mat A_A_O, B_A_O, C_A_O, D_A_O;
+mat A_bar_A_O, B_bar_A_O, C_bar_A_O, D_bar_A_O;
 void calVfield_attackers() {
     double R_bar_O1=7*rho_A;   //repulsive
     double R_bar_O2=17*rho_A;  //blending of repulsive and attractive
@@ -448,18 +451,18 @@ void calVfield_attackers() {
     // resize the vector to `NA` elements of type std::vector<int>,
     // each having size `NO` and default value
     // NA*NO matrix
-    R_m_AO.resize(NA, std::vector<double>(NO, default_value));
-    R_bar_AO.resize(NA, std::vector<double>(NO, default_value));
-    R_u_AO.resize(NA, std::vector<double>(NO, default_value));
-    R_v_AO.resize(NA, std::vector<double>(NO, default_value));
-    A_A_O.resize(NA, std::vector<double>(NO, default_value));
-    B_A_O.resize(NA, std::vector<double>(NO, default_value));
-    C_A_O.resize(NA, std::vector<double>(NO, default_value));
-    D_A_O.resize(NA, std::vector<double>(NO, default_value));
-    A_bar_A_O.resize(NA, std::vector<double>(NO, default_value));
-    B_bar_A_O.resize(NA, std::vector<double>(NO, default_value));
-    C_bar_A_O.resize(NA, std::vector<double>(NO, default_value));
-    D_bar_A_O.resize(NA, std::vector<double>(NO, default_value));
+    R_m_AO.resize(NA,NO);
+    R_bar_AO.resize(NA,NO);
+    R_u_AO.resize(NA,NO);
+    R_v_AO.resize(NA,NO);
+    A_A_O.resize(NA,NO);
+    B_A_O.resize(NA,NO);
+    C_A_O.resize(NA,NO);
+    D_A_O.resize(NA,NO);
+    A_bar_A_O.resize(NA,NO);
+    B_bar_A_O.resize(NA,NO);
+    C_bar_A_O.resize(NA,NO);
+    D_bar_A_O.resize(NA,NO);
     
 
 
@@ -468,21 +471,21 @@ void calVfield_attackers() {
         for (size_t k = 0; k < NO; k++)
         {
             double rho_bar=2*10*rho_A;
-            R_m_AO[j][k]=0;
-            R_bar_AO[j][k]=2*30*rho_A;
-            R_u_AO[j][k]=2*40*rho_A;
-            R_v_AO[j][k]=2*40*rho_A;
-            double dR_AO_cube=pow((R_u_AO[j][k]-R_bar_AO[j][k]),3);
-            A_A_O[j][k]=2/dR_AO_cube;
-            B_A_O[j][k]=-3*(R_u_AO[j][k]+R_bar_AO[j][k])/dR_AO_cube;
-            C_A_O[j][k]=6*R_u_AO[j][k]*R_bar_AO[j][k]/dR_AO_cube;
-            D_A_O[j][k]=pow(R_u_AO[j][k],2)*(R_u_AO[j][k]-3*R_bar_AO[j][k])/dR_AO_cube;
+            R_m_AO(j,k)=0;
+            R_bar_AO(j,k)=2*30*rho_A;
+            R_u_AO(j,k)=2*40*rho_A;
+            R_v_AO(j,k)=2*40*rho_A;
+            double dR_AO_cube=pow((R_u_AO(j,k)-R_bar_AO(j,k)),3);
+            A_A_O(j,k)=2/dR_AO_cube;
+            B_A_O(j,k)=-3*(R_u_AO(j,k)+R_bar_AO(j,k))/dR_AO_cube;
+            C_A_O(j,k)=6*R_u_AO(j,k)*R_bar_AO(j,k)/dR_AO_cube;
+            D_A_O(j,k)=pow(R_u_AO(j,k),2)*(R_u_AO(j,k)-3*R_bar_AO(j,k))/dR_AO_cube;
             
-            double dR_bar_AO_cube=pow((R_v_AO[j][k]-R_u_AO[j][k]),3);
-            A_bar_A_O[j][k]=2/dR_bar_AO_cube;
-            B_bar_A_O[j][k]=-3*(R_v_AO[j][k]+R_u_AO[j][k])/dR_bar_AO_cube;
-            C_bar_A_O[j][k]=6*R_v_AO[j][k]*R_u_AO[j][k]/dR_bar_AO_cube;
-            D_bar_A_O[j][k]=pow(R_v_AO[j][k],2)*(R_v_AO[j][k]-3*R_u_AO[j][k])/dR_bar_AO_cube;
+            double dR_bar_AO_cube=pow((R_v_AO(j,k)-R_u_AO(j,k)),3);
+            A_bar_A_O(j,k)=2/dR_bar_AO_cube;
+            B_bar_A_O(j,k)=-3*(R_v_AO(j,k)+R_u_AO(j,k))/dR_bar_AO_cube;
+            C_bar_A_O(j,k)=6*R_v_AO(j,k)*R_u_AO(j,k)/dR_bar_AO_cube;
+            D_bar_A_O(j,k)=pow(R_v_AO(j,k),2)*(R_v_AO(j,k)-3*R_u_AO(j,k))/dR_bar_AO_cube;
         }
         
     }
@@ -490,8 +493,8 @@ void calVfield_attackers() {
 }
 
 
-std::vector<std::vector<double>> A_D_O, B_D_O, C_D_O, D_D_O;
-std::vector<std::vector<double>> R_m_DO, R_bar_DO, R_u_DO;
+mat A_D_O, B_D_O, C_D_O, D_D_O;
+mat R_m_DO, R_bar_DO, R_u_DO;
 double R_m_DD, R_m_DDO, R_m2_DD, R_u_DD, R_bar_DD;
 double A_D_D, B_D_D, C_D_D, D_D_D;
 
@@ -505,27 +508,27 @@ void calVfield_defenders() {
     // resize the vector to `NA` elements of type std::vector<int>,
     // each having size `NO` and default value
     // NA*NO matrix
-    R_m_DO.resize(ND, std::vector<double>(NO, default_value));
-    R_bar_DO.resize(ND, std::vector<double>(NO, default_value));
-    R_u_DO.resize(ND, std::vector<double>(NO, default_value));
-    A_D_O.resize(ND, std::vector<double>(NO, default_value));
-    B_D_O.resize(ND, std::vector<double>(NO, default_value));
-    C_D_O.resize(ND, std::vector<double>(NO, default_value));
-    D_D_O.resize(ND, std::vector<double>(NO, default_value));
+    R_m_DO.resize(ND,NO);
+    R_bar_DO.resize(ND,NO);
+    R_u_DO.resize(ND,NO);
+    A_D_O.resize(ND,NO);
+    B_D_O.resize(ND,NO);
+    C_D_O.resize(ND,NO);
+    D_D_O.resize(ND,NO);
     
     for (size_t j = 0; j < ND; j++)
     {
         for (size_t k = 0; k < NO; k++)
         {
             double rho_bar=2*10*rho_D;
-            R_m_DO[j][k]=0;
-            R_bar_DO[j][k]=2*30*rho_D;
-            R_u_DO[j][k]=2*40*rho_D;
-            double dR_DO_cube=pow((R_u_DO[j][k]-R_bar_DO[j][k]),3);
-            A_D_O[j][k]=2/dR_DO_cube;
-            B_D_O[j][k]=-3*(R_u_DO[j][k]+R_bar_DO[j][k])/dR_DO_cube;
-            C_D_O[j][k]=6*R_u_DO[j][k]*R_bar_DO[j][k]/dR_DO_cube;
-            D_D_O[j][k]=pow(R_u_DO[j][k],2)*(R_u_DO[j][k]-3*R_bar_DO[j][k])/dR_DO_cube;
+            R_m_DO(j,k)=0;
+            R_bar_DO(j,k)=2*30*rho_D;
+            R_u_DO(j,k)=2*40*rho_D;
+            double dR_DO_cube=pow((R_u_DO(j,k)-R_bar_DO(j,k)),3);
+            A_D_O(j,k)=2/dR_DO_cube;
+            B_D_O(j,k)=-3*(R_u_DO(j,k)+R_bar_DO(j,k))/dR_DO_cube;
+            C_D_O(j,k)=6*R_u_DO(j,k)*R_bar_DO(j,k)/dR_DO_cube;
+            D_D_O(j,k)=pow(R_u_DO(j,k),2)*(R_u_DO(j,k)-3*R_bar_DO(j,k))/dR_DO_cube;
             
         }
         
@@ -550,7 +553,7 @@ void calVfield_defenders() {
 
 //Initialize the defenders
 double rD0[2] = {-150,-300};
-std::vector<std::vector<double>> rD;
+mat rD;
 arma::mat XD0;
 std::vector<std::vector<double>> rSD_goal;
 mat XD;
@@ -559,16 +562,16 @@ void rD_value() {
     rD = {{11.9907, 9.3724,	16.1838,},
           {-10.7580, -7.1278, -5.8411}};
    
-    XD0.resize(4, rD[0].size());
+    XD0.resize(4, rD.n_cols);
     XD0.zeros();
-    XD.set_size(4, rD[0].size());
+    XD.set_size(4, rD.n_cols);
     XD.zeros();
-    for (size_t i = 0; i < rD[0].size(); i++)
+    for (size_t i = 0; i < rD.n_cols; i++)
     {
-        XD0(0,i)=rD[0][i];
-        XD0(1,i)=rD[1][i];
-        XD(0,i)=rD[0][i];
-        XD(1,i)=rD[1][i];
+        XD0(0,i)=rD(0,i);
+        XD0(1,i)=rD(1,i);
+        XD(0,i)=rD(0,i);
+        XD(1,i)=rD(1,i);
     }
     
 }

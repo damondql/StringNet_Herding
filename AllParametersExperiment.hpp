@@ -96,7 +96,7 @@ extern double kDDesr, kDDesv;
 extern arma::cube rVO;
 
 //For formation orientation
-extern std::vector<double> R_bar_AcOc, R_u_AcOc, A_Ac_Oc, B_Ac_Oc, C_Ac_Oc, D_Ac_Oc;
+extern arma::vec R_bar_AcOc, R_u_AcOc, A_Ac_Oc, B_Ac_Oc, C_Ac_Oc, D_Ac_Oc;
 
 //Parameters for the vector fields for the attacker corresponding to the
 //defenders
@@ -114,12 +114,12 @@ std::vector<double> w, h, w_bar, h_bar;
 
 //Parameters for the vector fields for the attacker corresponding to the
 //obstacles
-extern std::vector<std::vector<double>> R_m_AO, R_bar_AO, R_u_AO, R_v_AO;
-extern std::vector<std::vector<double>> A_A_O, B_A_O, C_A_O, D_A_O;
-extern std::vector<std::vector<double>> A_bar_A_O, B_bar_A_O, C_bar_A_O, D_bar_A_O;
+extern arma::mat R_m_AO, R_bar_AO, R_u_AO, R_v_AO;
+extern arma::mat A_A_O, B_A_O, C_A_O, D_A_O;
+extern arma::mat A_bar_A_O, B_bar_A_O, C_bar_A_O, D_bar_A_O;
 
-extern std::vector<std::vector<double>> A_D_O, B_D_O, C_D_O, D_D_O;
-extern std::vector<std::vector<double>> R_m_DO, R_bar_DO, R_u_DO;
+extern arma::mat A_D_O, B_D_O, C_D_O, D_D_O;
+extern arma::mat R_m_DO, R_bar_DO, R_u_DO;
 extern double R_m_DD, R_m_DDO, R_m2_DD, R_u_DD, R_bar_DD;
 extern double A_D_D, B_D_D, C_D_D, D_D_D;
 

@@ -165,6 +165,7 @@ void getMoitonPlan(){
 }
 
 void calDistance(){
+    //Defenders indices for the formation
     vec indDef = regspace(1,ND+1);
     int na = motionP_result.mP.assign.n_elem;
     int nid = indDef.n_elem;
@@ -173,31 +174,137 @@ void calDistance(){
     vec indx(indx_num);
     indx.subvec(0,na-1) = motionP_result.mP.assign;
     indx.subvec(na,indx_num-1) = regspace(na+1,nid);
-    // indx.print("indx:");
+    
     for (int i = 0; i < tempV.n_elem; i++)
     {
         tempV(indx(i)-1) = indDef(i);
     }
     indDef = tempV;
-    // cout << "na: " << na <<endl;
-    // cout<< "nid: " <<nid <<endl;
+    
+
+    //minimum distance between the defenders
     vec RDjDl(ND);
+    vec arr_minRDD(ND-1);
+    vec arr_minRAD(ND-1);
     if (ND >1)
     {
         for (int j = 0; j < ND-1; j++)
         {
             for (int i = j+1 ; i < ND; i++)
             {
-                
+                RDjDl(i) = norm(rD.col(j) - rD.col(i));
             }
-            
+            arr_minRDD(j) = RDjDl.subvec(j+1,RDjDl.n_rows-1).min();
+            arr_minRAD(j) = norm(rD.col(j) - rA);
         }
+        minRDD(0,0) = arr_minRDD.min();
+        minRAD(0,0) = arr_minRAD.min();
         
     }
     
 
+}
+
+double dpsiAi0=0.02;
+double vA_ref_max=4;
+extern double dpsi_var;
+int flagDefReachOpen=0;
+int flagDefReachClosed=0;
+int flagDefConnect=0;
+int flagAttInSight=0;
+mat defReachCount(ND,1, fill::zeros);
+mat flagAttInObs(NA,NO, fill::zeros);
+mat FlagDefInObs(ND,NO, fill::zeros);
+mat betaAv0(NA,NO,fill::zeros);
+mat betaDv0(ND,NO,fill::zeros);
+mat mDv0=betaDv0;
+mat cDv0=mDv0;
+mat mAv0=betaAv0;
+mat cAv0=mAv0;
+mat speedA0=betaAv0;
+mat assignment; // needs to be initialized later
+int distTol=3;
+int countDDes=0;
+
+int flagGather=1;
+int flagSeek=0;
+int flagEnclose=0;
+int flagAttackerStayTogether=1;
+
+void checkFormation(){
+    assignment = regspace(1,1,ND);
+    mat RefTraj(4*ND, Niter);
+    for (int ti = 0; ti < Niter; ti++)
+    {
+        mat Psi(NA,1, fill::zeros);
+        mat Psi_dot;
+        mat Psi_ddot;
+        Psi_dot = Psi;
+        Psi_ddot = Psi;
+        
+        int countAinS = 0;
+        for (int ii = 0; ii < NA; ii++)
+        {
+            if (norm(rA.col(ii) - rS) < rho_S)
+            {
+                countAinS++;
+            }
+        }
+
+        int countDinS = 0;
+        for (int jj = 0; jj < ND; jj++)
+        {
+            if (norm(rD.col(jj) - rS) < rho_S)
+            {
+                countDinS++;
+            }
+        }
+        if (countAinS > NA-1 && countDinS > ND-1)
+        {
+            break;
+        }
+        //////////////////////////////////////////
+        /////////   safe flag protion     ////////
+        //////////////////////////////////////////
+
+        mat xd0(XD.n_rows, ND);
+        for (int i = 0; i < ND; i++)
+        {
+            xd0.col(i) = XD.col(i);
+        }
+        XD_Des.col(ti+1) = xd0.as_col();
+        
+        vec pairDA(ND);
+        pairDA = regspace(1,1,ND);
+        double kref = 0.1;
+
+        mat refTraj(4,ND, fill::ones);
+        RefTraj.col(ti) = refTraj.as_col();
+
+
+        vec XA_lead_goal(4,fill::zeros);
+        XA_lead_goal.subvec(0,1) = rP;
+        mat XA_goal(XA_lead_goal.n_rows, NA);
+        mat XA_goal_dot(XA_lead_goal.n_rows, NA);
+        XA_goal.col(0) = XA_lead_goal;
+        XA_goal_dot.col(0) = XA_lead_goal;
+
+        
+
+
+
+    }
+    
+
+    
+    
+    
 
 }
+
+
+
+
 
 
 int main() {
