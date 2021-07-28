@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.o"
-  "CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.o.d"
+  "CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.o"
+  "CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.o.d"
   "test3"
   "test3.pdb"
 )

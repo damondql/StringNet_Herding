@@ -2,10 +2,10 @@
 
 #include "gurobi_c++.h"
 #include <armadillo>
-
+// #include <chrono>
 using namespace std;
 using namespace arma;
-
+using namespace std::chrono;
 
 struct goal_assign
 {
@@ -205,7 +205,11 @@ goal_assign defGoalAssignMIQP(mat optT, mat Pbar, int ND)
 //      Pbar.load("../../../../../Downloads/swarm_matlab/defV/Pbar.txt");
 //      optT.print("optT: ");
 //      Pbar.print("Pbar: ");
+//      auto start = high_resolution_clock::now();
 //      goal_assign a = defGoalAssignMIQP(optT, Pbar, ND);
+//      auto stop = high_resolution_clock::now();
+//      auto duration = duration_cast<microseconds>(stop - start);
+//      cout << "It takes micro-s: " << duration.count() <<endl;
 //      a.assign.print("assign: ");
 //      cout << "cost: " << a.cost << endl;
 //      cout << "maxOptT: " << a.maxOptT << endl;

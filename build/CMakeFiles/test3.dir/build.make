@@ -69,28 +69,28 @@ include CMakeFiles/test3.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/test3.dir/flags.make
 
-CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.o: CMakeFiles/test3.dir/flags.make
-CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.o: ../motionPlanForDefOpenForm.cpp
-CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.o: CMakeFiles/test3.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.o -MF CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.o.d -o CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.o -c /home/damon/Documents/Lab/Aero/summer-research-1/motionPlanForDefOpenForm.cpp
+CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.o: CMakeFiles/test3.dir/flags.make
+CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.o: ../defGoalAssignMIQP.cpp
+CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.o: CMakeFiles/test3.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/damon/Documents/Lab/Aero/summer-research-1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.o -MF CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.o.d -o CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.o -c /home/damon/Documents/Lab/Aero/summer-research-1/defGoalAssignMIQP.cpp
 
-CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/damon/Documents/Lab/Aero/summer-research-1/motionPlanForDefOpenForm.cpp > CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.i
+CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/damon/Documents/Lab/Aero/summer-research-1/defGoalAssignMIQP.cpp > CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.i
 
-CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/damon/Documents/Lab/Aero/summer-research-1/motionPlanForDefOpenForm.cpp -o CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.s
+CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/damon/Documents/Lab/Aero/summer-research-1/defGoalAssignMIQP.cpp -o CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.s
 
 # Object files for target test3
 test3_OBJECTS = \
-"CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.o"
+"CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.o"
 
 # External object files for target test3
 test3_EXTERNAL_OBJECTS =
 
-test3: CMakeFiles/test3.dir/motionPlanForDefOpenForm.cpp.o
+test3: CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.o
 test3: CMakeFiles/test3.dir/build.make
 test3: /opt/gurobi912/linux64/lib/libgurobi_c++.a
 test3: /opt/gurobi912/linux64/lib/libgurobi91.so

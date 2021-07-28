@@ -31,7 +31,7 @@ vec potentialControl(mat X1,mat X2, double rho_sens_1, vec sigma_params_12,
     r1 = X1.submat(0,0,1,X1.n_cols-1);
     mat v1(2,X2.n_cols);
     v1 = X1.submat(2,0,3,X1.n_cols-1);
-
+    v1.print("in potentialControl v1:");
     vec uv_12(2,fill::zeros);
     vec ur_12(2,fill::zeros);
     double minDist_12 = INFINITY;
@@ -40,16 +40,19 @@ vec potentialControl(mat X1,mat X2, double rho_sens_1, vec sigma_params_12,
     double sigma = 0;
     for (int j = 0; j < r2.n_cols; j++)
     {
+        cout << "00000000000000000" << endl;
         vec r12j = r2.col(j) - r1;
         double R_12j = arma::norm(r12j);
         if(R_12j <= rho_sens_1) {
             if(R_12j < R_bar_12) {
+                cout << "111111111111111111111111111" << endl;
                 if(R_12j < R_bar_12) {
                     sigma = 1;
                 } else if (R_12j > R_underbar_12 && R_12j<R_bar_12) {
                     sigma = sigma_params_12(0)*pow(R_12j,3)+sigma_params_12(1)*pow(R_12j,2)+sigma_params_12(2)*R_12j+sigma_params_12(3);
                 }
                 vec nabla_r1_V12;
+                cout << "22222222222222222222" << endl;
                 if( (R_12j - R_m_12) > tol){
                     nabla_r1_V12 = kr_12 * (r1-r2.col(j)) / R_12j/abs(R_12j-R_m_12) * (pow((R_12j-R_m_12),2)-pow(R_tilde_12,2))/(pow((R_12j-R_m_12),2)+pow(R_tilde_12,2));
                 } else {
@@ -61,6 +64,7 @@ vec potentialControl(mat X1,mat X2, double rho_sens_1, vec sigma_params_12,
                 mat b  = r1 - r2.col(j);
                 mat c = a * b;
                 vec dv;
+                cout << "33333333333333333333333333" << endl;
                 if (norm_dv12 > 1e-16 && c(0,0) < 0) {
                     dv = kv_12 * (v1 - v2.col(j)) * pow(norm_dv12,alphav_12-1);
                 } else {

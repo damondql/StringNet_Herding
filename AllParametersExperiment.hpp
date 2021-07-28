@@ -44,15 +44,15 @@ extern double A_A_A, B_A_A, C_A_A, D_A_A;
 
 //Initialize the attackers
 #define NA      1   //number of attackers
-extern double v_maxA[NA], u_maxA[NA];
+extern arma::vec v_maxA, u_maxA;
 extern double NA_sep;
 
 extern int axS[2];
 extern int rDmin;
 
 extern double RA0, rho_Acon;
-extern double Rii00[NA], Rik00[NA];
-extern std::vector<double> Rjk00;
+extern arma::vec Rii00, Rik00;
+extern arma::vec Rjk00;
 
 extern int dRA0;
 extern double rho_sn;
@@ -106,7 +106,7 @@ extern double global,A_A_D,B_A_D,C_A_D,D_A_D;
 extern double R_m_AD2,R_bar_AD2,R_u_AD2;
 extern double A_A_D2,B_A_D2,C_A_D2,D_A_D2;
 
-extern std::vector<double> Rij0,Rjj0;
+extern arma::vec Rij0,Rjj0;
 extern double RAD_max;
 extern  double nO, A, B, C, D, aO, bO, E_bar_O, E_m_O, E_u_O, GO;
 

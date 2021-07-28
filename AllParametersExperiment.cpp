@@ -68,13 +68,13 @@ void VectorFields_A() {
     D_A_A=pow(R_u_AA,2)*(R_u_AA-3*R_bar_AA)/dR_AA_cube;
 }
 
-double v_maxA[NA], u_maxA[NA];
+vec v_maxA(NA), u_maxA(NA);
 
 void initialAttackersVel(){
     for (size_t i = 0; i < NA; i++)
     {
-       v_maxA[i] = vma;
-       u_maxA[i] = uma;
+       v_maxA(i) = vma;
+       u_maxA(i) = uma;
     }
 }
 
@@ -87,15 +87,15 @@ int rDmin = 7;
 
 double RA0;
 double potential;
-double Rii00[NA], Rik00[NA];
-std::vector<double> Rjk00;
+vec Rii00(NA), Rik00(NA);
+
 void cal(){
     RA0 = R_m_AA + 0.1;
     potential = RA0 * sqrt(2*(1-cos(2*M_PI/NA))); //for formation potential
     for (size_t i = 0; i < NA; i++)
     {
-        Rii00[i] = potential;
-        Rik00[i] = 1 * Rii00[i];
+        Rii00(i) = potential;
+        Rik00(i) = 1 * Rii00(i);
     }
 }
 
@@ -103,11 +103,12 @@ int dRA0 = 1;
 
 int sceneraio = 1;
 double RA01 = RA0;
-double rA0[2],thetaA0;
+double thetaA0;
+vec rA0(2);
 mat rA(2,NA, fill::zeros);
 mat vA(2,NA, fill::zeros);
 mat XA0(4,NA);
-double rA_follow[2][NA];
+mat rA_follow(2,NA);
 double RA;
 double rho_S;
 double rho_Acon;
@@ -123,8 +124,8 @@ void InitializeAttackers() {
         }
         
     }
-    rA0[0] = 6;
-    rA0[1] = -lW+4;
+    rA0(0) = 6;
+    rA0(1) = -lW+4;
     rA(0,0) = 6.1548;
     rA(1,0) = -33.0553;
     vA(0,0) = 0;
@@ -140,8 +141,8 @@ void InitializeAttackers() {
     
     for (size_t i = 0; i < NA; i++)
     {
-        rA_follow[0][i] = rA(0,i) - rA(0,0);
-        rA_follow[1][i] = rA(1,i) - rA(1,0);
+        rA_follow(0,i) = rA(0,i) - rA(0,0);
+        rA_follow(1,i) = rA(1,i) - rA(1,0);
     }
     
     //XA0(:,NA)=[-700,0,0,0]';
@@ -173,7 +174,7 @@ double rho_sn_max = 65;
 double ND = 3;
 double N;
 double rho_sn;
-
+vec Rjk00(ND);
 arma::vec v_maxD,v_maxDC,u_maxD,u_maxD1,u_maxD2,u_maxDr1,u_maxDr2;
 double rho_safe,dthetai,alphaD_v;
 double rhoAD_safe,rhoD_safe;
@@ -230,7 +231,7 @@ void defenders() {
     rho_sn=rho_Acon+rhoD_safe;   //radius of the stringNet
     for (size_t i = 0; i < ND; i++)
     {
-        Rjk00.push_back(Rik00[1]);
+        Rjk00(i)=(Rik00(0));
     }
 }
 
@@ -398,14 +399,14 @@ void calVfieldA() {
 }
 
 
-std::vector<double> Rij0,Rjj0;
+vec Rij0(ND),Rjj0(ND);
 double rho_Fmax;
 double RAD_max;
 void fillR() {
     for (size_t i = 0; i < ND; i++)
     {
-        Rij0.push_back(R_u_AD);
-        Rjj0.push_back(20);
+        Rij0(i) = (R_u_AD);
+        Rjj0(i) = 20;
     }
     RAD_max=0.2*R_bar_AD+.8*R_m_AD;
     rho_Fmax=RAD_max+rho_D;
