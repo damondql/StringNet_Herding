@@ -348,6 +348,14 @@ void checkFormation(){
                 }
             }
             extern double ti_g = ti;
+        } else if (flagGather!=1 && flagSeek==1 && flagEnclose!=1 && flagHerd!=1)
+        {
+            
+            
+            
+
+
+
         } else if (flagGather != 1 && flagSeek != 1 && flagEnclose == 1 && flagHerd != 1) {
             if (flagDForm != 1)
             {
