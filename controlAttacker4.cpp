@@ -14,21 +14,16 @@ struct control_attacker_t
     double R_AAProjS_min;
     mat vA_des;
     mat vA_des_dot;
-    mat FlagAttInObs;
-    mat BetaAv0;
-    mat SpeedA0;
-    mat mAv0;
-    mat cAv0;
     mat SigmaProdD;
-    mat FA;
-    mat FA_dot;
+    mat F_A;
+    mat F_A_dot;
 };
 
 
 
-void controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
-                      mat FlagAttInObs,int flagEnclose,int flagHerd,
-                      mat BetaAv0, mat SpeedA0,mat mAv0,mat cAv0, mat XD, mat WA,
+control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
+                      int flagEnclose,int flagHerd,
+                      mat XD, mat WA,
                       mat WDString,int Na, int ND){
     double tol = 0.5;
     int NO = 0;
@@ -58,7 +53,7 @@ void controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
     mat vA_dot;
     mat vA_Des;
     mat vA_Des_dot;
-    cout << "before for loop" << endl;
+    // cout << "before for loop" << endl;
     for (int i = 0; i < NA; i++)
     {
         mat WDString_temp = WDString;
@@ -125,6 +120,8 @@ void controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
             uAD_pot = potentialControl_result.subvec(0,1);
             minRAD = potentialControl_result(2);
         }
+        // uAD_pot.print("uAD_pot: ");
+        // cout << "minRAD: " << minRAD << endl;
         // cout << "3333333333333333333" << endl;
         double R_underbar = R_bar_AD;
         double R_bar = R_u_AD;
@@ -159,6 +156,8 @@ void controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
             rA_temp = rA;
             vA_temp = vA;
         }
+        // rA_temp.print("rA_temp: ");
+        // vA_temp.print("vA_temp: ");
         // cout << "444444444444444444444" << endl;
         mat rAProjS;
         mat vAProjS;
@@ -206,7 +205,7 @@ void controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
             
         }
         
-        cout << "88888888888888888888888" << endl;
+        // cout << "88888888888888888888888" << endl;
         if(flagHerd == 1) {
             if (countAPS > 2)
             {
@@ -228,21 +227,22 @@ void controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
                 countAPS = 2;
             }
         }
-        cout << "999999999999999999999999999" << endl;
+        // cout << "999999999999999999999999999" << endl;
         for (int js = 0; js < countAPS-1; js++)
         {
             mat rAvA_temp;
             rAvA_temp = arma::join_cols(rA_temp, vA_temp);
             mat rAvA_ProjS_temp;
-            cout << "0.1" << endl;
+            // cout << "0.1" << endl;
             rAvA_ProjS_temp = rAProjS.submat(0,js,1,js);
             rAvA_ProjS_temp = arma::join_cols(rAvA_ProjS_temp, vAProjS.col(js));
-            cout << "0.2" << endl;
+            // cout << "0.2" << endl;
             vec potentialControl_result = potentialControl(rAvA_temp, rAvA_ProjS_temp, 
                                                            2*rho_c_A,sigma_parameters(R_underbar,R_bar),
                                                            R_m,R_underbar,R_bar, R_bar+10,kADr,kADv, alphaADv);
+
         }
-        cout << "000000000000000000000000000000" << endl;
+        // cout << "000000000000000000000000000000" << endl;
         if (arma::norm(rAcm) < 1.2 * rho_Acon)
         {
             double thetaAAcm = atan2(rA(1)-rAcm(1), rA(0)- rAcm(0));
@@ -265,9 +265,9 @@ void controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
                 mat nabla_ri_ViP = - kAOr2*(rA-rAProjC)*largeP;
             }
         }
-        cout << "11111111111111111111111111111111" << endl;
+        // cout << "11111111111111111111111111111111" << endl;
         mat duA_goal;
-        if(i == 1) 
+        if(i == 0) 
         {
             duA_goal = XA_goal_dot.submat(2,i,3,i) - (kAPr*(rA-rA_goal)+kAPv*(vA-vA_goal));
         } else
@@ -275,6 +275,7 @@ void controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
             duA_goal = XA_goal_dot.submat(2,i,3,i) - (10*kAPr*(rA-rA_goal)+10*kAPv*(vA-vA_goal));
         }
         double norm_duA_goal = arma::norm(duA_goal);
+        // cout << "norm_duA_goal: " << norm_duA_goal << endl;
         if (norm_duA_goal > 1e-10 && flagHerd != 1)
         {
             mat cal_result;
@@ -286,7 +287,7 @@ void controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
             cal_result = uAFv+uAFr+uAOv+uAOr+uAD_pot+uAAProj+C_d*arma::norm(vA)*vA;
             uA.insert_cols(uA.n_cols,cal_result);
         }
-        cout << "22222222222222222222222222222222222" << endl;
+        // cout << "22222222222222222222222222222222222" << endl;
         uA0.insert_cols(uA0.n_cols,uA.col(i));
 
         if(flagHerd != 1 && i ==1)
@@ -311,7 +312,7 @@ void controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
         }
 
         double norm_uA = arma::norm(uA.col(i));
-        cout << "333333333333333333333333333333" << endl;
+        // cout << "333333333333333333333333333333" << endl;
         double uMaxA;
         if (flagEnclose == 1)
         {
@@ -329,84 +330,93 @@ void controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
         vA_Des.insert_cols(i,zeros<vec>(2));
         vA_Des_dot.insert_cols(i,zeros<vec>(2));
         SigmaProdD(i,0) = sigmaProdD;
-        cout << "44444444444444444444444444444444" << endl;
+        // cout << "44444444444444444444444444444444" << endl;
+        // uA.print("uA: ");
+        // uA0.print("uA0:");
+        // cout << "R_AO_min: "<< R_AO_min << endl;
+        // cout << "R_AAProjS_min" << R_AAProjS_min << endl;
+        // vA_Des.print("vA_Des: ");
+        // vA_Des_dot.print("vA_Des_dot:");
+        // SigmaProdD.print("SigmaProdD");
+        // F_A.print("F_A: ");
+        // F_A_dot.print("F_A_dot: ");
+        
     }
-    
+    control_attacker_t control_result;
+    control_result.uA = uA;
+    control_result.uA0 = uA0;
+    control_result.vA_des = vA_Des;
+    control_result.vA_des_dot = vA_Des_dot;
+    control_result.R_AO_min = R_AO_min;
+    control_result.R_AAProjS_min = R_AAProjS_min;
+    control_result.F_A = F_A;
+    control_result.F_A_dot = F_A_dot;
+    return control_result;
 
 }
 
-int main() {
-//     double R_bar = 10.4177;
-//     double R_underbar = 7.4177;
-//     mat a = sigma_parameters(R_underbar, R_bar);
-//     a.print("a:");
+// int main() {
+// //     double R_bar = 10.4177;
+// //     double R_underbar = 7.4177;
+// //     mat a = sigma_parameters(R_underbar, R_bar);
+// //     a.print("a:");
 
-//     double alphav_12 = 0.5;
-//     double kr_12 = 0.5;
-//     double kv_12 = 0.5;
-//     double R_m_12 = 5.4177;
-//     double rho_sens_1 = 20;
-//     double R_tilde = 20.4176960858139;
-//     mat X1(4,1);
-//     X1(0,0) = 6.15480000000000;
-//     X1(1,0) = -33.0553000000000;
-//     X1(2,0) = 0;
-//     X1(3,0) = 0;
-//     mat X2(4,2);
-//     X2 = {{9.37240000000000,16.1838000000000},
-//          {-7.12780000000000,-5.84110000000000},
-//          {0,0},
-//          {0,0}};
-//     vec re = potentialControl(X1,X2, rho_sens_1, a.as_col(),R_m_12, R_underbar, R_bar,R_tilde, kr_12,kv_12,alphav_12);
+// //     double alphav_12 = 0.5;
+// //     double kr_12 = 0.5;
+// //     double kv_12 = 0.5;
+// //     double R_m_12 = 5.4177;
+// //     double rho_sens_1 = 20;
+// //     double R_tilde = 20.4176960858139;
+// //     mat X1(4,1);
+// //     X1(0,0) = 6.15480000000000;
+// //     X1(1,0) = -33.0553000000000;
+// //     X1(2,0) = 0;
+// //     X1(3,0) = 0;
+// //     mat X2(4,2);
+// //     X2 = {{9.37240000000000,16.1838000000000},
+// //          {-7.12780000000000,-5.84110000000000},
+// //          {0,0},
+// //          {0,0}};
+// //     vec re = potentialControl(X1,X2, rho_sens_1, a.as_col(),R_m_12, R_underbar, R_bar,R_tilde, kr_12,kv_12,alphav_12);
 
-//     vec r = {6.15494381116162,
-//         -33.0547123910252};
-//     vec r1 = {9.37240000000000,
-// -7.12780000000000};
-//     vec r2 = {11.9907000000000,
-// -10.7580000000000};
-//     vec aa = projectionOnLine(r,r1,r2);
-//     aa.print("aa:");
-    calAllparametersExperiment();
-    mat XA;
-    mat XA_goal;
-    mat XA_goal_dot;
-    mat FlagAttInObs;
-    int flagEnclose;
-    int flagHerd;
-    mat BetaAv0;
-    mat SpeedA0;
-    mat mAv0;
-    mat cAv0;
-    mat XD;
-    mat WA;
-    mat WDString;
-    int ND = 3;
+// //     vec r = {6.15494381116162,
+// //         -33.0547123910252};
+// //     vec r1 = {9.37240000000000,
+// // -7.12780000000000};
+// //     vec r2 = {11.9907000000000,
+// // -10.7580000000000};
+// //     vec aa = projectionOnLine(r,r1,r2);
+// //     aa.print("aa:");
+//     calAllparametersExperiment();
+//     mat XA;
+//     mat XA_goal;
+//     mat XA_goal_dot;
+//     int flagEnclose;
+//     int flagHerd;
+//     mat BetaAv0;
+//     mat SpeedA0;
+//     mat mAv0;
+//     mat cAv0;
+//     mat XD;
+//     mat WA;
+//     mat WDString;
+//     int ND = 3;
     
-    XA.load("../../../../../Downloads/swarm_matlab/controlA/XA.txt");
-    XA.print("XA:");
-    XA_goal.load("../../../../../Downloads/swarm_matlab/controlA/XA_goal.txt");
-    XA_goal.print("XA_goal:");
-    XA_goal_dot.load("../../../../../Downloads/swarm_matlab/controlA/XA_goal_dot.txt");
-    XA_goal_dot.print("XA_goal_dot:");
-    FlagAttInObs.load("../../../../../Downloads/swarm_matlab/controlA/FlagAttInObs.txt");
-    FlagAttInObs.print("FlagAttInObs:");
-    BetaAv0.load("../../../../../Downloads/swarm_matlab/controlA/BetaAv0.txt");
-    BetaAv0.print("BetaAv0:");
-    SpeedA0.load("../../../../../Downloads/swarm_matlab/controlA/SpeedA0.txt");
-    SpeedA0.print("SpeedA0:");
-    mAv0.load("../../../../../Downloads/swarm_matlab/controlA/mAv0.txt");
-    mAv0.print("mAv0:");
-    cAv0.load("../../../../../Downloads/swarm_matlab/controlA/cAv0.txt");
-    cAv0.print("cAv0:");
-    XD.load("../../../../../Downloads/swarm_matlab/controlA/XD.txt");
-    XD.print("XD:");
-    WA.load("../../../../../Downloads/swarm_matlab/controlA/WA.txt");
-    WA.print("WA:");
-    WDString.load("../../../../../Downloads/swarm_matlab/controlA/WDString.txt");
-    WDString.print("WDString:");
-    controlAttacker4(XA,XA_goal, XA_goal_dot, FlagAttInObs,0,0,BetaAv0, SpeedA0, mAv0, cAv0, XD,WA,WDString,NA,ND);
+//     XA.load("../../../../../Downloads/swarm_matlab/controlA/XA.txt");
+//     XA.print("XA:");
+//     XA_goal.load("../../../../../Downloads/swarm_matlab/controlA/XA_goal.txt");
+//     XA_goal.print("XA_goal:");
+//     XA_goal_dot.load("../../../../../Downloads/swarm_matlab/controlA/XA_goal_dot.txt");
+//     XA_goal_dot.print("XA_goal_dot:");
+//     XD.load("../../../../../Downloads/swarm_matlab/controlA/XD.txt");
+//     XD.print("XD:");
+//     WA.load("../../../../../Downloads/swarm_matlab/controlA/WA.txt");
+//     WA.print("WA:");
+//     WDString.load("../../../../../Downloads/swarm_matlab/controlA/WDString.txt");
+//     WDString.print("WDString:");
+//     control_attacker_t a =  controlAttacker4(XA,XA_goal, XA_goal_dot, 0,0,XD,WA,WDString,NA,ND);
+//     a.uA.print("uA:");
+//     a.uA0.print("uA0:");
 
-
-    return 0;
-}
+//     return 0;
+// }

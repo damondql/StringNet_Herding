@@ -908,8 +908,15 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
   ../lambdaInterSecCircLine.cpp \
   ../defGoalAssignMIQP.cpp \
   /opt/gurobi912/linux64/include/gurobi_c++.h \
-  /opt/gurobi912/linux64/include/gurobi_c.h
+  /opt/gurobi912/linux64/include/gurobi_c.h \
+  ../controlAttacker4.cpp \
+  ../helperFunction.cpp \
+  ../controlDefender5.cpp
 
+
+../helperFunction.cpp:
+
+../controlAttacker4.cpp:
 
 ../defGoalAssignMIQP.cpp:
 
@@ -2038,6 +2045,8 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/include/armadillo_bits/MapMat_meat.hpp:
 
 /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
+
+../controlDefender5.cpp:
 
 /usr/include/armadillo_bits/glue_trapz_meat.hpp:
 

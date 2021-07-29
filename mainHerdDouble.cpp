@@ -2,8 +2,14 @@
 #include "symDerivative.cpp"
 #include "findCommGraphAndFormDist.cpp"
 #include "defInitDesirePos.cpp"
+#include "controlAttacker4.cpp"
+#include "controlDefender5.cpp"
 // #include "findCoordOnPath.cpp"
 #include <armadillo>
+#include <iostream>
+#include <fstream>
+#include <istream>
+
 
 using namespace std;
 using namespace arma;
@@ -12,7 +18,7 @@ int flagExp = 1;
 int flagGazeboExp = 0;
 
 
-auto t = 0;
+double t = 0;
 auto Time = 0;
 auto t_max = 2000;
 auto endGame = 0;
@@ -49,6 +55,7 @@ mat YA;
 mat SD;
 mat SD_arr;
 mat rAcm;
+mat vAcm;
 mat rDcm;
 mat vDcm;
 double flagNDeven;
@@ -65,6 +72,8 @@ void measurements(int s) {
                   {0,0,0,pow(0.12,2)}};
     }
     YA = XA + arma::mvnrnd(arma::zeros(4,1), Cov_YA, NA);
+    YA.load("../../../../../Downloads/swarm_matlab/controlD/YA.txt");
+    // XD0.load("../../../../../Downloads/swarm_matlab/controlD/XD0.txt");
     SD = arma::zeros(ND,1);
     SD_arr = SD;
     rAcm = arma::sum(YA,1)/NA;
@@ -93,6 +102,9 @@ double R_DD_string, RDF_closed;
 int flagHerd = 0;
 int flagDForm = 0;
 mat WDString;
+CommGraph attacker_graph;
+CommGraph defender_graph_close;
+CommGraph defender_graph_open;
 void initial_contorl() {
     uA = vA;
     RPA_arr = arma::zeros(1, Niter+1);
@@ -123,8 +135,8 @@ void initial_contorl() {
     RA0_des=0;
     Rii0 = RA0*sqrt(2*(1-cos(2*M_PI/NA)));
     Rii1=Rii0*sqrt(2*(1-cos(180-2*M_PI/NA)));
-    CommGraph attacker_graph = findCommGraphAndFormDist(NA,1,RA);
-    CommGraph defender_graph_close = findCommGraphAndFormDist(ND+1, 2, rho_sn);
+    attacker_graph = findCommGraphAndFormDist(NA,1,RA);
+    defender_graph_close = findCommGraphAndFormDist(ND+1, 2, rho_sn);
     // double RDF_open = 0;
     if (flagExp == 1) {
         RDF_open = 4.4;
@@ -134,7 +146,7 @@ void initial_contorl() {
     } else {
         RDF_open = rho_sn + 20;
     }
-    CommGraph defender_graph_open = findCommGraphAndFormDist(ND+1, 4, RDF_open);
+    defender_graph_open = findCommGraphAndFormDist(ND+1, 4, RDF_open);
     R_DD_string = 1.5 * defender_graph_close.Rij_tilde(0,1);
     RDF_closed = 1.1 * rho_sn;
     WDString = arma::zeros<mat>(ND, ND);
@@ -164,9 +176,10 @@ void getMoitonPlan(){
 
 }
 
+vec indDef;
 void calDistance(){
     //Defenders indices for the formation
-    vec indDef = regspace(1,ND+1);
+    indDef = regspace(1,ND+1);
     int na = motionP_result.mP.assign.n_elem;
     int nid = indDef.n_elem;
     vec tempV(indDef.n_elem);
@@ -234,7 +247,10 @@ int flagAttackerStayTogether=1;
 void checkFormation(){
     assignment = regspace(1,1,ND);
     mat RefTraj(4*ND, Niter);
-    for (int ti = 0; ti < Niter; ti++)
+    mat SigmaProdD_arr;
+    mat rAcm_arr;
+    mat vAcm_arr;
+    for (int ti = 0; ti < 1; ti++)
     {
         mat Psi(NA,1, fill::zeros);
         mat Psi_dot;
@@ -289,10 +305,66 @@ void checkFormation(){
         XA_goal.col(0) = XA_lead_goal;
         XA_goal_dot.col(0) = XA_lead_goal;
 
+        control_attacker_t control_A_result = controlAttacker4(XA,XA_goal,XA_goal_dot,flagEnclose, flagHerd, XD,attacker_graph.W,WDString,NA,ND);
+        SigmaProdD_arr.insert_cols(ti,control_A_result.SigmaProdD);
+
+        rAcm = arma::sum(XA.submat(0,0, 1,XA.n_cols-1),1)/NA;
+        vAcm = arma::sum(XA.submat(2,0, 3,XA.n_cols-1),1)/NA;
         
-
-
-
+        WDString = zeros<mat>(ND,ND);
+        
+        for (int j = 1; j <= ND-1; j++)
+        {
+            uvec j11 = find(motionP_result.mP.assign == j);
+            uvec j22 = find(motionP_result.mP.assign == j+1);
+            int j1 = j11(0);
+            int j2 = j22(0);
+            if (arma::norm(XD.submat(0,j1,1,j1) - XD.submat(0,j2,1,j2)) <= R_DD_string)
+            {
+                WDString(j1,j2) = 1;
+                WDString(j2,j1) = 1;
+            } else {
+                WDString(j1,j2) = 0;
+                WDString(j2,j1) = 0;
+            } 
+        }
+        mat uD;
+        if (flagGather == 1 && flagSeek != 1 && flagEnclose != 1 && flagHerd !=1)
+        {
+            mat XD_des = motionP_result.dDf.XD_des0;
+            mat XD_des_dot = motionP_result.dDf.XD_des_dot0;
+            uD = controlDefender5(XD, SD, regspace(1,1,ND+1), motionP_result.mP.assign, XD_des, XD_des_dot, motionP_result.mP, times(ti), ND);
+            for (int j = 0; j < count; j++)
+            {
+                if (arma::norm(XD.submat(0,indDef(j), 1,indDef(j))- XD_des(0,j,1,j)) < 1e-3) {
+                    defReachCount(j) = 1;
+                    if (accu(defReachCount) >= ND)
+                    {
+                        flagDefReachOpen = 1;
+                        flagSeek = 1;
+                        flagGather = 0;
+                    }
+                    
+                }
+            }
+            extern double ti_g = ti;
+        } else if (flagGather != 1 && flagSeek != 1 && flagEnclose == 1 && flagHerd != 1) {
+            if (flagDForm != 1)
+            {
+                flagDForm = 1;
+            }
+            for (int j = 0; i < ND; j++)
+            {
+                double RD0 = RDF_closed;
+                double thetaD;
+                thetaD = motionP_result.dDf.phi + 2*M_PI *(j+1)/ND - M_PI / ND;
+            }
+            
+            
+        }
+        
+        
+        
     }
     
 
@@ -329,17 +401,32 @@ int main() {
     // cout << "rho_sn:" << rho_sn << endl;
     // cout << "rho_Acon:" << rho_Acon << endl;
     // YA.print("YA:");
-    YA(0,0) = 6.15469799011143;
-    YA(1,0) = -33.3348469481075;
-    YA(2,0) = -0.116564575844461;
-    YA(3,0) = 0.207257244260275;
-    YA.print("YA: ");
-    XD0 = {{11.9907000000000,9.37240000000000,16.1838000000000},
-{-10.7580000000000,-7.12780000000000,-5.84110000000000},
-{0,0,0},
-{0,0,0}};
+    
 //     XD0.print("XD0: ");
     // cout << "RDF_open:" << RDF_open << endl;
+    // YA.load("../../../../../Downloads/swarm_matlab/controlD/YA.txt");
+    // XD0.load("../../../../../Downloads/swarm_matlab/controlD/XD0.txt");
     getMoitonPlan();
     calDistance();
+    checkFormation();
+    // mat XD_des = motionP_result.dDf.XD_des0;
+    // mat XD_des_dot = motionP_result.dDf.XD_des_dot0;
+    // std::ifstream fin("../../../../../Downloads/swarm_matlab/controlD/t.txt");
+    // double time;
+    // fin >> time;
+    // // time = 10;
+    // std::cout << "t: "<<time << std::endl;
+
+    // fin.close();
+    // XD.load("../../../../../Downloads/swarm_matlab/controlD/XD.txt");
+    // XD.print("XD: ");
+    // SD.load("../../../../../Downloads/swarm_matlab/controlD/SD.txt");
+    // SD.print("SD: ");
+    // // indDef.print("indDef: ");
+    // motionP_result.mP.assign.print("assign: ");
+    // XD_des.print("XD_des: ");
+    // XD_des_dot.print("XD_des_dot: ");
+    // mat uD = controlDefender5(XD,SD, regspace(1,1,4), motionP_result.mP.assign, XD_des, XD_des_dot, motionP_result.mP, time,3);
+    // uD.print("uD: ");
+
 }

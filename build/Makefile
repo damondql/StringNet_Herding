@@ -117,41 +117,41 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named test5
+# Target rules for targets named mainHD
 
 # Build rule for target.
-test5: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test5
-.PHONY : test5
+mainHD: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 mainHD
+.PHONY : mainHD
 
 # fast build rule for target.
-test5/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test5.dir/build.make CMakeFiles/test5.dir/build
-.PHONY : test5/fast
+mainHD/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mainHD.dir/build.make CMakeFiles/mainHD.dir/build
+.PHONY : mainHD/fast
 
-controlAttacker4.o: controlAttacker4.cpp.o
-.PHONY : controlAttacker4.o
+mainHerdDouble.o: mainHerdDouble.cpp.o
+.PHONY : mainHerdDouble.o
 
 # target to build an object file
-controlAttacker4.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test5.dir/build.make CMakeFiles/test5.dir/controlAttacker4.cpp.o
-.PHONY : controlAttacker4.cpp.o
+mainHerdDouble.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mainHD.dir/build.make CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o
+.PHONY : mainHerdDouble.cpp.o
 
-controlAttacker4.i: controlAttacker4.cpp.i
-.PHONY : controlAttacker4.i
+mainHerdDouble.i: mainHerdDouble.cpp.i
+.PHONY : mainHerdDouble.i
 
 # target to preprocess a source file
-controlAttacker4.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test5.dir/build.make CMakeFiles/test5.dir/controlAttacker4.cpp.i
-.PHONY : controlAttacker4.cpp.i
+mainHerdDouble.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mainHD.dir/build.make CMakeFiles/mainHD.dir/mainHerdDouble.cpp.i
+.PHONY : mainHerdDouble.cpp.i
 
-controlAttacker4.s: controlAttacker4.cpp.s
-.PHONY : controlAttacker4.s
+mainHerdDouble.s: mainHerdDouble.cpp.s
+.PHONY : mainHerdDouble.s
 
 # target to generate assembly for a file
-controlAttacker4.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/test5.dir/build.make CMakeFiles/test5.dir/controlAttacker4.cpp.s
-.PHONY : controlAttacker4.cpp.s
+mainHerdDouble.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/mainHD.dir/build.make CMakeFiles/mainHD.dir/mainHerdDouble.cpp.s
+.PHONY : mainHerdDouble.cpp.s
 
 # Help Target
 help:
@@ -161,10 +161,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... test5"
-	@echo "... controlAttacker4.o"
-	@echo "... controlAttacker4.i"
-	@echo "... controlAttacker4.s"
+	@echo "... mainHD"
+	@echo "... mainHerdDouble.o"
+	@echo "... mainHerdDouble.i"
+	@echo "... mainHerdDouble.s"
 .PHONY : help
 
 
