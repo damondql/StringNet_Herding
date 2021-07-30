@@ -840,4 +840,6 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: \
  /opt/gurobi912/linux64/include/gurobi_c.h \
  /home/damon/Documents/Lab/Aero/summer-research-1/controlAttacker4.cpp \
  /home/damon/Documents/Lab/Aero/summer-research-1/helperFunction.cpp \
- /home/damon/Documents/Lab/Aero/summer-research-1/controlDefender5.cpp
+ /home/damon/Documents/Lab/Aero/summer-research-1/controlDefender5.cpp \
+ /home/damon/Documents/Lab/Aero/summer-research-1/defDesiredOpenForm.cpp \
+ /home/damon/Documents/Lab/Aero/summer-research-1/controlFiniteTimeTrajTracking.cpp

@@ -100,7 +100,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
             double R_m = 15*R_m_AD;
             double R_underbar = R_m+20;
             double R_bar = R_m + 25;
-            vec potentialControl_result = potentialControl(XA.col(i),XD.submat(0,0,XD.n_rows-1, ND-1),
+            vec potentialControl_result = potentialControl(0.1, XA.col(i),XD.submat(0,0,XD.n_rows-1, ND-1),
                                                            2*rho_c_A,sigma_parameters(R_underbar,R_bar),
                                                            R_m,R_underbar,R_bar, R_bar+10,kADr,kADv, alphaADv);
             uAD_pot = potentialControl_result.subvec(0,1);
@@ -113,7 +113,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
             sig_para(2,0) = C_A_D;
             sig_para(3,0) = D_A_D;
             // XD.submat(0,0,XD.n_rows-1, ND-1).print("potential input:");
-            vec potentialControl_result = potentialControl(XA.col(i),XD.submat(0,0,XD.n_rows-1, ND-1),
+            vec potentialControl_result = potentialControl(0.1, XA.col(i),XD.submat(0,0,XD.n_rows-1, ND-1),
                                                            rho_c_A,sig_para,
                                                            R_m_AD,R_bar_AD, R_u_AD, Rij0(0),kADr,kADv, alphaADv);
             // potentialControl_result.print("finish potential Control:");
@@ -148,7 +148,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
             mat rv_Acm(rAcm.n_rows+vAcm.n_rows, rAcm.n_cols);
             rv_Acm.submat(0,0,rAcm.n_rows-1,0) = rAcm;
             rv_Acm.submat(rAcm.n_rows,0,rv_Acm.n_rows-1,0) = vAcm;
-            vec potentialControl_result = potentialControl(rv_Acm, XD.submat(0,0,XD.n_rows-1,ND-1),
+            vec potentialControl_result = potentialControl(0.1,rv_Acm, XD.submat(0,0,XD.n_rows-1,ND-1),
                                                             rho_c_A,sigma_parameters(R_underbar,R_bar),
                                                             R_m,R_underbar,R_bar, R_bar+10,kADr,kADv, alphaADv);
             uAD_pot = potentialControl_result.subvec(0,1);
@@ -237,7 +237,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
             rAvA_ProjS_temp = rAProjS.submat(0,js,1,js);
             rAvA_ProjS_temp = arma::join_cols(rAvA_ProjS_temp, vAProjS.col(js));
             // cout << "0.2" << endl;
-            vec potentialControl_result = potentialControl(rAvA_temp, rAvA_ProjS_temp, 
+            vec potentialControl_result = potentialControl(0.1,rAvA_temp, rAvA_ProjS_temp, 
                                                            2*rho_c_A,sigma_parameters(R_underbar,R_bar),
                                                            R_m,R_underbar,R_bar, R_bar+10,kADr,kADv, alphaADv);
 
@@ -303,7 +303,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
             {
                 temp_M.col(ii) = XD.col(num(ii));
             }
-            vec potentialControl_result = potentialControl(XA.col(i), temp_M, 
+            vec potentialControl_result = potentialControl(0.1, XA.col(i), temp_M, 
                                                            2*rho_c_A,sigma_parameters(R_underbar,R_bar),
                                                            R_m,R_underbar,R_bar, R_bar+10,kADr,kADv, alphaADv);
             vec uAD_pot2;

@@ -911,7 +911,9 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
   /opt/gurobi912/linux64/include/gurobi_c.h \
   ../controlAttacker4.cpp \
   ../helperFunction.cpp \
-  ../controlDefender5.cpp
+  ../controlDefender5.cpp \
+  ../defDesiredOpenForm.cpp \
+  ../controlFiniteTimeTrajTracking.cpp
 
 
 ../helperFunction.cpp:
@@ -1928,6 +1930,8 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/armadillo_bits/injector_bones.hpp:
 
+../controlFiniteTimeTrajTracking.cpp:
+
 /usr/include/c++/9/limits:
 
 /usr/include/armadillo_bits/subview_cube_slices_bones.hpp:
@@ -2153,6 +2157,8 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/include/armadillo_bits/fn_clamp.hpp:
 
 /usr/include/armadillo_bits/op_wishrnd_bones.hpp:
+
+../defDesiredOpenForm.cpp:
 
 /usr/include/c++/9/bits/allocator.h:
 

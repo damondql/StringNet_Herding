@@ -20,7 +20,7 @@ mat sigma_parameters(double R_underbar, double R_bar){
 //potential function approach
 //return a 3x1 vector where the first 2 elements are u_pot_12
 // and the 3rd element is minDist_12
-vec potentialControl(mat X1,mat X2, double rho_sens_1, mat sigma_params_12,
+vec potentialControl(double tol, mat X1,mat X2, double rho_sens_1, mat sigma_params_12,
                      double R_m_12, double R_underbar_12, double R_bar_12, 
                      double R_tilde_12, double kr_12, double kv_12, double alphav_12){
     // cout << "enter potentialControl" << endl;
@@ -36,7 +36,6 @@ vec potentialControl(mat X1,mat X2, double rho_sens_1, mat sigma_params_12,
     vec uv_12(2,fill::zeros);
     vec ur_12(2,fill::zeros);
     double minDist_12 = INFINITY;
-    double tol = 0.1;
     double largeNum = -1/tol*(pow((tol),2)-pow(R_tilde_12,2))/(pow((tol),2)+pow(R_tilde_12,2));
     double sigma = 0;
     for (int j = 0; j < r2.n_cols; j++)

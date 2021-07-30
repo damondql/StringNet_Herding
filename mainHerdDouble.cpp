@@ -4,6 +4,8 @@
 #include "defInitDesirePos.cpp"
 #include "controlAttacker4.cpp"
 #include "controlDefender5.cpp"
+#include "defDesiredOpenForm.cpp"
+#include "controlFiniteTimeTrajTracking.cpp"
 // #include "findCoordOnPath.cpp"
 #include <armadillo>
 #include <iostream>
@@ -329,14 +331,18 @@ void checkFormation(){
             } 
         }
         mat uD;
+        mat XD_des;
+        mat XD_des_dot;
+        mat uDFc_trans;
+
         if (flagGather == 1 && flagSeek != 1 && flagEnclose != 1 && flagHerd !=1)
         {
-            mat XD_des = motionP_result.dDf.XD_des0;
-            mat XD_des_dot = motionP_result.dDf.XD_des_dot0;
+            XD_des = motionP_result.dDf.XD_des0;
+            XD_des_dot = motionP_result.dDf.XD_des_dot0;
             uD = controlDefender5(XD, SD, regspace(1,1,ND+1), motionP_result.mP.assign, XD_des, XD_des_dot, motionP_result.mP, times(ti), ND);
-            for (int j = 0; j < count; j++)
+            for (int j = 0; j < ND; j++)
             {
-                if (arma::norm(XD.submat(0,indDef(j), 1,indDef(j))- XD_des(0,j,1,j)) < 1e-3) {
+                if (arma::norm(XD.submat(0,indDef(j), 1,indDef(j))- XD_des.submat(0,j,1,j)) < 1e-3) {
                     defReachCount(j) = 1;
                     if (accu(defReachCount) >= ND)
                     {
@@ -347,12 +353,21 @@ void checkFormation(){
                     
                 }
             }
-            extern double ti_g = ti;
+            double ti_g = ti;
         } else if (flagGather!=1 && flagSeek==1 && flagEnclose!=1 && flagHerd!=1)
         {
-            
-            
-            
+            uvec j11 = find(motionP_result.mP.assign == 1);
+            int j1 = j11(0);
+            uvec jND_v = find(motionP_result.mP.assign == ND);
+            int jND = jND_v(0);
+            double phi_ddot;
+            defDesiredOpenForm(XD.col(ND), RDF_open, YA, motionP_result.dDf.phi, motionP_result.dDf.phi_dot, NA, ND, &XD_des, &XD_des_dot, &phi_ddot, &uDFc_trans, &flagAttInSight);
+            motionP_result.dDf.phi += dt * motionP_result.dDf.phi_dot;
+            if (motionP_result.dDf.phi > 2*M_PI)
+            {
+                motionP_result.dDf.phi -= 2*M_PI;
+            }
+            motionP_result.dDf.phi_dot += dt * phi_ddot;
 
 
 
@@ -361,7 +376,7 @@ void checkFormation(){
             {
                 flagDForm = 1;
             }
-            for (int j = 0; i < ND; j++)
+            for (int j = 0; j < ND; j++)
             {
                 double RD0 = RDF_closed;
                 double thetaD;
@@ -436,5 +451,36 @@ int main() {
     // XD_des_dot.print("XD_des_dot: ");
     // mat uD = controlDefender5(XD,SD, regspace(1,1,4), motionP_result.mP.assign, XD_des, XD_des_dot, motionP_result.mP, time,3);
     // uD.print("uD: ");
+    
+    // mat XDFc;
+    // XDFc.load("../../../../../Downloads/swarm_matlab/OpenForm/XDFc.txt");
+    // XA.load("../../../../../Downloads/swarm_matlab/OpenForm/XA.txt");
+    // XDFc.print("XDFc: ");
+    // XA.print("XA: ");
+    // std::ifstream fin("../../../../../Downloads/swarm_matlab/OpenForm/RDF0.txt");
+    // double RDF0;
+    // fin >> RDF0;
+    // std::cout << "RDF0: "<< RDF0 << std::endl;
+    // fin.close();
+
+    // fin.open("../../../../../Downloads/swarm_matlab/OpenForm/phi.txt");
+    // double phi;
+    // fin >> phi;
+    // std::cout << "phi: "<< phi << std::endl;
+    // fin.close();
+
+    // fin.open("../../../../../Downloads/swarm_matlab/OpenForm/phi_dot.txt");
+    // double phi_dot;
+    // fin >> phi_dot;
+    // std::cout << "phi_dot: "<< phi_dot << std::endl;
+    // fin.close();
+    // mat XD_des, XD_des_dot, uDFf_trans;
+    // double phi_ddot;
+    // defDesiredOpenForm(XDFc, RDF0, XA, phi, phi_dot, NA, ND, &XD_des, &XD_des_dot, &phi_ddot, &uDFf_trans, &flagAttInSight);
+    // XD_des.print("using pointer, XD_des:");
+    // XD_des_dot.print("using pointer, XD_des_dot: ");
+    // cout << "using pointer, phi_ddot: "<<phi_ddot << endl;
+    
+
 
 }
