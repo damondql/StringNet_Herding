@@ -299,7 +299,7 @@ double kDDesv=1;
 ////            define as global                                  ////
 //////////////////////////////////////////////////////////////////////
 
-
+double bd=0.5;   
 ///////////////////////////////////
 //Convex polygonal Obstalces///////
 ///////////////////////////////////
@@ -538,7 +538,7 @@ void calVfield_defenders() {
     //for other defenders
     double R_bar_DD1=6*rho_D;
     double R_bar_DD2=6*rho_D;
-    R_m_DD = 1*(rho_D+rho_D)+rhoD_safe;
+    R_m_DD = 1*(rho_D+rho_D)+rhoD_safe+1;
     R_m_DDO=3*R_m_DD;
     R_m2_DD=100;
     R_bar_DD=R_m_DD+R_bar_DD1+rhoD_safe;
@@ -556,7 +556,7 @@ void calVfield_defenders() {
 double rD0[2] = {-150,-300};
 mat rD;
 arma::mat XD0;
-std::vector<std::vector<double>> rSD_goal;
+mat rSD_goal;
 mat XD;
 void rD_value() {
 

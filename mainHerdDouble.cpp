@@ -6,6 +6,8 @@
 #include "controlDefender5.cpp"
 #include "defDesiredOpenForm.cpp"
 #include "controlFiniteTimeTrajTracking.cpp"
+#include "inhull.cpp"
+#include "controlDefenderFormation4.cpp"
 // #include "findCoordOnPath.cpp"
 #include <armadillo>
 #include <iostream>
@@ -334,7 +336,8 @@ void checkFormation(){
         mat XD_des;
         mat XD_des_dot;
         mat uDFc_trans;
-
+        mat XDF_des;
+        double ti_2,ti_3, ti_e, ti_g;
         if (flagGather == 1 && flagSeek != 1 && flagEnclose != 1 && flagHerd !=1)
         {
             XD_des = motionP_result.dDf.XD_des0;
@@ -353,7 +356,7 @@ void checkFormation(){
                     
                 }
             }
-            double ti_g = ti;
+            ti_g = ti;
         } else if (flagGather!=1 && flagSeek==1 && flagEnclose!=1 && flagHerd!=1)
         {
             uvec j11 = find(motionP_result.mP.assign == 1);
@@ -368,7 +371,14 @@ void checkFormation(){
                 motionP_result.dDf.phi -= 2*M_PI;
             }
             motionP_result.dDf.phi_dot += dt * phi_ddot;
+            uD = controlFiniteTimeTrajTracking(XD, indDef, XD_des, XD_des_dot , uDFc_trans, YA, ND,1);
+            double ti_2 = ti;
 
+            if (arma::norm(rAcm - rDcm) < 2*rho_sn  && flagAttInSight) {
+                flagEnclose = 1;
+                flagSeek = 0;
+            }
+            double ti_s = ti;
 
 
         } else if (flagGather != 1 && flagSeek != 1 && flagEnclose == 1 && flagHerd != 1) {
@@ -381,11 +391,158 @@ void checkFormation(){
                 double RD0 = RDF_closed;
                 double thetaD;
                 thetaD = motionP_result.dDf.phi + 2*M_PI *(j+1)/ND - M_PI / ND;
+                mat tempM1(2,1);
+                tempM1(0,0) = cos(thetaD);
+                tempM1(1,0) = sin(thetaD);
+                mat rD_des;
+                rD_des.insert_cols(j, rAcm+RD0*tempM1);
+                mat tempM2;
+                tempM2 = join_cols(rD_des.col(j), vAcm);
+                XD_des.col(j) = tempM2.as_col();
+                XD_des_dot.col(j) = zeros<vec>(4);
+                rSD_goal.resize(rS.n_rows, j+1);
+                rSD_goal.col(j) = rS + RD0 * tempM1;
             }
             
+            // Check if the terminal defenders should be connected or not
+            // first check if all attackers are inside the convex hull of the
+            // defenders or not;
+            int flagAttackInHull = 1;
+            for (int i = 0; i < NA; i++)
+            {
+                if(!poly_contain(XD.submat(0,0,1,ND-1), rA.col(i)))
+                {
+                    flagAttInSight = 0;
+                    break;
+                }
+            }
+            uvec j1_v = find(motionP_result.mP.assign==1);
+            int j1 = j1_v(0);
+            uvec jND_v = find(motionP_result.mP.assign == ND);
+            int jND = jND_v(0);
+            if ((arma::norm(XD.submat(0,j1,1,j1)-XD_des.submat(0,0,1,0))< bd && arma::norm(XD.submat(0,jND,1,jND)-XD_des.submat(0,ND-1,1,ND-1))<bd) ||  (arma::norm(XD.submat(0,j1,1,j1)-XD.submat(0,jND,1,jND))<=0.95*R_DD_string && flagAttackInHull))
+            {
+                WDString(j1,jND) = 1;
+                WDString(jND,j1) = 1;
+            } else 
+            {
+                WDString(j1,jND) = 0;
+                WDString(jND,j1) = 0;
+            }
+            
+            //Check if all the defenders are connected to each other and the
+            //StringNet is formed
+            int countDefConnect = 0;
+            for (int j = 0; j < ND; j++)
+            {
+                if (j >= ND-1)
+                {
+                    if (WDString(indDef(ND-1)-1, indDef(0)-1) == 1) 
+                    {
+                        countDefConnect++;
+                    }
+                    
+                } else
+                {
+                    if (WDString(indDef(j)-1, indDef(j+1)-1) == 1)
+                    {
+                        countDefConnect++;
+                    }
+                }
+            }
+            if (countDefConnect == ND)
+            {
+                flagDefConnect = 1;
+                flagHerd = 1;
+                flagEnclose = 0;
+                rDcm = arma::sum(XD.submat(0,0,1,XD.n_cols-1),1) / ND;
+                // double thetaD1 = atan2(XD(1,indDef(0)-1) - rDcm(2), XD(0,indDef(0)-1) - rDcm(0));
+                // for (int j = 0; j < ND; j++)
+                // {
+                //     double thetaD = thetaD1+2*M_PI*(j)/(ND);
+                // }
+                
+            }
+            
+            uD = controlDefenderFormation4(XD, indDef, motionP_result.mP.assign, XD_des, XD_des_dot, uDFc_trans, YA, NA, ND, 1);
+
+            ti_3 = ti;
+            ti_e = ti;
+
+            
+            XDF_des = XD_des;
+            
+            X.submat(4*(NA+ND+1)-4,ti,4*(NA+ND+1)-1,ti) = join_cols(rAcm, vAcm);
+
+        } else if (flagDefReachClosed != 1) 
+        {
+            uvec j1_v = find(motionP_result.mP.assign==1);
+            int j1 = j1_v(0);
+            uvec jND_v = find(motionP_result.mP.assign == ND);
+            int jND = jND_v(0);
+            if (arma::norm(XD.submat(0,j1,1,j1)-XD.submat(0,jND,1,jND))<=R_DD_string)
+            {
+                WDString(j1,jND) = 1;
+                WDString(jND,j1) = 1;
+            } else 
+            {
+                WDString(j1,jND) = 0;
+                WDString(jND,j1) = 0;
+            }
+            flagDefReachClosed = 1;
+            flagHerd = 1;
+            for (int j = 0; j < ND; j++)
+            {
+                if (arma::norm(XD.submat(0,indDef(j)-1,1,indDef(j)-1)-XDF_des.submat(0,j,1,j))<2 && arma::norm(XD.submat(2,j,3,j))<1e-1 && flagDefReachClosed!=1)
+                {
+                    defReachCount(j) = 1;
+                    if(accu(defReachCount) >= ND) {
+                        flagDefReachClosed = 1;
+                        flagHerd = 1;
+                        break;
+                    }
+                }
+            }
+            
+            uD = zeros<mat>(2,ND+1);
+            for (int j = 0; j < ND; j++)
+            {
+                uD.col(indDef(j)-1) = -0.1*(XD.submat(0,indDef(j)-1,1,indDef(j)-1)-XDF_des.submat(0,j,1,j))-0.1*(XD.submat(2,indDef(j)-1,3,indDef(j)-1));
+                double infNorm_uD = max(abs(uD(0,indDef(j)-1)),abs(uD(1,indDef(j)-1)));
+                if (infNorm_uD > u_maxD(indDef(j)-1))
+                {
+                    uD.col(indDef(j)-1) = uD.col(indDef(j)-1)*u_maxD(indDef(j)-1)/infNorm_uD;
+                }
+            }
+            uD.col(ND) = C_d*XD.submat(2,ND,3,ND);
+            XD_des = XDF_des;
+            ti_3 = ti;
+            ti_e = ti;
+
+        }else if (flagGather!=1 && flagSeek!=1 && flagEnclose!=1 && flagHerd==1)
+        {
+            uvec j1_v = find(motionP_result.mP.assign==1);
+            int j1 = j1_v(0);
+            uvec jND_v = find(motionP_result.mP.assign == ND);
+            int jND = jND_v(0);
+            if (arma::norm(XD.submat(0,j1,1,j1)-XD.submat(0,jND,1,jND))<=R_DD_string)
+            {
+                WDString(j1,jND) = 1;
+                WDString(jND,j1) = 1;
+            } else 
+            {
+                WDString(j1,jND) = 0;
+                WDString(jND,j1) = 0;
+            }
+
+            if (ti - ti_3 < 100)
+            {
+                XD.col(ND) = join_cols(rAcm,vAcm);
+            }
+            mat XDFc_des = XD.col(ND);
+            double delta_t = dt*(ti-ti_3);
             
         }
-        
         
         
     }
@@ -481,6 +638,22 @@ int main() {
     // XD_des_dot.print("using pointer, XD_des_dot: ");
     // cout << "using pointer, phi_ddot: "<<phi_ddot << endl;
     
-
+    XD.load("../../../../../Downloads/swarm_matlab/controlDF/XD.txt");
+    indDef.load("../../../../../Downloads/swarm_matlab/controlDF/indDef.txt");
+    mat XD_des,XD_des_dot, uDFc_trans;
+    XD_des.load("../../../../../Downloads/swarm_matlab/controlDF/XD_des.txt");
+    XD_des_dot.load("../../../../../Downloads/swarm_matlab/controlDF/XD_des_dot.txt");
+    uDFc_trans.load("../../../../../Downloads/swarm_matlab/controlDF/uDFc_trans.txt");
+    XA.load("../../../../../Downloads/swarm_matlab/controlDF/XA.txt");
+    XD.print("XD: ");
+    indDef.print("indDef: ");
+    XD_des.print("XD_des: ");
+    XD_des_dot.print("XD_des_dot: ");
+    uDFc_trans.print("uDFc_trans: ");
+    
+    // mat Abc = controlDefenderFormation4(XD, indDef, motionP_result.mP.assign, XD_des, XD_des_dot, uDFc_trans, XA, NA, 3, 1);
+    // // mat Abc = controlFiniteTimeTrajTracking(XD,indDef, XD_des, XD_des_dot,uDFc_trans, XA, ND, 1);
+    // Abc.print("Abc:");
+    // uD.print("uD: ");
 
 }

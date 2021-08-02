@@ -123,7 +123,7 @@ extern arma::mat R_m_DO, R_bar_DO, R_u_DO;
 extern double R_m_DD, R_m_DDO, R_m2_DD, R_u_DD, R_bar_DD;
 extern double A_D_D, B_D_D, C_D_D, D_D_D;
 
-extern std::vector<std::vector<double>> rSD_goal;
+extern arma::mat rSD_goal;
 
 
 
