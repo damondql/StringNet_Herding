@@ -915,7 +915,9 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
   ../defDesiredOpenForm.cpp \
   ../controlFiniteTimeTrajTracking.cpp \
   ../inhull.cpp \
-  ../controlDefenderFormation4.cpp
+  ../controlDefenderFormation4.cpp \
+  ../defDesiredClosedForm.cpp \
+  ../modifiedDIDynamics.cpp
 
 
 ../controlDefenderFormation4.cpp:
@@ -1574,6 +1576,8 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 
 /usr/include/x86_64-linux-gnu/bits/timex.h:
 
+../modifiedDIDynamics.cpp:
+
 /usr/include/x86_64-linux-gnu/bits/stdio_lim.h:
 
 /usr/include/c++/9/bits/streambuf.tcc:
@@ -2033,6 +2037,8 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: ../mainHerdDouble.cpp \
 /usr/include/c++/9/complex:
 
 /usr/include/armadillo:
+
+../defDesiredClosedForm.cpp:
 
 /usr/include/c++/9/ext/alloc_traits.h:
 

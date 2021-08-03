@@ -33,12 +33,12 @@ void defDesiredOpenForm(mat XDFc,double RDF0,mat XA, double phi, double phi_dot,
     if (dphi < -M_PI) {
         dphi += 2*M_PI;
     }
-    // int flagAttInSight = 0;
+    int flagAttInSight1 = 0;
     if (dphi < fabs(asin(RDF0) / arma::norm(drc)))
     {
-        *flagAttInSight = 1;
+        flagAttInSight1 = 1;
     } else {
-        *flagAttInSight = 0;
+        flagAttInSight1 = 0;
     }
     
     double phi_ddot0=-kDFphi*dphi-kDFphid*(phi_dot-phi_des_dot);
@@ -94,6 +94,7 @@ void defDesiredOpenForm(mat XDFc,double RDF0,mat XA, double phi, double phi_dot,
     *XD_des_dot = XD_des_dot1;
     *phi_ddot = phi_ddot1;
     *uDFc_trans = uDFc_trans0;
+    *flagAttInSight = flagAttInSight1;
     // *XD_des = XD_des1;
 
 }

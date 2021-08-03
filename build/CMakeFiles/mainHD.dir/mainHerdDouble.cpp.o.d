@@ -844,4 +844,6 @@ CMakeFiles/mainHD.dir/mainHerdDouble.cpp.o: \
  /home/damon/Documents/Lab/Aero/summer-research-1/defDesiredOpenForm.cpp \
  /home/damon/Documents/Lab/Aero/summer-research-1/controlFiniteTimeTrajTracking.cpp \
  /home/damon/Documents/Lab/Aero/summer-research-1/inhull.cpp \
- /home/damon/Documents/Lab/Aero/summer-research-1/controlDefenderFormation4.cpp
+ /home/damon/Documents/Lab/Aero/summer-research-1/controlDefenderFormation4.cpp \
+ /home/damon/Documents/Lab/Aero/summer-research-1/defDesiredClosedForm.cpp \
+ /home/damon/Documents/Lab/Aero/summer-research-1/modifiedDIDynamics.cpp

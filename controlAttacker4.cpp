@@ -25,6 +25,12 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
                       int flagEnclose,int flagHerd,
                       mat XD, mat WA,
                       mat WDString,int Na, int ND){
+    // XA.print("XA: ");
+    // XA_goal.print("XA_goal: ");
+    // XA_goal_dot.print("XA_goal_dot: ");
+    // XD.print("XD: ");
+    // WA.print("WA: ");
+    // WDString.print("WDString: ");
     double tol = 0.5;
     int NO = 0;
 
@@ -351,6 +357,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
     control_result.R_AAProjS_min = R_AAProjS_min;
     control_result.F_A = F_A;
     control_result.F_A_dot = F_A_dot;
+    control_result.SigmaProdD = SigmaProdD;
     return control_result;
 
 }

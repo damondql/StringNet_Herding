@@ -13,7 +13,7 @@ mat controlFiniteTimeTrajTracking(mat XD, mat indDef, mat XD_des, mat XD_des_dot
     {
         XD.col(i) = tempM.col(indDef(i)-1);
     }
-    XD.print("XD after switch:");
+    // XD.print("XD after switch:");
     // XD = tempM;
     int Na;
     Na = XA.n_cols;
@@ -169,8 +169,8 @@ mat controlFiniteTimeTrajTracking(mat XD, mat indDef, mat XD_des, mat XD_des_dot
         norm_uD1=arma::norm(uD1);
         uD2=dv+C_d*XD.submat(2,j,3,j)*arma::norm(XD.submat(2,j,3,j));
         norm_uD2=arma::norm(uD2);
-        cout << "norm_uD1" << norm_uD1 << endl;
-        cout << "norm_uD2" << norm_uD2 << endl;
+        // cout << "norm_uD1: " << norm_uD1 << endl;
+        // cout << "norm_uD2: " << norm_uD2 << endl;
         mat uD1_hat, uD2_hat;
         if (norm_uD1 > 1e-15)
         {
@@ -185,22 +185,22 @@ mat controlFiniteTimeTrajTracking(mat XD, mat indDef, mat XD_des, mat XD_des_dot
         } else {
             uD2_hat = zeros<mat>(2,1);
         }
-        uD1_hat.print("uD1_hat: ");
-        uD2_hat.print("uD2_hat: ");
-        cout << "std::min(umd1,norm_uD1)" << std::min(umd1,norm_uD1) << endl;
-        cout << "std::min(umd2,norm_uD2)" << std::min(umd2,norm_uD2) << endl;
+        // uD1_hat.print("uD1_hat: ");
+        // uD2_hat.print("uD2_hat: ");
+        // cout << "std::min(umd1,norm_uD1)" << std::min(umd1,norm_uD1) << endl;
+        // cout << "std::min(umd2,norm_uD2)" << std::min(umd2,norm_uD2) << endl;
         tempM.reset();
         tempM = XD_des_dot.submat(2,j,3,j)+std::min(umd1,norm_uD1)*uD1_hat+std::min(umd2,norm_uD2)*uD2_hat;;
-        tempM.print("tempM:");
-        uD.print("uD before cal:");
+        // tempM.print("tempM:");
+        // uD.print("uD before cal:");
         uD.col(j) = XD_des_dot.submat(2,j,3,j)+std::min(umd1,norm_uD1)*uD1_hat+std::min(umd2,norm_uD2)*uD2_hat;
-        uD.col(j).print("uD col j:");
-        uD.print("uD after cal: ");
+        // uD.col(j).print("uD col j:");
+        // uD.print("uD after cal: ");
         
 
     }
     uD.col(ND) = uDFc_trans;
-    uD.print("uD after all cal before switch:");
+    // uD.print("uD after all cal before switch:");
     tempM.reset();
     tempM = uD;
     for (int i = 0; i < uD.n_cols; i++)

@@ -8,6 +8,8 @@
 #include "controlFiniteTimeTrajTracking.cpp"
 #include "inhull.cpp"
 #include "controlDefenderFormation4.cpp"
+#include "defDesiredClosedForm.cpp"
+#include "modifiedDIDynamics.cpp"
 // #include "findCoordOnPath.cpp"
 #include <armadillo>
 #include <iostream>
@@ -79,7 +81,7 @@ void measurements(int s) {
     YA.load("../../../../../Downloads/swarm_matlab/controlD/YA.txt");
     // XD0.load("../../../../../Downloads/swarm_matlab/controlD/XD0.txt");
     SD = arma::zeros(ND,1);
-    SD_arr = SD;
+    SD_arr = arma::zeros(ND,Niter+1);
     rAcm = arma::sum(YA,1)/NA;
     rAcm = rAcm(2,0, arma::size(2,1));
     rDcm = arma::sum(XD,1)/ND;
@@ -254,7 +256,10 @@ void checkFormation(){
     mat SigmaProdD_arr;
     mat rAcm_arr;
     mat vAcm_arr;
-    for (int ti = 0; ti < 1; ti++)
+    mat sigmaProd;
+    mat minRAAProjS(Niter,1);
+    int out_ti;
+    for (int ti = 0; ti < 299; ti++)
     {
         mat Psi(NA,1, fill::zeros);
         mat Psi_dot;
@@ -265,7 +270,7 @@ void checkFormation(){
         int countAinS = 0;
         for (int ii = 0; ii < NA; ii++)
         {
-            if (norm(rA.col(ii) - rS) < rho_S)
+            if (arma::norm(rA.col(ii) - rS) < rho_S)
             {
                 countAinS++;
             }
@@ -274,7 +279,7 @@ void checkFormation(){
         int countDinS = 0;
         for (int jj = 0; jj < ND; jj++)
         {
-            if (norm(rD.col(jj) - rS) < rho_S)
+            if (arma::norm(rD.col(jj) - rS) < rho_S)
             {
                 countDinS++;
             }
@@ -310,13 +315,30 @@ void checkFormation(){
         XA_goal_dot.col(0) = XA_lead_goal;
 
         control_attacker_t control_A_result = controlAttacker4(XA,XA_goal,XA_goal_dot,flagEnclose, flagHerd, XD,attacker_graph.W,WDString,NA,ND);
-        SigmaProdD_arr.insert_cols(ti,control_A_result.SigmaProdD);
+        uA = control_A_result.uA;
+        // cout << "ti: " << ti << endl;
+        
+        // control_A_result.uA.print("uA:");
+        // control_A_result.uA0.print("uA0: ");
+        // control_A_result.F_A.print("F_A: ");
+        // control_A_result.F_A_dot.print("F_A_dot: ");
+        // cout << "R_AO_min: " << control_A_result.R_AO_min << endl;
+        // cout << "R_AAProjS_min: " << control_A_result.R_AAProjS_min << endl;
+        // control_A_result.vA_des.print("vA_des");
+        // control_A_result.vA_des_dot.print("vA_des_dot: ");
+        // cout << endl;
+        mat sigmaProd = control_A_result.SigmaProdD;
+        // cout << "controlAttacker4:" << endl;
+        // sigmaProd.print("sigmaProd:");
+        SigmaProdD_arr.resize(control_A_result.SigmaProdD.n_rows,ti+1);
+        SigmaProdD_arr.col(ti) = control_A_result.SigmaProdD;
+        // cout << "SigmaProd_arr" << endl;
 
         rAcm = arma::sum(XA.submat(0,0, 1,XA.n_cols-1),1)/NA;
         vAcm = arma::sum(XA.submat(2,0, 3,XA.n_cols-1),1)/NA;
         
         WDString = zeros<mat>(ND,ND);
-        
+        cube WDString_mat(ND,ND, Niter);
         for (int j = 1; j <= ND-1; j++)
         {
             uvec j11 = find(motionP_result.mP.assign == j);
@@ -340,12 +362,13 @@ void checkFormation(){
         double ti_2,ti_3, ti_e, ti_g;
         if (flagGather == 1 && flagSeek != 1 && flagEnclose != 1 && flagHerd !=1)
         {
+            
             XD_des = motionP_result.dDf.XD_des0;
             XD_des_dot = motionP_result.dDf.XD_des_dot0;
             uD = controlDefender5(XD, SD, regspace(1,1,ND+1), motionP_result.mP.assign, XD_des, XD_des_dot, motionP_result.mP, times(ti), ND);
             for (int j = 0; j < ND; j++)
             {
-                if (arma::norm(XD.submat(0,indDef(j), 1,indDef(j))- XD_des.submat(0,j,1,j)) < 1e-3) {
+                if (arma::norm(XD.submat(0,indDef(j)-1, 1,indDef(j)-1)- XD_des.submat(0,j,1,j)) < 1e-3) {
                     defReachCount(j) = 1;
                     if (accu(defReachCount) >= ND)
                     {
@@ -357,8 +380,10 @@ void checkFormation(){
                 }
             }
             ti_g = ti;
+            // uD.print("uD: ");
         } else if (flagGather!=1 && flagSeek==1 && flagEnclose!=1 && flagHerd!=1)
         {
+            // cout << "enter Seek phase when ti = " << ti << endl;
             uvec j11 = find(motionP_result.mP.assign == 1);
             int j1 = j11(0);
             uvec jND_v = find(motionP_result.mP.assign == ND);
@@ -374,6 +399,12 @@ void checkFormation(){
             uD = controlFiniteTimeTrajTracking(XD, indDef, XD_des, XD_des_dot , uDFc_trans, YA, ND,1);
             double ti_2 = ti;
 
+            if ( ti == 297)
+            {
+                cout << "arma::norm(rAcm - rDcm) = "<< arma::norm(rAcm - rDcm);
+                cout << "flagAttInSight" << flagAttInSight << endl; 
+            }
+            
             if (arma::norm(rAcm - rDcm) < 2*rho_sn  && flagAttInSight) {
                 flagEnclose = 1;
                 flagSeek = 0;
@@ -382,6 +413,7 @@ void checkFormation(){
 
 
         } else if (flagGather != 1 && flagSeek != 1 && flagEnclose == 1 && flagHerd != 1) {
+            cout << "enter enclose formation at ti = " << ti << endl;
             if (flagDForm != 1)
             {
                 flagDForm = 1;
@@ -541,14 +573,155 @@ void checkFormation(){
             }
             mat XDFc_des = XD.col(ND);
             double delta_t = dt*(ti-ti_3);
-            
+            defDesiredClosedForm(XDFc_des, RDF_closed, motionP_result.dDf.phi, YA, NA, ND, flagNDeven, delta_t, &XD_des, &XD_des_dot, &uDFc_trans);
+            uD = controlFiniteTimeTrajTracking(XD,indDef, XD_des, XD_des_dot, uDFc_trans, YA, ND, 0 );
+        }
+        XD_Des.col(ti) =  XD_des.as_col();
+        WDString_mat.slice(ti) = WDString;
+        // XD_des.print("XD_Des:");
+        // If any attacker has reached inside the protected area stop their
+        // control action
+        for (int ii = 0; ii < NA; ii++)
+        {
+            if (arma::norm(rA.col(ii)-rP) < rho_P)
+            {
+                uA.col(ii) = zeros<mat>(2,1);
+            }
         }
         
+        U.col(ti) = join_cols(uA.as_col(), uD.as_col());
+        // U.col(ti).print("U col(ti)");
+        // X.col(ti).print("X col(ti) before modified");
+        X.col(ti+1) = modifiedDIDynamics(X.col(ti), U.col(ti), dt, C_d);
+        // X.col(ti+1).print("X col(ti+1) after modifed");
+        // cout << "11111111111111" << endl;
+        XA = reshape(X.submat(0,ti+1,4*NA-1,ti+1),4,NA);
+        // YA = XA + arma::mvnrnd(arma::zeros(4,1), Cov_YA, NA);
+        YA = XA;
+        rA = XA.submat(0,0,1,XA.n_cols-1);
+        vA = XA.submat(2,0,3,XA.n_cols-1);
+        //  cout << "222222222222222222222" << endl;
+        XD = reshape(X.submat(4*NA,ti+1,4*(N+1)-1,ti+1),4,ND+1);
+        mat XDp = reshape(X.submat(4*NA,ti,4*(N+1)-1,ti),4,ND+1);
+        //  cout << "3333333333333333333333" << endl;
+        rD = XD.submat(0,0,1,XD.n_cols-1);
+        mat vD = XD.submat(2,0,3,XD.n_cols-1);
         
+        
+        // Saturate the velocity if beyond the maximum
+        for (int i = 0; i < NA; i++)
+        {
+            double norm_vA = arma::norm(vA.col(i));
+            if(norm_vA > v_maxA(i))
+            {
+                vA.col(i) = vA.col(i) * v_maxA(i) / norm_vA;
+            }
+        }
+        for (int j = 0; j < ND; j++)
+        {
+            double norm_vD = arma::norm(vD.col(j));
+            if (norm_vD > v_maxD(j))
+            {
+                vD.col(j) = vD.col(j)*v_maxD(j)/norm_vD;
+            }
+        }
+        XA = join_cols(rA, vA);
+        XD = join_cols(rD, vD);
+        cout << "ti: " << ti << endl;
+        XD.print("XD: ");
+        XA.print("XA: ");
+        cout << " " << endl;
+
+        for (int j = 0; j < ND; j++)
+        {
+            SD(j) = SD_arr(j,ti) + arma::norm(XD.submat(0,j,1,j) - XDp.submat(0,j,1,j));
+        }
+        SD_arr.col(ti+1) = SD;
+        
+        arma::mat arr_minRDD;
+        mat arr_minRAD(NA,ND);
+        mat arr_minRAA(1,NA);
+        mat RDjDl(1,ND);
+        for (int j = 0; j < ND; j++)
+        {
+            if (j < ND-1)
+            {
+                for (int l = j+1; l < ND; l++)
+                {
+                    RDjDl.col(l) = arma::norm(rD.col(j)- rD.col(l));
+                }
+                arr_minRDD.resize(1,j+1);
+                mat tempM;
+                tempM = RDjDl.submat(0,j+1,0,RDjDl.n_cols-1);
+                arr_minRDD.col(j) = tempM.min();
+                
+            }
+            for (int i = 0; i < NA; i++)
+            {
+                arr_minRAD(i,j) = arma::norm(rD.col(j) - rA.col(i));
+            }
+            
+        }
+
+        if(!arr_minRDD.is_empty())
+        {
+            minRDD(ti+1) = arr_minRDD.min();
+        }
+
+        for (int i = 0; i < NA; i++)
+        {
+            arr_minRAD(i,ND-1) = arma::norm(rD.col(ND-1)- rA.col(i));
+        }
+        minRAD(ti+1) = arr_minRAD.min();
+
+        //  Find critical distances for the attackers
+        mat RAiAl(1,NA);
+        for (int i = 0; i < NA; i++)
+        {
+            if (i < NA-1)
+            {
+                for (int ii = i+1; ii < NA; ii++)
+                {
+                    RAiAl = arma::norm(rA.col(i) - rA.col(ii));
+                }
+                arr_minRAA.resize(1,i+1);
+                mat tempM;
+                tempM = RDjDl.submat(0,i+1,0,RDjDl.n_cols-1);
+                arr_minRDD.col(i) = tempM.min();
+            }
+        }
+        if(!arr_minRAA.is_empty())
+        {
+            minRAA(ti+1) = arr_minRAA.min();
+        }
+    
+        if (NA > 1)
+        {
+            minEAO(ti)=(R_m_AA-rhoA_safe)/(control_A_result.R_AO_min);
+        }
+
+        minRAAProjS(ti)=(R_m_AD-rhoAD_safe)/control_A_result.R_AAProjS_min;
+        
+        t=t+dt;
+        times(ti+1)=t;
+
+        out_ti = ti;
+        // control_A_result.uA.print("uA:");
+        // control_A_result.uA0.print("uA0: ");
     }
     
+    // U.col(out_ti).print("U col out_ti: ");
+    // U.col(out_ti-1).print("U col ti-1: ");
 
-    
+    cout << "out ti" << out_ti << endl;
+    // U.col(out_ti) = U.col(out_ti-1);
+    // RefTraj.col(out_ti) = RefTraj.col(out_ti-1);
+    // SigmaProdD_arr.col(out_ti) = sigmaProd;
+    // minEDO(out_ti) = minEDO(out_ti-1);
+    // minEAO(out_ti) = minEAO(out_ti-1);
+    // minRAAProjS(out_ti)=minRAAProjS(out_ti-1);
+    // rA.print("rA: ");
+    // rD.print("rD: ");
     
     
 
@@ -638,22 +811,72 @@ int main() {
     // XD_des_dot.print("using pointer, XD_des_dot: ");
     // cout << "using pointer, phi_ddot: "<<phi_ddot << endl;
     
-    XD.load("../../../../../Downloads/swarm_matlab/controlDF/XD.txt");
-    indDef.load("../../../../../Downloads/swarm_matlab/controlDF/indDef.txt");
-    mat XD_des,XD_des_dot, uDFc_trans;
-    XD_des.load("../../../../../Downloads/swarm_matlab/controlDF/XD_des.txt");
-    XD_des_dot.load("../../../../../Downloads/swarm_matlab/controlDF/XD_des_dot.txt");
-    uDFc_trans.load("../../../../../Downloads/swarm_matlab/controlDF/uDFc_trans.txt");
-    XA.load("../../../../../Downloads/swarm_matlab/controlDF/XA.txt");
-    XD.print("XD: ");
-    indDef.print("indDef: ");
-    XD_des.print("XD_des: ");
-    XD_des_dot.print("XD_des_dot: ");
-    uDFc_trans.print("uDFc_trans: ");
+    // XD.load("../../../../../Downloads/swarm_matlab/controlDF/XD.txt");
+    // indDef.load("../../../../../Downloads/swarm_matlab/controlDF/indDef.txt");
+    // mat XD_des,XD_des_dot, uDFc_trans;
+    // XD_des.load("../../../../../Downloads/swarm_matlab/controlDF/XD_des.txt");
+    // XD_des_dot.load("../../../../../Downloads/swarm_matlab/controlDF/XD_des_dot.txt");
+    // uDFc_trans.load("../../../../../Downloads/swarm_matlab/controlDF/uDFc_trans.txt");
+    // XA.load("../../../../../Downloads/swarm_matlab/controlDF/XA.txt");
+    // XD.print("XD: ");
+    // indDef.print("indDef: ");
+    // XD_des.print("XD_des: ");
+    // XD_des_dot.print("XD_des_dot: ");
+    // uDFc_trans.print("uDFc_trans: ");
     
     // mat Abc = controlDefenderFormation4(XD, indDef, motionP_result.mP.assign, XD_des, XD_des_dot, uDFc_trans, XA, NA, 3, 1);
     // // mat Abc = controlFiniteTimeTrajTracking(XD,indDef, XD_des, XD_des_dot,uDFc_trans, XA, ND, 1);
     // Abc.print("Abc:");
     // uD.print("uD: ");
 
+    // mat XDFc;
+    // XDFc.load("../../../../../Downloads/swarm_matlab/OpenForm/XDFc.txt");
+    // XA.load("../../../../../Downloads/swarm_matlab/OpenForm/XA.txt");
+
+    // std::ifstream fin("../../../../../Downloads/swarm_matlab/OpenForm/RDF0.txt");
+    // double RDF0;
+    // fin >> RDF0;
+    // fin.close();
+
+    // fin.open("../../../../../Downloads/swarm_matlab/OpenForm/phi0.txt");
+    // double phi0;
+    // fin >> phi0;
+    // fin.close();
+    
+    // fin.open("../../../../../Downloads/swarm_matlab/OpenForm/delta_t.txt");
+    // double delta_t;
+    // fin >> delta_t;
+    // fin.close();
+
+    // XDFc.print("XDFc:");
+    // cout << "RDF0: " << RDF0 << endl;
+    // cout << "phi0: " << phi0 << endl;
+    // XA.print("XA: ");
+    // cout << "delta_t: " << delta_t << endl;
+
+    // mat XD_des, XD_des_dot, uDFc_trans;
+    // XD_des.print("XD_des");
+    // XD_des_dot.print("XD_des_dot:");
+    // uDFc_trans.print("uDFc_trans: ");
+
+    // defDesiredClosedForm(XDFc, RDF0, phi0, XA,NA,ND, 1, delta_t, &XD_des, &XD_des_dot, &uDFc_trans);
+    // XD_des.print("XD_des pointer");
+    // XD_des_dot.print("XD_des_dot pointer:");
+    // uDFc_trans.print("uDFc_trans pointer: ");
+
+
+    // mat X0;
+    // X0.load("../../../../../Downloads/swarm_matlab/OpenForm/X0.txt");
+    // U.load("../../../../../Downloads/swarm_matlab/OpenForm/U.txt");
+    // std::ifstream fin("../../../../../Downloads/swarm_matlab/OpenForm/dt.txt");
+    // double dt;
+    // fin >> dt;
+    // fin.close();
+
+    // X0.print("X0:");
+    // U.print("U");
+    // cout << "dt: " << dt << endl;
+    // cout << "C_d: " << C_d << endl;
+    // mat X1 = modifiedDIDynamics(X0,U, dt, C_d);
+    // X1.print("X1: ");
 }
