@@ -77,8 +77,9 @@ void measurements(int s) {
                   {0,0,pow(0.12,2),0},
                   {0,0,0,pow(0.12,2)}};
     }
-    YA = XA + arma::mvnrnd(arma::zeros(4,1), Cov_YA, NA);
-    YA.load("../../../../../Downloads/swarm_matlab/controlD/YA.txt");
+    // YA = XA + arma::mvnrnd(arma::zeros(4,1), Cov_YA, NA);
+    // YA.load("../../../../../Downloads/swarm_matlab/controlD/YA.txt");
+    YA = XA;
     // XD0.load("../../../../../Downloads/swarm_matlab/controlD/XD0.txt");
     SD = arma::zeros(ND,1);
     SD_arr = arma::zeros(ND,Niter+1);
@@ -259,7 +260,8 @@ void checkFormation(){
     mat sigmaProd;
     mat minRAAProjS(Niter,1);
     int out_ti;
-    for (int ti = 0; ti < 299; ti++)
+    int bound = 298;
+    for (int ti = 0; ti < bound; ti++)
     {
         mat Psi(NA,1, fill::zeros);
         mat Psi_dot;
@@ -389,7 +391,30 @@ void checkFormation(){
             uvec jND_v = find(motionP_result.mP.assign == ND);
             int jND = jND_v(0);
             double phi_ddot;
+            // if ( ti == bound-1)
+            // {
+            //     cout << "" << endl;
+            //     cout << "defDesiredOpenForm input: " << endl;
+            //     XD.col(ND).print("XD: ");
+            //     cout << "RDF_open" << RDF_open << endl;
+            //     YA.print("YA:");
+            //     cout << "phi: " << motionP_result.dDf.phi << endl;
+            //     cout << "phi_dot: " << motionP_result.dDf.phi_dot << endl;
+            //     cout << 
+
+            // }
             defDesiredOpenForm(XD.col(ND), RDF_open, YA, motionP_result.dDf.phi, motionP_result.dDf.phi_dot, NA, ND, &XD_des, &XD_des_dot, &phi_ddot, &uDFc_trans, &flagAttInSight);
+            // if ( ti == bound-1)
+            // {
+            //     cout << "" << endl;
+            //     cout << "defDesiredOpenForm output: " << endl;
+            //     XD_des.print("XD_des: ");
+            //     XD_des_dot.print("XD_des_dot:");
+            //     cout << "phi_ddot" << phi_ddot << endl;
+            //     uDFc_trans.print("uDFc_trans:");
+            //     cout << "flagAttInSight: " << flagAttInSight << endl;
+
+            // }
             motionP_result.dDf.phi += dt * motionP_result.dDf.phi_dot;
             if (motionP_result.dDf.phi > 2*M_PI)
             {
@@ -399,10 +424,11 @@ void checkFormation(){
             uD = controlFiniteTimeTrajTracking(XD, indDef, XD_des, XD_des_dot , uDFc_trans, YA, ND,1);
             double ti_2 = ti;
 
-            if ( ti == 297)
+            if ( ti == bound-1)
             {
-                cout << "arma::norm(rAcm - rDcm) = "<< arma::norm(rAcm - rDcm);
-                cout << "flagAttInSight" << flagAttInSight << endl; 
+                
+                cout << "arma::norm(rAcm - rDcm) = "<< arma::norm(rAcm - rDcm) <<endl;
+                cout << "flagAttInSight:" << flagAttInSight << endl; 
             }
             
             if (arma::norm(rAcm - rDcm) < 2*rho_sn  && flagAttInSight) {
@@ -444,7 +470,7 @@ void checkFormation(){
             {
                 if(!poly_contain(XD.submat(0,0,1,ND-1), rA.col(i)))
                 {
-                    flagAttInSight = 0;
+                    flagAttackInHull = 0;
                     break;
                 }
             }
@@ -627,10 +653,20 @@ void checkFormation(){
         }
         XA = join_cols(rA, vA);
         XD = join_cols(rD, vD);
-        cout << "ti: " << ti << endl;
-        XD.print("XD: ");
-        XA.print("XA: ");
-        cout << " " << endl;
+
+        rDcm = arma::sum(XD.submat(0,0,1,ND-1),1) /ND;
+        vDcm = arma::sum(XD.submat(2,0,3,ND-1),1) / ND;
+        if (ti == bound-1)
+        {
+            cout << "ti: " << ti << endl;
+            XD.print("XD: ");
+            XA.print("XA: ");
+            cout << " " << endl;
+            rAcm.print("rAcm: ");
+            rDcm.print("rDcm: "); 
+        }
+        
+        
 
         for (int j = 0; j < ND; j++)
         {

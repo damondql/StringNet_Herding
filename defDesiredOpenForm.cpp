@@ -34,13 +34,19 @@ void defDesiredOpenForm(mat XDFc,double RDF0,mat XA, double phi, double phi_dot,
         dphi += 2*M_PI;
     }
     int flagAttInSight1 = 0;
-    if (dphi < fabs(asin(RDF0) / arma::norm(drc)))
+    // drc.print("drc: ");
+    // cout << "arma::norm(drc): " << arma::norm(drc) << endl;
+    // cout << "asin(RDF0): " << asin(RDF0) << endl;
+    // cout <<"asin(RDF0) / arma::norm(drc): " << asin(RDF0) / arma::norm(drc) << endl; 
+    // cout << "fabs(asin(RDF0) / arma::norm(drc)): " << fabs(asin(RDF0) / arma::norm(drc)) << endl;
+    // cout << "dphi: " << dphi << endl;
+    if (dphi<abs(asin((RDF0)/arma::norm(drc))))
     {
         flagAttInSight1 = 1;
     } else {
         flagAttInSight1 = 0;
     }
-    
+    // cout <<"in defDesiredOpenForm flagAttInSight1: " << flagAttInSight1 << endl;
     double phi_ddot0=-kDFphi*dphi-kDFphid*(phi_dot-phi_des_dot);
     double phi_ddot1=arma::sign(phi_ddot0)* std::min(fabs(phi_ddot0),phi_ddot_max);
 
