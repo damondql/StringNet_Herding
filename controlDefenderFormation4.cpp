@@ -48,7 +48,7 @@ mat controlDefenderFormation4(mat XD, mat indDef, mat assign, mat XD_des, mat XD
             double R_m = 1.5;
             mat rvDproj;
             rvDproj = arma::join_cols(rDProj, vDProj);
-            rvDproj.print("rvDproj");
+            // rvDproj.print("rvDproj");
             vec potentialControl_result = potentialControl(0.1,XD.col(j),rvDproj,20,sigma_parameters(R_underbar,R_bar),R_m,R_underbar,R_bar, R_bar+10,kDOr,kDOv2, alphaDOv);
             uAcon = potentialControl_result.subvec(0,1);
         }
@@ -59,10 +59,10 @@ mat controlDefenderFormation4(mat XD, mat indDef, mat assign, mat XD_des, mat XD
         double norm_uD1, norm_uD2;
         uD1=-kDDesr*(rD-XD_des.submat(0,j,1,j))-kDDesv*(vD-XD_des.submat(2,j,3,j)) + uAcon+uDOv+uDOr;
         norm_uD1=arma::norm(uD1);
-        cout << "norm_uD1: " << norm_uD1 << endl;
+        // cout << "norm_uD1: " << norm_uD1 << endl;
         uD2=-kDDesv*(vD-XD_des.submat(2,j,3,j))+C_d*vD*arma::norm(vD);
         norm_uD2=arma::norm(uD2);
-        cout << "norm_uD2: " << norm_uD2 << endl;
+        // cout << "norm_uD2: " << norm_uD2 << endl;
         uD.col(j)=XD_des_dot.submat(2,j,3,j) + std::min(umd_e1,norm_uD1)*uD1/norm_uD1 + std::min(umd_e2,norm_uD2)*uD2/norm_uD2;
 
     }

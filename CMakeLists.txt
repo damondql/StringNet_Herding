@@ -39,5 +39,7 @@ target_link_libraries(mainHD "/opt/gurobi912/linux64/lib/libgurobi_c++.a" "/opt/
 # target_link_libraries(test5 "/opt/gurobi912/linux64/lib/libgurobi_c++.a" "/opt/gurobi912/linux64/lib/libgurobi91.so" -O2 -larmadillo)
 # add_executable(test6 inhull.cpp)
 # target_link_libraries(test6  -O2 -larmadillo)
+# add_executable(test7 helperFunction.cpp)
+# target_link_libraries(test7  -O2 -larmadillo)
 # target_link_libraries(findShortestPath Armadillo)
 # target_link_libraries( ifopt_test ifopt::ifopt_core ifopt::ifopt_ipopt)

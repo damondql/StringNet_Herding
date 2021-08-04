@@ -260,7 +260,13 @@ void checkFormation(){
     mat sigmaProd;
     mat minRAAProjS(Niter,1);
     int out_ti;
-    int bound = 298;
+    int bound = Niter;
+    mat uD;
+    mat XD_des;
+    mat XD_des_dot;
+    mat uDFc_trans;
+    mat XDF_des;
+    cube WDString_mat(ND,ND, Niter);
     for (int ti = 0; ti < bound; ti++)
     {
         mat Psi(NA,1, fill::zeros);
@@ -316,20 +322,38 @@ void checkFormation(){
         XA_goal.col(0) = XA_lead_goal;
         XA_goal_dot.col(0) = XA_lead_goal;
 
-        control_attacker_t control_A_result = controlAttacker4(XA,XA_goal,XA_goal_dot,flagEnclose, flagHerd, XD,attacker_graph.W,WDString,NA,ND);
+        if(ti == bound -1)
+        {   
+            cout << "controlAttacker input: " << endl;
+            cout << "ti: " << ti << endl;
+            XA.print("XA: ");
+            XA_goal.print("XA_goal: ");
+            XA_goal_dot.print("XA_goal_dot: ");
+            cout << "flagEnClose: " << flagEnclose << endl;
+            cout << "flagHerd: " << flagHerd << endl;
+            XD.print("XD: ");
+            attacker_graph.W.print("W: ");
+            WDString.print("WDString: ");
+            cout << endl;
+        }
+
+        control_attacker_t control_A_result = controlAttacker4(XA,XA_goal,XA_goal_dot,flagEnclose, flagHerd, XD,attacker_graph.W,WDString,NA,ND, ti, bound);
         uA = control_A_result.uA;
-        // cout << "ti: " << ti << endl;
+        if(ti == bound -1)
+        {
+            cout << "ti: " << ti << endl;
+            control_A_result.uA.print("uA:");
+            control_A_result.uA0.print("uA0: ");
+            control_A_result.F_A.print("F_A: ");
+            control_A_result.F_A_dot.print("F_A_dot: ");
+            cout << "R_AO_min: " << control_A_result.R_AO_min << endl;
+            cout << "R_AAProjS_min: " << control_A_result.R_AAProjS_min << endl;
+            control_A_result.vA_des.print("vA_des");
+            control_A_result.vA_des_dot.print("vA_des_dot: ");
+            cout << endl;
+        }
         
-        // control_A_result.uA.print("uA:");
-        // control_A_result.uA0.print("uA0: ");
-        // control_A_result.F_A.print("F_A: ");
-        // control_A_result.F_A_dot.print("F_A_dot: ");
-        // cout << "R_AO_min: " << control_A_result.R_AO_min << endl;
-        // cout << "R_AAProjS_min: " << control_A_result.R_AAProjS_min << endl;
-        // control_A_result.vA_des.print("vA_des");
-        // control_A_result.vA_des_dot.print("vA_des_dot: ");
-        // cout << endl;
-        mat sigmaProd = control_A_result.SigmaProdD;
+        sigmaProd = control_A_result.SigmaProdD;
         // cout << "controlAttacker4:" << endl;
         // sigmaProd.print("sigmaProd:");
         SigmaProdD_arr.resize(control_A_result.SigmaProdD.n_rows,ti+1);
@@ -340,7 +364,7 @@ void checkFormation(){
         vAcm = arma::sum(XA.submat(2,0, 3,XA.n_cols-1),1)/NA;
         
         WDString = zeros<mat>(ND,ND);
-        cube WDString_mat(ND,ND, Niter);
+        
         for (int j = 1; j <= ND-1; j++)
         {
             uvec j11 = find(motionP_result.mP.assign == j);
@@ -356,11 +380,7 @@ void checkFormation(){
                 WDString(j2,j1) = 0;
             } 
         }
-        mat uD;
-        mat XD_des;
-        mat XD_des_dot;
-        mat uDFc_trans;
-        mat XDF_des;
+        
         double ti_2,ti_3, ti_e, ti_g;
         if (flagGather == 1 && flagSeek != 1 && flagEnclose != 1 && flagHerd !=1)
         {
@@ -444,24 +464,38 @@ void checkFormation(){
             {
                 flagDForm = 1;
             }
+            mat rD_des;
             for (int j = 0; j < ND; j++)
             {
+                // cout << "j: " << j << endl;
                 double RD0 = RDF_closed;
                 double thetaD;
                 thetaD = motionP_result.dDf.phi + 2*M_PI *(j+1)/ND - M_PI / ND;
                 mat tempM1(2,1);
                 tempM1(0,0) = cos(thetaD);
                 tempM1(1,0) = sin(thetaD);
-                mat rD_des;
+                // tempM1.print("tempM1: ");
                 rD_des.insert_cols(j, rAcm+RD0*tempM1);
+                // rD_des.print("rD_des: ");
                 mat tempM2;
                 tempM2 = join_cols(rD_des.col(j), vAcm);
+                
+                // tempM2.print("tempM2: ");
+                // XD_des.print("XD_des: ");
                 XD_des.col(j) = tempM2.as_col();
+                // XD_des.print("XD_des: ");
                 XD_des_dot.col(j) = zeros<vec>(4);
+                // XD_des_dot.print("XD_des_dot: ");
                 rSD_goal.resize(rS.n_rows, j+1);
+                // rSD_goal.print("rSD_goal: ");
                 rSD_goal.col(j) = rS + RD0 * tempM1;
+                // rSD_goal.print("rSD_goal: ");
+
             }
             
+            // XD_des.print("XD_des: ");
+            // XD_des_dot.print("XD_des_dot: ");
+            // rSD_goal.print("rSD_goal: ");
             // Check if the terminal defenders should be connected or not
             // first check if all attackers are inside the convex hull of the
             // defenders or not;
@@ -474,6 +508,11 @@ void checkFormation(){
                     break;
                 }
             }
+            if (ti == bound-1)
+            {
+                cout << "flagAttackInHull" << flagAttackInHull << endl;
+            }
+            
             uvec j1_v = find(motionP_result.mP.assign==1);
             int j1 = j1_v(0);
             uvec jND_v = find(motionP_result.mP.assign == ND);
@@ -510,6 +549,7 @@ void checkFormation(){
             }
             if (countDefConnect == ND)
             {
+
                 flagDefConnect = 1;
                 flagHerd = 1;
                 flagEnclose = 0;
@@ -522,8 +562,25 @@ void checkFormation(){
                 
             }
             
+            if (ti == bound -1)
+            {
+                cout << "controlDefenderFormation4 inputs: " << endl;
+                XD.print("XD: ");
+                indDef.print("indDef: ");
+                motionP_result.mP.assign.print("assign: ");
+                XD_des.print("XD_des: ");
+                XD_des_dot.print("XD_des_dot: ");
+                uDFc_trans.print("uDFc_trans: ");
+                YA.print("YA: ");
+            }
+            
             uD = controlDefenderFormation4(XD, indDef, motionP_result.mP.assign, XD_des, XD_des_dot, uDFc_trans, YA, NA, ND, 1);
-
+            
+            if (ti == bound - 1)
+            {
+                uD.print("uD: ");
+            }
+            
             ti_3 = ti;
             ti_e = ti;
 
@@ -534,6 +591,7 @@ void checkFormation(){
 
         } else if (flagDefReachClosed != 1) 
         {
+            cout << "enter loop flagDefReachClosed at ti = " << ti << endl;
             uvec j1_v = find(motionP_result.mP.assign==1);
             int j1 = j1_v(0);
             uvec jND_v = find(motionP_result.mP.assign == ND);
@@ -750,17 +808,49 @@ void checkFormation(){
     // U.col(out_ti-1).print("U col ti-1: ");
 
     cout << "out ti" << out_ti << endl;
-    // U.col(out_ti) = U.col(out_ti-1);
-    // RefTraj.col(out_ti) = RefTraj.col(out_ti-1);
-    // SigmaProdD_arr.col(out_ti) = sigmaProd;
-    // minEDO(out_ti) = minEDO(out_ti-1);
-    // minEAO(out_ti) = minEAO(out_ti-1);
-    // minRAAProjS(out_ti)=minRAAProjS(out_ti-1);
+    U.col(out_ti) = U.col(out_ti-1);
+    RefTraj.col(out_ti) = RefTraj.col(out_ti-1);
+    SigmaProdD_arr.col(out_ti) = sigmaProd;
+    minEDO(out_ti) = minEDO(out_ti-1);
+    minEAO(out_ti) = minEAO(out_ti-1);
+    minRAAProjS(out_ti)=minRAAProjS(out_ti-1);
+
+
     // rA.print("rA: ");
     // rD.print("rD: ");
-    
-    
+    // delete the unnecessry elements ti<Niter
 
+    times = times.submat(0,0,times.n_rows-1,out_ti + 1);
+    X = X.submat(0,0,X.n_rows-1, out_ti+1);
+    // X.col(out_ti).print("X col out_ti: ");
+    // X.col(out_ti+1).print("col out_ti+1: ");
+    U = U.submat(0,0,U.n_rows-1,out_ti+1);
+    XD_Des = XD_Des.submat(0,0,XD_Des.n_rows-1, out_ti+1);
+    vA_dot_arr = vA_dot_arr.submat(0,0,vA_dot_arr.n_rows-1, out_ti+1);
+    FA_dot_arr = FA_dot_arr.submat(0,0,FA_dot_arr.n_rows-1, out_ti+1);
+    minRDD = minRDD.submat(0,0,minRDD.n_rows-1, out_ti+1);
+    minRAD = minRAD.submat(0,0,minRAD.n_rows-1, out_ti+1);
+    minRAA = minRAA.submat(0,0,minRAA.n_rows-1, out_ti+1);
+    minEDO = minEDO.submat(0,0,minEDO.n_rows-1, out_ti+1);
+    minEAO = minEAO.submat(0,0,minEAO.n_rows-1, out_ti+1);
+    SigmaProdD_arr = SigmaProdD_arr.submat(0,0,SigmaProdD_arr.n_rows-1, out_ti);
+    // times.print("times");
+    X.save("../../../../../Downloads/swarm_matlab/cppResult/X.csv", csv_ascii);
+    rP.save("../../../../../Downloads/swarm_matlab/cppResult/rP.csv", csv_ascii);
+    rS.save("../../../../../Downloads/swarm_matlab/cppResult/rS.csv", csv_ascii);
+    // std::ofstream myfile;
+    // myfile.open ("rho_S.csv");
+    // myfile << rho_S;
+    // myfile.close();
+    // myfile.open("rho_Acon.csv");
+    // myfile << rho_Acon;
+    // myfile.close();
+    // cout << "rho_S: " << rho_S<< endl;
+    // cout <<"rho_Acon: " << rho_Acon << endl;
+    // cout << "rho_P: " << rho_P << endl;
+    times.save("../../../../../Downloads/swarm_matlab/cppResult/times.csv", csv_ascii);
+    WDString_mat.save("../../../../../Downloads/swarm_matlab/cppResult/WDString_mat.csv");
+    
 }
 
 
@@ -915,4 +1005,5 @@ int main() {
     // cout << "C_d: " << C_d << endl;
     // mat X1 = modifiedDIDynamics(X0,U, dt, C_d);
     // X1.print("X1: ");
+    
 }

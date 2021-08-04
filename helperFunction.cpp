@@ -43,15 +43,17 @@ vec potentialControl(double tol, mat X1,mat X2, double rho_sens_1, mat sigma_par
         // cout << "00000000000000000" << endl;
         vec r12j = r2.col(j) - r1;
         double R_12j = arma::norm(r12j);
+        // cout << "R_12j: " << R_12j << endl;
         if(R_12j <= rho_sens_1) {
             if(R_12j < R_bar_12) {
                 // cout << "111111111111111111111111111" << endl;
-                if(R_12j < R_bar_12) {
+                if(R_12j < R_underbar_12) {
                     sigma = 1;
                 } else if (R_12j > R_underbar_12 && R_12j<R_bar_12) {
                     sigma = sigma_params_12(0)*pow(R_12j,3)+sigma_params_12(1)*pow(R_12j,2)+sigma_params_12(2)*R_12j+sigma_params_12(3);
                 }
                 vec nabla_r1_V12;
+                // cout << "sigma: " << sigma <<endl;
                 // cout << "22222222222222222222" << endl;
                 if( (R_12j - R_m_12) > tol){
                     nabla_r1_V12 = kr_12 * (r1-r2.col(j)) / R_12j/abs(R_12j-R_m_12) * (pow((R_12j-R_m_12),2)-pow(R_tilde_12,2))/(pow((R_12j-R_m_12),2)+pow(R_tilde_12,2));
@@ -59,6 +61,7 @@ vec potentialControl(double tol, mat X1,mat X2, double rho_sens_1, mat sigma_par
                     nabla_r1_V12 = -kr_12*(r1-r2.col(j)) / R_12j*largeNum;
                 }
                 double norm_dv12 = arma::norm(v1 - v2.col(j));
+                // cout << "norm_dv12: " << norm_dv12 << endl;
                 mat a = v1 - v2.col(j);
                 a = a.t();
                 mat b  = r1 - r2.col(j);
@@ -72,6 +75,8 @@ vec potentialControl(double tol, mat X1,mat X2, double rho_sens_1, mat sigma_par
                 }
                 uv_12 = uv_12 - sigma * dv;
                 ur_12 = ur_12 - sigma * nabla_r1_V12;
+                // uv_12.print("uv_12: ");
+                // ur_12.print("ur_12: ");
             }
         }
         if (minDist_12 > R_12j)
@@ -113,3 +118,19 @@ vec projectionOnLine(vec r, vec r1, vec r2) {
     result(2) = lambdaP;
     return result;
 }
+
+// int main(){
+//     mat XA,XD, sigma_p;
+//     XA.load("../AttackerStep328/XA.txt");
+//     XD.load("../AttackerStep328/XD.txt");
+//     XA(0,0) = 10.0096;
+//     XA(1,0) = -17.3049;
+//     XA(2,0) = 0.0503;
+//     XA(3,0) = 0.2058;
+//     sigma_p.load("../AttackerStep328/sigma_p.txt");
+//     XA.print("XA: ");
+//     XD.print("XD: ");
+//     sigma_p.print("sigma_p:");
+//     vec a = potentialControl(0.1, XA, XD, 20, sigma_p, 5.4177,7.4177,10.4177, 20.4177,0.5,0.5,0.5);
+//     a.print("a:");
+// }
