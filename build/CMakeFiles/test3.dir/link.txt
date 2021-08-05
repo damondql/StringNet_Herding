@@ -1,1 +1,0 @@
-/usr/bin/c++ -rdynamic CMakeFiles/test3.dir/defGoalAssignMIQP.cpp.o -o test3   -L/opt/gurobi912/linux64/lib  -Wl,-rpath,/opt/gurobi912/linux64/lib /opt/gurobi912/linux64/lib/libgurobi_c++.a -lgurobi91 -O2 -larmadillo 

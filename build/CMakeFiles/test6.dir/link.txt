@@ -1,1 +1,0 @@
-/usr/bin/c++ -rdynamic CMakeFiles/test6.dir/inhull.cpp.o -o test6  -O2 -larmadillo 
