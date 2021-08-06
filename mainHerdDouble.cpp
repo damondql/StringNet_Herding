@@ -835,7 +835,7 @@ void checkFormation(){
     minEAO = minEAO.submat(0,0,minEAO.n_rows-1, out_ti+1);
     SigmaProdD_arr = SigmaProdD_arr.submat(0,0,SigmaProdD_arr.n_rows-1, out_ti);
     // times.print("times");
-    X.save("../../../../../Downloads/swarm_matlab/cppResult/X.csv", csv_ascii);
+    X.save("/home/dasclab/Vishnu/Stringnet_Herding_Experiments/Results/X.csv", csv_ascii);
     rP.save("../../../../../Downloads/swarm_matlab/cppResult/rP.csv", csv_ascii);
     rS.save("../../../../../Downloads/swarm_matlab/cppResult/rS.csv", csv_ascii);
     // std::ofstream myfile;

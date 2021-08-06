@@ -17,6 +17,11 @@
 #include <istream>
 #include <string>
 #include <vector>
+#include <list>
+#include <deque>
+#include <iterator>
+#include "boost/bind.hpp"
+#include "boost/function.hpp"
 
 #include<ros/ros.h>
 #include<ros/console.h>
@@ -44,20 +49,23 @@
 #include <tf/transform_listener.h>
 const float PI = 3.141567;
 
-mavros_msgs::State current_state;
-void state_cb(const mavros_msgs::State::ConstPtr& msg){
+// mavros_msgs::State current_state;
+std::vector<mavros_msgs::State> current_state_list(N);
+void state_cb(const mavros_msgs::State::ConstPtr& msg, mavros_msgs::State current_state){
   current_state=*msg;
 }
 
-geometry_msgs::PoseStamped current_pos;
-void current_pos_cb(const geometry_msgs::PoseStamped::ConstPtr& msg1){
+// geometry_msgs::PoseStamped current_pos;
+std::vector<geometry_msgs::PoseStamped> current_pos_list(N);
+void current_pos_cb(const geometry_msgs::PoseStamped::ConstPtr& msg1, geometry_msgs::PoseStamped current_pos){
   current_pos=*msg1;
 }
 
-geometry_msgs::PoseStamped offset;
+// geometry_msgs::PoseStamped offset;
+std::vector<geometry_msgs::PoseStamped> offset_list(N);
 bool offset_check_flag = false;
 
-void ENUoff_cb(const geometry_msgs::PoseStamped::ConstPtr& msg1){
+void ENUoff_cb(const geometry_msgs::PoseStamped::ConstPtr& msg1, geometry_msgs::PoseStamped offset){
   offset=*msg1;
   offset_check_flag = true;
 }
@@ -301,7 +309,11 @@ double z_h = 2.5;
 void control_loop(std::vector<ros::Subscriber> state_sb_list,
     std::vector<ros::Subscriber> curr_pos_list,
     std::vector<ros::Subscriber> curr_off_sb_list,
-    std::vector<ros::Publisher> setpoint_pub_list){
+    std::vector<ros::Publisher> setpoint_pub_list,
+    ros::Rate rate,
+    tf::TransformBroadcaster broadcaster,
+    std::deque<tf::Transform> body_frame_quad
+    ){
     assignment = regspace(1,1,ND);
     mat RefTraj(4*ND, Niter);
     mat SigmaProdD_arr;
@@ -317,7 +329,9 @@ void control_loop(std::vector<ros::Subscriber> state_sb_list,
     mat uDFc_trans;
     mat XDF_des;
     cube WDString_mat(ND,ND, Niter);
-    for (int ti = 0; ti < bound; ti++)
+    geometry_msgs::PoseStamped setpoint;
+    setpoint.header.frame_id = "world";
+    for (int ti = 0; ti < bound; ti++ && ros::ok())
     {
         mat Psi(NA,1, fill::zeros);
         mat Psi_dot;
@@ -740,20 +754,40 @@ void control_loop(std::vector<ros::Subscriber> state_sb_list,
         //  cout << "3333333333333333333333" << endl;
         rD = XD.submat(0,0,1,XD.n_cols-1);
         mat vD = XD.submat(2,0,3,XD.n_cols-1);
-        
-        for (int j = 0; j < NA+ND; i++)
+        cout<< "before publish" << endl;
+        //std::list<tf::Transform>::iterator it = body_frame_quad.begin();
+        for (int j = 0; j < NA+ND; j++)
         {
-            geometry_msgs::PoseStamped setpoint;
-            setpoint.pose.postion.x = X(4*i, ti+1);
-            setpoint.pose.postion.y = X(4*i+1, ti+1);
-            setpoint.pose.postion.z = z_h;
-            setpoint_pub_list[i].publish(setpoint);
+            
+            setpoint.pose.position.x = X(4*j, ti+1);
+            setpoint.pose.position.y = X(4*j+1, ti+1);
+            setpoint.pose.position.z = z_h;
+            setpoint_pub_list[j].publish(setpoint);
+            cout<<"message publised"<<endl;
+            
+            body_frame_quad[j].setOrigin(tf::Vector3(setpoint.pose.position.x, setpoint.pose.position.y, setpoint.pose.position.z));
+            cout<<"message broadcasted"<<endl;
+            broadcaster.sendTransform(tf::StampedTransform(body_frame_quad[j], ros::Time::now(), "world", "quad" + to_string(j+1)));
+            cout<<"message broadcasted"<<endl;
+
+            //std:advance(it,1);
         }
-        
-        for (int j = 0; j < NA; i++)
-        {
-            geometry_msgs::PoseStamped msgSubA_pose = current_pos_list[i]
-        }
+
+        ros::spinOnce();
+        rate.sleep();
+        // mat pos , vel;
+        // for (int j = 0; j < NA; j++)
+        // {
+        //     geometry_msgs::PoseStamped msg_pose = current_pos_list[j];
+        //     vec tempV;
+        //     tempV = {msg_pose.pose.position.x, msg_pose.pose.position.y, msg_pose.pose.position.z};
+        //     pos.insert_cols(pos.n_cols, tempV);
+
+        //     mavros_msgs::State msg_odom = current_state_list[j];
+
+            
+
+        // }
         
         
 
@@ -931,17 +965,24 @@ void control_loop(std::vector<ros::Subscriber> state_sb_list,
 
 int main(int argc, char **argv) {
     //std::string id="1";
-    ros::init(argc, argv, "circle_traj_node");
+    ros::init(argc, argv, "single_swarm_stringnet_herding_node");
     ros::NodeHandle nh;
     tf::TransformBroadcaster broadcaster;
     tf::Transform quad_body_frame(tf::Transform::getIdentity());
+    std::deque<tf::Transform> body_frame_quad;
+    for (int i = 0; i < N; i++)
+    {
+        body_frame_quad.push_back(tf::Transform::getIdentity());
+    }
+    
 
     int id;
-    nh.param<int>("id", id, 0); //id of the quadrotor
+    //nh.param<int>("id", id, 0); //id of the quadrotor
 
     //M-Air Dimensions (The local common frame follows ENU convection) with the origin close to the small door near the pavilion 
 
     float X_max=21, X_min=-1, Y_max=-2.5, Y_min=-36;
+    cout<<"Main loop started"<<endl;
 
     //Subscriber and Publisher Block
 
@@ -951,7 +992,7 @@ int main(int argc, char **argv) {
 
     // ros::Publisher setpoint_pub = nh.advertise<geometry_msgs::PoseStamped>("desired_setpoint", 10);
 
-    // ros::Rate rate(20.0);
+    ros::Rate rate(20.0);
 
     // geometry_msgs::PoseStamped setpoint;
 
@@ -964,37 +1005,48 @@ int main(int argc, char **argv) {
     {
         string state = "mavros/state";
         string quad = "quad";
-        string num = to_string(i);
+        string num = to_string(i+1);
         string quad_state = "/"+quad+num+"/"+state;
-        ros::Subscriber state_sb = nh.subscribe<mavros_msgs::State>(quad_state, 10, state_cb);
+        // cout<<"subscribers creating"<<endl;
+        // ros::Subscriber state_sb = nh.subscribe<mavros_msgs::State>(quad_state, 10, boost::bind(state_cb,boost::placeholders::_1,current_state_list[i]));
+        // cout<<"subscribers created"<<endl;
 
-        string gstation = "gstation_position";
-        string quad_gstation = "/"+quad+num+"/"+gstation;
-        ros::Subscriber curr_pos = nh.subscribe<geometry_msgs::PoseStamped>(quad_gstation,20, current_pos_cb);
+        // string gstation = "gstation_position";
+        // string quad_gstation = "/"+quad+num+"/"+gstation;
+        // ros::Subscriber curr_pos = nh.subscribe<geometry_msgs::PoseStamped>(quad_gstation,20, boost::bind(current_pos_cb,boost::placeholders::_1, current_pos_list[i]));
 
-        string offset = "local_ENU_offset";
-        string quad_offset = "/"+quad+num+"/"+offset;
-        ros::Subscriber curr_off_sb = nh.subscribe<geometry_msgs::PoseStamped>(quad_offset, 10, ENUoff_cb);
+        // string offset = "local_ENU_offset";
+        // string quad_offset = "/"+quad+num+"/"+offset;
+        // ros::Subscriber curr_off_sb = nh.subscribe<geometry_msgs::PoseStamped>(quad_offset, 10, boost::bind(ENUoff_cb,boost::placeholders::_1, offset_list[i]));
 
         string setpoint = "desired_setpoint";
         string quad_setpoint = "/"+quad+num+"/"+setpoint;
         ros::Publisher setpoint_pub = nh.advertise<geometry_msgs::PoseStamped>(quad_setpoint, 10);
 
-        state_sb_list.pushback(state_sb);
-        curr_pos_list.pushback(curr_pos);
-        curr_off_sb_list.pushback(curr_off_sb);
-        setpoint_pub_list.pushback(setpoint_pub);
+        // state_sb_list.push_back(state_sb);
+        // curr_pos_list.push_back(curr_pos);
+        // curr_off_sb_list.push_back(curr_off_sb);
+        setpoint_pub_list.push_back(setpoint_pub);
     }
-    
+    cout<<"subscribers created"<<endl;
 
 
     // get the parameters for the circular trajectory from the user otherwise set some default values
-    double Na;
-    nh.param<double>("ND",ND, 3); //default number of defender:3
-    nh.param<double>("NA",Na,1);  //default number of attacker:1
+    // double Na;
+    // nh.param<double>("ND",ND, 3); //default number of defender:3
+    // nh.param<double>("NA",Na,1);  //default number of attacker:1
 
-    double hover_time;
-    nh.param<double>("hover_time", hover_time, 25);
+    // double hover_time;
+    // nh.param<double>("hover_time", hover_time, 25);
+
+    // double t0 = ros::Time::now().toSec();
+    // double t = ros::Time::now().toSec();
+    // ROS_INFO("Sending Hover Position commend to Quadrotor")
+    // while ((t-t0) < hover_time)
+    // {
+        
+    // }
+    
     
     calAllparametersExperiment();
     AllocateMemory();
@@ -1002,7 +1054,13 @@ int main(int argc, char **argv) {
     initial_contorl();
     getMoitonPlan();
     calDistance();
-    control_loop();
+    control_loop( state_sb_list,
+                  curr_pos_list,
+                  curr_off_sb_list,
+                  setpoint_pub_list,
+                  rate,
+                  broadcaster,
+                  body_frame_quad);
 
     
     
