@@ -51,22 +51,22 @@ const float PI = 3.141567;
 
 // mavros_msgs::State current_state;
 std::vector<mavros_msgs::State> current_state_list(N);
-void state_cb(const mavros_msgs::State::ConstPtr& msg, mavros_msgs::State current_state){
-  current_state=*msg;
+void state_cb(const mavros_msgs::State::ConstPtr& msg, int i){
+  current_state_list[i]=*msg;
 }
 
 // geometry_msgs::PoseStamped current_pos;
 std::vector<geometry_msgs::PoseStamped> current_pos_list(N);
-void current_pos_cb(const geometry_msgs::PoseStamped::ConstPtr& msg1, geometry_msgs::PoseStamped current_pos){
-  current_pos=*msg1;
+void current_pos_cb(const geometry_msgs::PoseStamped::ConstPtr& msg1, int i){
+  current_pos_list[i]=*msg1;
 }
 
 // geometry_msgs::PoseStamped offset;
 std::vector<geometry_msgs::PoseStamped> offset_list(N);
 bool offset_check_flag = false;
 
-void ENUoff_cb(const geometry_msgs::PoseStamped::ConstPtr& msg1, geometry_msgs::PoseStamped offset){
-  offset=*msg1;
+void ENUoff_cb(const geometry_msgs::PoseStamped::ConstPtr& msg1, int i){
+  offset_list[i]=*msg1;
   offset_check_flag = true;
 }
 
@@ -306,7 +306,7 @@ int flagEnclose=0;
 int flagAttackerStayTogether=1;
 double z_h = 2.5;
 
-void control_loop(std::vector<ros::Subscriber> state_sb_list,
+void control_loop(std::deque<ros::Subscriber> state_sb_list,
     std::vector<ros::Subscriber> curr_pos_list,
     std::vector<ros::Subscriber> curr_off_sb_list,
     std::vector<ros::Publisher> setpoint_pub_list,
@@ -996,7 +996,7 @@ int main(int argc, char **argv) {
 
     // geometry_msgs::PoseStamped setpoint;
 
-    std::vector<ros::Subscriber> state_sb_list;
+    std::deque<ros::Subscriber> state_sb_list;
     std::vector<ros::Subscriber> curr_pos_list;
     std::vector<ros::Subscriber> curr_off_sb_list;
     std::vector<ros::Publisher> setpoint_pub_list;
@@ -1007,25 +1007,25 @@ int main(int argc, char **argv) {
         string quad = "quad";
         string num = to_string(i+1);
         string quad_state = "/"+quad+num+"/"+state;
-        // cout<<"subscribers creating"<<endl;
-        // ros::Subscriber state_sb = nh.subscribe<mavros_msgs::State>(quad_state, 10, boost::bind(state_cb,boost::placeholders::_1,current_state_list[i]));
-        // cout<<"subscribers created"<<endl;
+        cout<<"subscribers creating"<<endl;
+        ros::Subscriber state_sb = nh.subscribe<mavros_msgs::State>(quad_state, 10, boost::bind(state_cb,boost::placeholders::_1,i));
+        cout<<"subscribers created"<<endl;
 
-        // string gstation = "gstation_position";
-        // string quad_gstation = "/"+quad+num+"/"+gstation;
-        // ros::Subscriber curr_pos = nh.subscribe<geometry_msgs::PoseStamped>(quad_gstation,20, boost::bind(current_pos_cb,boost::placeholders::_1, current_pos_list[i]));
+        string gstation = "gstation_position";
+        string quad_gstation = "/"+quad+num+"/"+gstation;
+        ros::Subscriber curr_pos = nh.subscribe<geometry_msgs::PoseStamped>(quad_gstation,20, boost::bind(current_pos_cb,boost::placeholders::_1, i));
 
-        // string offset = "local_ENU_offset";
-        // string quad_offset = "/"+quad+num+"/"+offset;
-        // ros::Subscriber curr_off_sb = nh.subscribe<geometry_msgs::PoseStamped>(quad_offset, 10, boost::bind(ENUoff_cb,boost::placeholders::_1, offset_list[i]));
+        string offset = "local_ENU_offset";
+        string quad_offset = "/"+quad+num+"/"+offset;
+        ros::Subscriber curr_off_sb = nh.subscribe<geometry_msgs::PoseStamped>(quad_offset, 10, boost::bind(ENUoff_cb,boost::placeholders::_1, i));
 
         string setpoint = "desired_setpoint";
         string quad_setpoint = "/"+quad+num+"/"+setpoint;
         ros::Publisher setpoint_pub = nh.advertise<geometry_msgs::PoseStamped>(quad_setpoint, 10);
 
-        // state_sb_list.push_back(state_sb);
-        // curr_pos_list.push_back(curr_pos);
-        // curr_off_sb_list.push_back(curr_off_sb);
+        state_sb_list.push_back(state_sb);
+        curr_pos_list.push_back(curr_pos);
+        curr_off_sb_list.push_back(curr_off_sb);
         setpoint_pub_list.push_back(setpoint_pub);
     }
     cout<<"subscribers created"<<endl;
