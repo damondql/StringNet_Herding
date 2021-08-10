@@ -74,11 +74,11 @@ struct DesiredPos {
     motionPlan mP;
 };
 
-DesiredPos defInitDesiredPos(mat XA0, mat XD, int Na, int ND, double RD0, double v_maxA, double DeltaT_s) {
+DesiredPos defInitDesiredPos(mat XA0, mat XD, int NA, int ND, double RD0, double v_maxA, double DeltaT_s) {
     DesiredPos result;
     // cout << "enter function  " << endl;
-    colvec rAcm = arma::sum(XA0.submat(0,0,1,XA0.n_cols-1),1) / Na;
-    colvec vAcm = arma::sum(XA0.submat(2,0,3,XA0.n_cols-1),1) / Na;
+    colvec rAcm = arma::sum(XA0.submat(0,0,1,XA0.n_cols-1),1) / NA;
+    colvec vAcm = arma::sum(XA0.submat(2,0,3,XA0.n_cols-1),1) / NA;
     double thetaAcm0=atan2(rAcm(1)-rP(1),rAcm(0)-rP(0))+20*M_PI/180;
     if (thetaAcm0 < 0) {
         thetaAcm0 = thetaAcm0 + 2 * M_PI;

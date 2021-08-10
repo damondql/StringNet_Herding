@@ -1,13 +1,6 @@
 #pragma once
-
-#include "iostream"
 #include "AllParametersExperiment.hpp" 
-#include <math.h>
-#include <complex>
-#include <vector>
-#include <cmath>
-#include <algorithm>
-#include <armadillo>
+
 using namespace std;
 using namespace arma;
  
@@ -68,9 +61,11 @@ void VectorFields_A() {
     D_A_A=pow(R_u_AA,2)*(R_u_AA-3*R_bar_AA)/dR_AA_cube;
 }
 
-vec v_maxA(NA), u_maxA(NA);
+vec v_maxA, u_maxA;
 
-void initialAttackersVel(){
+void initialAttackersVel(int NA){
+    v_maxA.resize(NA);
+    u_maxA.resize(NA);
     for (size_t i = 0; i < NA; i++)
     {
        v_maxA(i) = vma;
@@ -87,9 +82,11 @@ int rDmin = 7;
 
 double RA0;
 double potential;
-vec Rii00(NA), Rik00(NA);
+vec Rii00, Rik00;
 
-void cal(){
+void cal(int NA){
+    Rii00.resize(NA);
+    Rik00.resize(NA);
     RA0 = R_m_AA + 0.1;
     potential = RA0 * sqrt(2*(1-cos(2*M_PI/NA))); //for formation potential
     for (size_t i = 0; i < NA; i++)
@@ -105,16 +102,22 @@ int sceneraio = 1;
 double RA01 = RA0;
 double thetaA0;
 vec rA0(2);
-mat rA(2,NA, fill::zeros);
-mat vA(2,NA, fill::zeros);
-mat XA0(4,NA);
-mat rA_follow(2,NA);
+mat rA;
+mat vA;
+mat XA0;
+mat rA_follow;
 double RA;
 double rho_S;
 double rho_Acon;
 
-void InitializeAttackers() {
-
+void InitializeAttackers(int NA, int flag_initial_position, 
+                         std::vector<geometry_msgs::PoseStamped>current_pos_list, 
+                         std::vector<double> initial_pos_from_launch) {
+    cout << "start initialized attackers" << endl;
+    rA.resize(2,NA);
+    vA.resize(2,NA);
+    XA0.resize(4,NA);
+    rA_follow.resize(2,NA);
     for (size_t i = 0; i < 2; i++)
     {
         for (size_t j = 0; j < NA; j++)
@@ -126,10 +129,31 @@ void InitializeAttackers() {
     }
     rA0(0) = 6;
     rA0(1) = -lW+4;
-    rA(0,0) = 6.1548;
-    rA(1,0) = -33.0553;
+    // rA(0,0) = 6.1548;
+    // rA(1,0) = -33.0553;
     vA(0,0) = 0;
     vA(1,0) = 0;
+    if(flag_initial_position == 0) 
+    {
+        rA(0,0) = 6.1548;
+        rA(1,0) = -33.0553;
+    } else if(flag_initial_position == 1) 
+    {
+        for (int i = 0; i < NA; i++)
+        {
+            rA(0,i) = current_pos_list[i].pose.position.x;
+            rA(1,i) = current_pos_list[i].pose.position.y;
+        }
+
+    } else if(flag_initial_position == 2) 
+    {
+        for (int i = 0; i < NA; i++)
+        {
+            rA(0,i) = initial_pos_from_launch[2*i];
+            rA(1,i) = initial_pos_from_launch[2*i+1];
+        }
+        
+    }
 
     for (size_t i = 0; i < NA; i++)
     {
@@ -165,22 +189,23 @@ void InitializeAttackers() {
     rho_Acon = 1.3*RA0;  //radius of the connectivity region
     
     rho_S= 13;   //radius of the safe area
-
+    cout << "finished initialize attackers" << endl;
 }
 // Defenders
 
 double rho_D = 0.4;
 double rho_sn_max = 65;
-double ND = 3;
+
 double N;
 double rho_sn;
-vec Rjk00(ND);
+vec Rjk00;
 arma::vec v_maxD,v_maxDC,u_maxD,u_maxD1,u_maxD2,u_maxDr1,u_maxDr2;
 double rho_safe,dthetai,alphaD_v;
 double rhoAD_safe,rhoD_safe;
 double umd1,umd2,umdf_s1,umdf_s2,umd,umdf_h1,vmd,vmdc,vmdf_s,umd_e1,umd_e2;
 obstacle obs;
-void defenders() {
+void defenders(int NA, int ND) {
+    Rjk00.resize(ND);
     v_maxD.resize(ND);
     v_maxD.resize(ND);
     v_maxDC.resize(ND);
@@ -399,10 +424,12 @@ void calVfieldA() {
 }
 
 
-vec Rij0(ND),Rjj0(ND);
+vec Rij0,Rjj0;
 double rho_Fmax;
 double RAD_max;
-void fillR() {
+void fillR(int ND) {
+    Rij0.resize(ND);
+    Rjj0.resize(ND);
     for (size_t i = 0; i < ND; i++)
     {
         Rij0(i) = (R_u_AD);
@@ -442,7 +469,7 @@ void calVfield_formation() {
 mat R_m_AO, R_bar_AO, R_u_AO, R_v_AO;
 mat A_A_O, B_A_O, C_A_O, D_A_O;
 mat A_bar_A_O, B_bar_A_O, C_bar_A_O, D_bar_A_O;
-void calVfield_attackers() {
+void calVfield_attackers(int NA) {
     double R_bar_O1=7*rho_A;   //repulsive
     double R_bar_O2=17*rho_A;  //blending of repulsive and attractive
     double R_bar_O3=12;
@@ -499,7 +526,7 @@ mat R_m_DO, R_bar_DO, R_u_DO;
 double R_m_DD, R_m_DDO, R_m2_DD, R_u_DD, R_bar_DD;
 double A_D_D, B_D_D, C_D_D, D_D_D;
 
-void calVfield_defenders() {
+void calVfield_defenders(int ND) {
     double E_bar_O1=10*rho_D;  //repulsive
     double E_bar_O2=20*rho_D;  //blending of repulsive and attractive
     double E_bar_O3=5;
@@ -558,10 +585,34 @@ mat rD;
 arma::mat XD0;
 mat rSD_goal;
 mat XD;
-void rD_value() {
-
-    rD = {{11.9907, 9.3724,	16.1838,},
-          {-10.7580, -7.1278, -5.8411}};
+void rD_value(int NA, int ND, int flag_initial_position, 
+              std::vector<geometry_msgs::PoseStamped>current_pos_list, 
+              std::vector<double> initial_pos_from_launch) {
+    cout << "start initialize defenders" << endl;
+    rD.resize(2,ND);
+    if (flag_initial_position == 0) 
+    {
+        rD = {{11.9907, 9.3724,	16.1838,},
+              {-10.7580, -7.1278, -5.8411}};
+    } else if (flag_initial_position == 1) 
+    {
+        for (int i = NA; i < NA+ND; i++)
+        {
+            rD(0,i) = current_pos_list[i].pose.position.x;
+            rD(1,i) = current_pos_list[i].pose.position.y;
+        }
+        
+    } else if (flag_initial_position == 2) 
+    {
+        rD.print("rD: ");
+        for (int i = 0; i < ND; i++)
+        {
+            rD(0,i) = initial_pos_from_launch[(i+NA)*2];
+            rD(1,i) = initial_pos_from_launch[(i+NA)*2+1];
+        }
+        rD.print("rD: ");
+        
+    }
    
     XD0.resize(4, rD.n_cols);
     XD0.zeros();
@@ -574,25 +625,28 @@ void rD_value() {
         XD(0,i)=rD(0,i);
         XD(1,i)=rD(1,i);
     }
+    cout << "finish initialized defenders" << endl;
     
 }
 
-void calAllparametersExperiment() {
+void calAllparametersExperiment(int NA, int ND, int flag_initial_position, 
+                                std::vector<geometry_msgs::PoseStamped>current_pos_list, 
+                                std::vector<double> initial_pos_from_launch) {
  
     // Function declared in header
     // file to find the sum
     calControlLimits();
     VectorFields_A();
-    initialAttackersVel();
-    cal();
-    InitializeAttackers();
-    defenders();
+    initialAttackersVel(NA);
+    cal(NA);
+    InitializeAttackers(NA,flag_initial_position, current_pos_list, initial_pos_from_launch);
+    defenders(NA,ND);
     FormationOri();
     calVfieldA();
-    fillR();
-    calVfield_attackers();
-    calVfield_defenders();
-    rD_value();
+    fillR(ND);
+    calVfield_attackers(NA);
+    calVfield_defenders(ND);
+    rD_value(NA, ND, flag_initial_position, current_pos_list, initial_pos_from_launch);
     
     
 }

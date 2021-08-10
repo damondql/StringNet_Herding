@@ -306,14 +306,15 @@ int flagEnclose=0;
 int flagAttackerStayTogether=1;
 double z_h = 2.5;
 
-void control_loop(std::deque<ros::Subscriber> state_sb_list,
+void control_loop(std::vector<ros::Subscriber> state_sb_list,
     std::vector<ros::Subscriber> curr_pos_list,
     std::vector<ros::Subscriber> curr_off_sb_list,
     std::vector<ros::Publisher> setpoint_pub_list,
     ros::Rate rate,
     tf::TransformBroadcaster broadcaster,
     std::deque<tf::Transform> body_frame_quad
-    ){
+    )
+{
     assignment = regspace(1,1,ND);
     mat RefTraj(4*ND, Niter);
     mat SigmaProdD_arr;
@@ -754,7 +755,7 @@ void control_loop(std::deque<ros::Subscriber> state_sb_list,
         //  cout << "3333333333333333333333" << endl;
         rD = XD.submat(0,0,1,XD.n_cols-1);
         mat vD = XD.submat(2,0,3,XD.n_cols-1);
-        cout<< "before publish" << endl;
+        //cout<< "before publish" << endl;
         //std::list<tf::Transform>::iterator it = body_frame_quad.begin();
         for (int j = 0; j < NA+ND; j++)
         {
@@ -763,17 +764,20 @@ void control_loop(std::deque<ros::Subscriber> state_sb_list,
             setpoint.pose.position.y = X(4*j+1, ti+1);
             setpoint.pose.position.z = z_h;
             setpoint_pub_list[j].publish(setpoint);
-            cout<<"message publised"<<endl;
+            //cout<<"message published"<<endl;
             
             body_frame_quad[j].setOrigin(tf::Vector3(setpoint.pose.position.x, setpoint.pose.position.y, setpoint.pose.position.z));
-            cout<<"message broadcasted"<<endl;
+            //cout<<"message broadcasted"<<endl;
             broadcaster.sendTransform(tf::StampedTransform(body_frame_quad[j], ros::Time::now(), "world", "quad" + to_string(j+1)));
-            cout<<"message broadcasted"<<endl;
+            //cout<<"message broadcasted"<<endl;
 
             //std:advance(it,1);
         }
 
+        cout<<"messages broadcasted at ti = "<<ti<<endl;
+
         ros::spinOnce();
+        cout<<"Ros spin at ti = "<<ti<<endl; 
         rate.sleep();
         // mat pos , vel;
         // for (int j = 0; j < NA; j++)
@@ -787,10 +791,8 @@ void control_loop(std::deque<ros::Subscriber> state_sb_list,
 
             
 
-        // }
-        
-        
-
+        // }       
+        cout<<"saturation 0 done at ti = "<<ti<<endl; 
 
         // Saturate the velocity if beyond the maximum
         for (int i = 0; i < NA; i++)
@@ -822,14 +824,9 @@ void control_loop(std::deque<ros::Subscriber> state_sb_list,
         //     cout << " " << endl;
         //     rAcm.print("rAcm: ");
         //     rDcm.print("rDcm: "); 
-        // }
-        
-
-        
-
-
-
-        
+        // }    
+      
+        cout<<"saturation done at ti = "<<ti<<endl; 
 
         for (int j = 0; j < ND; j++)
         {
@@ -920,7 +917,6 @@ void control_loop(std::deque<ros::Subscriber> state_sb_list,
     minEAO(out_ti) = minEAO(out_ti-1);
     minRAAProjS(out_ti)=minRAAProjS(out_ti-1);
 
-
     // rA.print("rA: ");
     // rD.print("rD: ");
     // delete the unnecessry elements ti<Niter
@@ -939,6 +935,8 @@ void control_loop(std::deque<ros::Subscriber> state_sb_list,
     minEDO = minEDO.submat(0,0,minEDO.n_rows-1, out_ti+1);
     minEAO = minEAO.submat(0,0,minEAO.n_rows-1, out_ti+1);
     SigmaProdD_arr = SigmaProdD_arr.submat(0,0,SigmaProdD_arr.n_rows-1, out_ti);
+
+    //cout<<"min distance calculations done at ti = "<<ti<<endl; 
     // times.print("times");
     // X.save("../../../../../Downloads/swarm_matlab/cppResult/X.csv", csv_ascii);
     // rP.save("../../../../../Downloads/swarm_matlab/cppResult/rP.csv", csv_ascii);
@@ -982,7 +980,7 @@ int main(int argc, char **argv) {
     //M-Air Dimensions (The local common frame follows ENU convection) with the origin close to the small door near the pavilion 
 
     float X_max=21, X_min=-1, Y_max=-2.5, Y_min=-36;
-    cout<<"Main loop started"<<endl;
+    //cout<<"Main loop started"<<endl;
 
     //Subscriber and Publisher Block
 
@@ -996,20 +994,33 @@ int main(int argc, char **argv) {
 
     // geometry_msgs::PoseStamped setpoint;
 
-    std::deque<ros::Subscriber> state_sb_list;
+    std::vector<ros::Subscriber> state_sb_list;
     std::vector<ros::Subscriber> curr_pos_list;
     std::vector<ros::Subscriber> curr_off_sb_list;
     std::vector<ros::Publisher> setpoint_pub_list;
+
+    //int num_of_drones;
+    nh.param<int>("num_of_attackers",NA,1);
+    nh.param<int>("num_of_defenders",ND,1);
+    std::vector<int> quad_ids(NA+ND);
+    std::vector<int> quad_ids0(NA+ND);
+
+    for (int i = 0; i < ND+NA; i++)
+    {
+        drone_ids0.push_back(i);
+    }
+
+    nh.param("drone_ids",quad_ids,quad_ids0);
 
     for (int i = 0; i < ND+NA; i++)
     {
         string state = "mavros/state";
         string quad = "quad";
-        string num = to_string(i+1);
+        string num = to_string(quad_ids[i]);
         string quad_state = "/"+quad+num+"/"+state;
-        cout<<"subscribers creating"<<endl;
+        //cout<<"subscribers creating"<<endl;
         ros::Subscriber state_sb = nh.subscribe<mavros_msgs::State>(quad_state, 10, boost::bind(state_cb,boost::placeholders::_1,i));
-        cout<<"subscribers created"<<endl;
+        //cout<<"subscribers created"<<endl;
 
         string gstation = "gstation_position";
         string quad_gstation = "/"+quad+num+"/"+gstation;
@@ -1028,13 +1039,16 @@ int main(int argc, char **argv) {
         curr_off_sb_list.push_back(curr_off_sb);
         setpoint_pub_list.push_back(setpoint_pub);
     }
-    cout<<"subscribers created"<<endl;
+    cout<<"Subscribers created"<<endl;
 
 
     // get the parameters for the circular trajectory from the user otherwise set some default values
     // double Na;
     // nh.param<double>("ND",ND, 3); //default number of defender:3
     // nh.param<double>("NA",Na,1);  //default number of attacker:1
+    // int NA,ND;
+    // nh.param<double>("ND",ND, 3); //default number of defender:3
+    // nh.param<double>("NA",ND, 3); //default number of defender:3
 
     // double hover_time;
     // nh.param<double>("hover_time", hover_time, 25);
@@ -1045,8 +1059,7 @@ int main(int argc, char **argv) {
     // while ((t-t0) < hover_time)
     // {
         
-    // }
-    
+    // }    
     
     calAllparametersExperiment();
     AllocateMemory();
@@ -1054,6 +1067,50 @@ int main(int argc, char **argv) {
     initial_contorl();
     getMoitonPlan();
     calDistance();
+
+    // Check if all the quads are already hovering
+    
+    std::vector<geometry_msgs::PoseStamped> current_pos_temp(N);
+    string hover_flag_string;
+    int hover_flag;
+    int flag_start_herding = 0;
+    int flag_stop_herding = 0;
+    int hover_flag_count = 0;
+
+    while (!flag_start_herding)
+    {
+        hover_flag_count = 0;
+
+        for (int i = 0; i < NA+ND; i++)
+        {
+            hover_flag_string ="/quad" + to_string(quad_ids[i]) +"/flag_hover_completed";
+            hover_flag = 0;  //reset to 0 to check for a new quad
+            nh.getParam(hover_flag_string, hover_flag);
+            //ROS_INFO_STREAM(hover_flag_string);
+            //ROS_INFO_STREAM("hover_flag = "<<hover_flag);
+
+            if (hover_flag==1)
+            {
+                hover_flag_count +=1;
+            }
+        //ROS_INFO_STREAM("hover_flag_count = "<<hover_flag_count);
+        }
+
+        if (hover_flag_count==N)
+        {
+            flag_start_herding = 1;
+        }
+
+        if (flag_stop_herding)
+        {
+            ros::shutdown();
+        }
+    }
+
+    ROS_INFO_STREAM("Total "<<hover_flag_count<<" quadrotors are successfully hovering");
+
+    ROS_INFO("Herding started");
+    
     control_loop( state_sb_list,
                   curr_pos_list,
                   curr_off_sb_list,

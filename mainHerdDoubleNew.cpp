@@ -15,10 +15,64 @@
 #include <iostream>
 #include <fstream>
 #include <istream>
+#include <string>
+#include <vector>
+#include <list>
+#include <deque>
+#include <iterator>
+#include "boost/bind.hpp"
+#include "boost/function.hpp"
 
+
+#include<ros/ros.h>
+#include<ros/console.h>
+//#include<mavros_msgs/SwarmCommands.h>
+#include <eigen_conversions/eigen_msg.h>
+#include<geometry_msgs/PoseStamped.h>
+#include<mavros_msgs/CommandBool.h>
+#include<mavros_msgs/SetMode.h>
+#include<mavros_msgs/State.h>
+#include<mavros_msgs/GlobalPositionTarget.h>
+#include<mavros_msgs/HomePosition.h>
+#include <mavros/mavros_plugin.h>
+#include <sensor_msgs/NavSatFix.h>
+#include <sensor_msgs/NavSatStatus.h>
+#include "std_msgs/String.h"
+#include <geographic_msgs/GeoPointStamped.h>
+#include <geographic_msgs/GeoPoseStamped.h>
+#include <geometry_msgs/TransformStamped.h>
+#include <GeographicLib/Geocentric.hpp>
+#include<string>
+#include <math.h>
+#include <cmath>
+#include <tf/transform_broadcaster.h>
+#include <tf/transform_datatypes.h>
+#include <tf/transform_listener.h>
 
 using namespace std;
 using namespace arma;
+
+// mavros_msgs::State current_state;
+std::vector<mavros_msgs::State> current_state_list;
+void state_cb(const mavros_msgs::State::ConstPtr& msg, int i){
+  current_state_list[i]=*msg;
+}
+
+// geometry_msgs::PoseStamped current_pos;
+std::vector<geometry_msgs::PoseStamped> current_pos_list;
+void current_pos_cb(const geometry_msgs::PoseStamped::ConstPtr& msg1, int i){
+  current_pos_list[i]=*msg1;
+}
+
+// geometry_msgs::PoseStamped offset;
+std::vector<geometry_msgs::PoseStamped> offset_list;
+bool offset_check_flag = false;
+
+void ENUoff_cb(const geometry_msgs::PoseStamped::ConstPtr& msg1, int i){
+  offset_list[i]=*msg1;
+  offset_check_flag = true;
+}
+
 
 int flagExp = 1;
 int flagGazeboExp = 0;
@@ -72,9 +126,9 @@ void measurements(int NA, int ND) {
                   {0,pow(0.9/3,2),0,0},
                   {0,0,pow(0.12,2),0},
                   {0,0,0,pow(0.12,2)}};
-    // YA = XA + arma::mvnrnd(arma::zeros(4,1), Cov_YA, NA);
+    YA = XA + arma::mvnrnd(arma::zeros(4,1), Cov_YA, NA);
     // YA.load("../../../../../Downloads/swarm_matlab/controlD/YA.txt");
-    YA = XA;
+    // YA = XA;
     // XD0.load("../../../../../Downloads/swarm_matlab/controlD/XD0.txt");
     SD = arma::zeros(ND,1);
     SD_arr = arma::zeros(ND,Niter+1);
@@ -152,8 +206,8 @@ void initial_contorl(int NA, int ND) {
     R_DD_string = 1.5 * defender_graph_close.Rij_tilde(0,1);
     RDF_closed = 1.1 * rho_sn;
     WDString = arma::zeros<mat>(ND, ND);
-    cout  << "RDF_closed: " << RDF_closed << endl;
-    cout << "RDF_open" <<RDF_open << endl;
+    // cout  << "RDF_closed: " << RDF_closed << endl;
+    // cout << "RDF_open" <<RDF_open << endl;
 }
 
 DesiredPos motionP_result;
@@ -247,7 +301,14 @@ int flagSeek=0;
 int flagEnclose=0;
 int flagAttackerStayTogether=1;
 
-void control_loop(int NA, int ND){
+void control_loop(int NA, int ND, double z_h,
+                  std::vector<ros::Subscriber> state_sb_list,
+                  std::vector<ros::Subscriber> curr_pos_list,
+                  std::vector<ros::Subscriber> curr_off_sb_list,
+                  std::vector<ros::Publisher> setpoint_pub_list,
+                  ros::Rate rate,
+                  tf::TransformBroadcaster broadcaster,
+                  std::deque<tf::Transform> body_frame_quad){
     assignment = regspace(1,1,ND);
     defReachCount.resize(ND,1);
     flagAttInObs.resize(NA,NO);
@@ -273,6 +334,8 @@ void control_loop(int NA, int ND){
     mat uDFc_trans;
     mat XDF_des;
     cube WDString_mat(ND,ND, Niter);
+    geometry_msgs::PoseStamped setpoint;
+    setpoint.header.frame_id = "world";
     for (int ti = 0; ti < bound; ti++)
     {
         mat Psi(NA,1, fill::zeros);
@@ -328,36 +391,36 @@ void control_loop(int NA, int ND){
         XA_goal.col(0) = XA_lead_goal;
         XA_goal_dot.col(0) = XA_lead_goal;
 
-        if(ti == bound -1)
-        {   
-            cout << "controlAttacker input: " << endl;
-            cout << "ti: " << ti << endl;
-            XA.print("XA: ");
-            XA_goal.print("XA_goal: ");
-            XA_goal_dot.print("XA_goal_dot: ");
-            cout << "flagEnClose: " << flagEnclose << endl;
-            cout << "flagHerd: " << flagHerd << endl;
-            XD.print("XD: ");
-            attacker_graph.W.print("W: ");
-            WDString.print("WDString: ");
-            cout << endl;
-        }
+        // if(ti == bound -1)
+        // {   
+        //     cout << "controlAttacker input: " << endl;
+        //     cout << "ti: " << ti << endl;
+        //     XA.print("XA: ");
+        //     XA_goal.print("XA_goal: ");
+        //     XA_goal_dot.print("XA_goal_dot: ");
+        //     cout << "flagEnClose: " << flagEnclose << endl;
+        //     cout << "flagHerd: " << flagHerd << endl;
+        //     XD.print("XD: ");
+        //     attacker_graph.W.print("W: ");
+        //     WDString.print("WDString: ");
+        //     cout << endl;
+        // }
 
         control_attacker_t control_A_result = controlAttacker4(XA,XA_goal,XA_goal_dot,flagEnclose, flagHerd, XD,attacker_graph.W,WDString,NA,ND, ti, bound);
         uA = control_A_result.uA;
-        if(ti == bound -1)
-        {
-            cout << "ti: " << ti << endl;
-            control_A_result.uA.print("uA:");
-            control_A_result.uA0.print("uA0: ");
-            control_A_result.F_A.print("F_A: ");
-            control_A_result.F_A_dot.print("F_A_dot: ");
-            cout << "R_AO_min: " << control_A_result.R_AO_min << endl;
-            cout << "R_AAProjS_min: " << control_A_result.R_AAProjS_min << endl;
-            control_A_result.vA_des.print("vA_des");
-            control_A_result.vA_des_dot.print("vA_des_dot: ");
-            cout << endl;
-        }
+        // if(ti == bound -1)
+        // {
+        //     cout << "ti: " << ti << endl;
+        //     control_A_result.uA.print("uA:");
+        //     control_A_result.uA0.print("uA0: ");
+        //     control_A_result.F_A.print("F_A: ");
+        //     control_A_result.F_A_dot.print("F_A_dot: ");
+        //     cout << "R_AO_min: " << control_A_result.R_AO_min << endl;
+        //     cout << "R_AAProjS_min: " << control_A_result.R_AAProjS_min << endl;
+        //     control_A_result.vA_des.print("vA_des");
+        //     control_A_result.vA_des_dot.print("vA_des_dot: ");
+        //     cout << endl;
+        // }
         
         sigmaProd = control_A_result.SigmaProdD;
         // cout << "controlAttacker4:" << endl;
@@ -450,12 +513,12 @@ void control_loop(int NA, int ND){
             uD = controlFiniteTimeTrajTracking(XD, indDef, XD_des, XD_des_dot , uDFc_trans, YA, ND,1);
             double ti_2 = ti;
 
-            if ( ti == bound-1)
-            {
+            // if ( ti == bound-1)
+            // {
                 
-                cout << "arma::norm(rAcm - rDcm) = "<< arma::norm(rAcm - rDcm) <<endl;
-                cout << "flagAttInSight:" << flagAttInSight << endl; 
-            }
+            //     cout << "arma::norm(rAcm - rDcm) = "<< arma::norm(rAcm - rDcm) <<endl;
+            //     cout << "flagAttInSight:" << flagAttInSight << endl; 
+            // }
             
             if (arma::norm(rAcm - rDcm) < 2*rho_sn  && flagAttInSight) {
                 flagEnclose = 1;
@@ -465,7 +528,7 @@ void control_loop(int NA, int ND){
 
 
         } else if (flagGather != 1 && flagSeek != 1 && flagEnclose == 1 && flagHerd != 1) {
-            cout << "enter enclose formation at ti = " << ti << endl;
+            // cout << "enter enclose formation at ti = " << ti << endl;
             if (flagDForm != 1)
             {
                 flagDForm = 1;
@@ -514,10 +577,10 @@ void control_loop(int NA, int ND){
                     break;
                 }
             }
-            if (ti == bound-1)
-            {
-                cout << "flagAttackInHull" << flagAttackInHull << endl;
-            }
+            // if (ti == bound-1)
+            // {
+            //     cout << "flagAttackInHull" << flagAttackInHull << endl;
+            // }
             
             uvec j1_v = find(motionP_result.mP.assign==1);
             int j1 = j1_v(0);
@@ -568,17 +631,17 @@ void control_loop(int NA, int ND){
                 
             }
             
-            if (ti == bound -1)
-            {
-                cout << "controlDefenderFormation4 inputs: " << endl;
-                XD.print("XD: ");
-                indDef.print("indDef: ");
-                motionP_result.mP.assign.print("assign: ");
-                XD_des.print("XD_des: ");
-                XD_des_dot.print("XD_des_dot: ");
-                uDFc_trans.print("uDFc_trans: ");
-                YA.print("YA: ");
-            }
+            // if (ti == bound -1)
+            // {
+            //     cout << "controlDefenderFormation4 inputs: " << endl;
+            //     XD.print("XD: ");
+            //     indDef.print("indDef: ");
+            //     motionP_result.mP.assign.print("assign: ");
+            //     XD_des.print("XD_des: ");
+            //     XD_des_dot.print("XD_des_dot: ");
+            //     uDFc_trans.print("uDFc_trans: ");
+            //     YA.print("YA: ");
+            // }
             
             uD = controlDefenderFormation4(XD, indDef, motionP_result.mP.assign, XD_des, XD_des_dot, uDFc_trans, YA, NA, ND, 1);
             
@@ -597,7 +660,7 @@ void control_loop(int NA, int ND){
 
         } else if (flagDefReachClosed != 1) 
         {
-            cout << "enter loop flagDefReachClosed at ti = " << ti << endl;
+            // cout << "enter loop flagDefReachClosed at ti = " << ti << endl;
             uvec j1_v = find(motionP_result.mP.assign==1);
             int j1 = j1_v(0);
             uvec jND_v = find(motionP_result.mP.assign == ND);
@@ -686,8 +749,8 @@ void control_loop(int NA, int ND){
         // X.col(ti+1).print("X col(ti+1) after modifed");
         // cout << "11111111111111" << endl;
         XA = reshape(X.submat(0,ti+1,4*NA-1,ti+1),4,NA);
-        // YA = XA + arma::mvnrnd(arma::zeros(4,1), Cov_YA, NA);
-        YA = XA;
+        YA = XA + arma::mvnrnd(arma::zeros(4,1), Cov_YA, NA);
+        // YA = XA;
         rA = XA.submat(0,0,1,XA.n_cols-1);
         vA = XA.submat(2,0,3,XA.n_cols-1);
         //  cout << "222222222222222222222" << endl;
@@ -697,7 +760,29 @@ void control_loop(int NA, int ND){
         rD = XD.submat(0,0,1,XD.n_cols-1);
         mat vD = XD.submat(2,0,3,XD.n_cols-1);
         
-        
+        for (int j = 0; j < NA+ND; j++)
+        {
+            
+            setpoint.pose.position.x = X(4*j, ti+1);
+            setpoint.pose.position.y = X(4*j+1, ti+1);
+            setpoint.pose.position.z = z_h;
+            setpoint_pub_list[j].publish(setpoint);
+            //cout<<"message published"<<endl;
+            
+            body_frame_quad[j].setOrigin(tf::Vector3(setpoint.pose.position.x, setpoint.pose.position.y, setpoint.pose.position.z));
+            //cout<<"message broadcasted"<<endl;
+            broadcaster.sendTransform(tf::StampedTransform(body_frame_quad[j], ros::Time::now(), "world", "quad" + to_string(j+1)));
+            //cout<<"message broadcasted"<<endl;
+
+            //std:advance(it,1);
+        }
+        cout<<"messages broadcasted at ti = "<<ti<<endl;
+        ros::spinOnce();
+        cout<<"Ros spin at ti = "<<ti<<endl; 
+        // rate.sleep();
+
+
+
         // Saturate the velocity if beyond the maximum
         for (int i = 0; i < NA; i++)
         {
@@ -720,15 +805,15 @@ void control_loop(int NA, int ND){
 
         rDcm = arma::sum(XD.submat(0,0,1,ND-1),1) /ND;
         vDcm = arma::sum(XD.submat(2,0,3,ND-1),1) / ND;
-        if (ti == bound-1)
-        {
-            cout << "ti: " << ti << endl;
-            XD.print("XD: ");
-            XA.print("XA: ");
-            cout << " " << endl;
-            rAcm.print("rAcm: ");
-            rDcm.print("rDcm: "); 
-        }
+        // if (ti == bound-1)
+        // {
+        //     cout << "ti: " << ti << endl;
+        //     XD.print("XD: ");
+        //     XA.print("XA: ");
+        //     cout << " " << endl;
+        //     rAcm.print("rAcm: ");
+        //     rDcm.print("rDcm: "); 
+        // }
         
         
 
@@ -813,7 +898,7 @@ void control_loop(int NA, int ND){
     // U.col(out_ti).print("U col out_ti: ");
     // U.col(out_ti-1).print("U col ti-1: ");
 
-    cout << "out ti" << out_ti << endl;
+    cout << "out ti : " << out_ti << endl;
     U.col(out_ti) = U.col(out_ti-1);
     RefTraj.col(out_ti) = RefTraj.col(out_ti-1);
     SigmaProdD_arr.col(out_ti) = sigmaProd;
@@ -864,162 +949,107 @@ void control_loop(int NA, int ND){
 
 
 
-int main() {
-    int NA = 1;
-    int ND = 3;
-    calAllparametersExperiment(NA,ND);
+int main(int argc, char **argv) {
+    ros::init(argc, argv, "single_swarm_stringnet_herding_node");
+    ros::NodeHandle nh;
+    tf::TransformBroadcaster broadcaster;
+    tf::Transform quad_body_frame(tf::Transform::getIdentity());
+    std::deque<tf::Transform> body_frame_quad;
+    for (int i = 0; i < N; i++)
+    {
+        body_frame_quad.push_back(tf::Transform::getIdentity());
+    }
+    
+    //M-Air Dimensions (The local common frame follows ENU convection) with the origin close to the small door near the pavilion 
+    float X_max=21, X_min=-1, Y_max=-2.5, Y_min=-36;
+    ros::Rate rate(20.0);
+
+
+    std::vector<ros::Subscriber> state_sb_list;
+    std::vector<ros::Subscriber> curr_pos_list;
+    std::vector<ros::Subscriber> curr_off_sb_list;
+    std::vector<ros::Publisher> setpoint_pub_list;
+
+    int NA;
+    int ND;
+    double z_h;
+    int flag_initial_position; // the flag to set initial position of the code:
+                               // 0-the value in cpp code, 1-current positon from gstation topic, 2-manually setting from launch file
+                               // setting format: [x1, y1, x2, y2,...xN, yN]
+
+    nh.param<int>("num_of_attackers",NA,1);
+    nh.param<int>("num_of_defenders",ND,3);
+    nh.param<double>("z_h", z_h, 2.5);
+    nh.param<int>("setting_initial_position", flag_initial_position,0);
+    std::vector<int> quad_ids(NA+ND);
+    std::vector<int> quad_ids0(NA+ND);
+    std::vector<double> initial_pos_from_launch(NA+ND);
+    std::vector<double> initial_pos_from_launch_default(NA+ND); //which is the same as the code position ==> flag_initial_positon == 0
+
+    initial_pos_from_launch_default = {6.1548,-33.0553,
+                                11.9907, 9.3724, 
+                                16.1838, -10.7580,
+                                -7.1278, -5.8411};
+    nh.param("initial_pos", initial_pos_from_launch, initial_pos_from_launch_default);
+    std::cout<<"positions read" << std::endl;
+    for (int i = 0; i < ND+NA; i++)
+    {
+        quad_ids0.push_back(i);
+    }
+    std::cout<<"positions stored" << std::endl;
+
+
+    nh.param("quad_ids",quad_ids,quad_ids0);
+    for (int i = 0; i < ND+NA; i++)
+    {
+        string state = "mavros/state";
+        string quad = "quad";
+        string num = to_string(quad_ids[i]);
+        string quad_state = "/"+quad+num+"/"+state;
+        //cout<<"subscribers creating"<<endl;
+        ros::Subscriber state_sb = nh.subscribe<mavros_msgs::State>(quad_state, 10, boost::bind(state_cb,boost::placeholders::_1,i));
+        //cout<<"subscribers created"<<endl;
+
+        string gstation = "gstation_position";
+        string quad_gstation = "/"+quad+num+"/"+gstation;
+        ros::Subscriber curr_pos = nh.subscribe<geometry_msgs::PoseStamped>(quad_gstation,20, boost::bind(current_pos_cb,boost::placeholders::_1, i));
+
+        string offset = "local_ENU_offset";
+        string quad_offset = "/"+quad+num+"/"+offset;
+        ros::Subscriber curr_off_sb = nh.subscribe<geometry_msgs::PoseStamped>(quad_offset, 10, boost::bind(ENUoff_cb,boost::placeholders::_1, i));
+
+        string setpoint = "desired_setpoint";
+        string quad_setpoint = "/"+quad+num+"/"+setpoint;
+        ros::Publisher setpoint_pub = nh.advertise<geometry_msgs::PoseStamped>(quad_setpoint, 10);
+
+        state_sb_list.push_back(state_sb);
+        curr_pos_list.push_back(curr_pos);
+        curr_off_sb_list.push_back(curr_off_sb);
+        setpoint_pub_list.push_back(setpoint_pub);
+    }
+
+    cout<<"Subscribers  & publishers created"<<endl;
+    for (int i = 0; i < quad_ids.size(); i++)
+    {
+        cout << "quad: " << quad_ids[i] << endl;
+    }
+    
+
+    
+    calAllparametersExperiment(NA,ND, flag_initial_position, current_pos_list, initial_pos_from_launch);
     AllocateMemory(NA,ND);
     measurements(NA,ND);
     initial_contorl(NA, ND);
     getMotionPlan(NA,ND);
     calDistance(ND);
-    control_loop(NA,ND);
+    control_loop(NA,ND,z_h,
+                 state_sb_list,
+                 curr_pos_list,
+                 curr_off_sb_list,
+                 setpoint_pub_list,
+                 rate,
+                 broadcaster,
+                 body_frame_quad);
 
-
-//     AllocateMemory();
-//     measurements(2);
-//     initial_contorl();
-//     // arma::vec rAcm = {5.9807,-33.2064};
-//     // arma::vec rP = {14,-1};
-//     // path_elem p = findShortestPath(rAcm, rP);
-//     // p.rV.print("rV: ");
-//     // p.S.print("S: ");
-//     // double q = 16.0949;
-//     // CoorOnPath A = findCoordOnPath(q, p);
-//     // A.rp.print("rDFc0: ");
-//     // A.thetap.print("thetaAcom0: ");
-//     // v_maxD.print("v_maxD: ");
-//     // v_maxDC.print("v_maxDC: ");
-//     // u_maxD.print("u_maxD: ");
-//     // cout << "rho_P:" << rho_P << endl;
-//     // cout << "rho_safe:" << rho_safe << endl;
-//     // cout << "rho_sn:" << rho_sn << endl;
-//     // cout << "rho_Acon:" << rho_Acon << endl;
-//     // YA.print("YA:");
-    
-// //     XD0.print("XD0: ");
-//     // cout << "RDF_open:" << RDF_open << endl;
-//     // YA.load("../../../../../Downloads/swarm_matlab/controlD/YA.txt");
-//     // XD0.load("../../../../../Downloads/swarm_matlab/controlD/XD0.txt");
-//     getMoitonPlan();
-//     calDistance();
-//     checkFormation();
-    // mat XD_des = motionP_result.dDf.XD_des0;
-    // mat XD_des_dot = motionP_result.dDf.XD_des_dot0;
-    // std::ifstream fin("../../../../../Downloads/swarm_matlab/controlD/t.txt");
-    // double time;
-    // fin >> time;
-    // // time = 10;
-    // std::cout << "t: "<<time << std::endl;
-
-    // fin.close();
-    // XD.load("../../../../../Downloads/swarm_matlab/controlD/XD.txt");
-    // XD.print("XD: ");
-    // SD.load("../../../../../Downloads/swarm_matlab/controlD/SD.txt");
-    // SD.print("SD: ");
-    // // indDef.print("indDef: ");
-    // motionP_result.mP.assign.print("assign: ");
-    // XD_des.print("XD_des: ");
-    // XD_des_dot.print("XD_des_dot: ");
-    // mat uD = controlDefender5(XD,SD, regspace(1,1,4), motionP_result.mP.assign, XD_des, XD_des_dot, motionP_result.mP, time,3);
-    // uD.print("uD: ");
-    
-    // mat XDFc;
-    // XDFc.load("../../../../../Downloads/swarm_matlab/OpenForm/XDFc.txt");
-    // XA.load("../../../../../Downloads/swarm_matlab/OpenForm/XA.txt");
-    // XDFc.print("XDFc: ");
-    // XA.print("XA: ");
-    // std::ifstream fin("../../../../../Downloads/swarm_matlab/OpenForm/RDF0.txt");
-    // double RDF0;
-    // fin >> RDF0;
-    // std::cout << "RDF0: "<< RDF0 << std::endl;
-    // fin.close();
-
-    // fin.open("../../../../../Downloads/swarm_matlab/OpenForm/phi.txt");
-    // double phi;
-    // fin >> phi;
-    // std::cout << "phi: "<< phi << std::endl;
-    // fin.close();
-
-    // fin.open("../../../../../Downloads/swarm_matlab/OpenForm/phi_dot.txt");
-    // double phi_dot;
-    // fin >> phi_dot;
-    // std::cout << "phi_dot: "<< phi_dot << std::endl;
-    // fin.close();
-    // mat XD_des, XD_des_dot, uDFf_trans;
-    // double phi_ddot;
-    // defDesiredOpenForm(XDFc, RDF0, XA, phi, phi_dot, NA, ND, &XD_des, &XD_des_dot, &phi_ddot, &uDFf_trans, &flagAttInSight);
-    // XD_des.print("using pointer, XD_des:");
-    // XD_des_dot.print("using pointer, XD_des_dot: ");
-    // cout << "using pointer, phi_ddot: "<<phi_ddot << endl;
-    
-    // XD.load("../../../../../Downloads/swarm_matlab/controlDF/XD.txt");
-    // indDef.load("../../../../../Downloads/swarm_matlab/controlDF/indDef.txt");
-    // mat XD_des,XD_des_dot, uDFc_trans;
-    // XD_des.load("../../../../../Downloads/swarm_matlab/controlDF/XD_des.txt");
-    // XD_des_dot.load("../../../../../Downloads/swarm_matlab/controlDF/XD_des_dot.txt");
-    // uDFc_trans.load("../../../../../Downloads/swarm_matlab/controlDF/uDFc_trans.txt");
-    // XA.load("../../../../../Downloads/swarm_matlab/controlDF/XA.txt");
-    // XD.print("XD: ");
-    // indDef.print("indDef: ");
-    // XD_des.print("XD_des: ");
-    // XD_des_dot.print("XD_des_dot: ");
-    // uDFc_trans.print("uDFc_trans: ");
-    
-    // mat Abc = controlDefenderFormation4(XD, indDef, motionP_result.mP.assign, XD_des, XD_des_dot, uDFc_trans, XA, NA, 3, 1);
-    // // mat Abc = controlFiniteTimeTrajTracking(XD,indDef, XD_des, XD_des_dot,uDFc_trans, XA, ND, 1);
-    // Abc.print("Abc:");
-    // uD.print("uD: ");
-
-    // mat XDFc;
-    // XDFc.load("../../../../../Downloads/swarm_matlab/OpenForm/XDFc.txt");
-    // XA.load("../../../../../Downloads/swarm_matlab/OpenForm/XA.txt");
-
-    // std::ifstream fin("../../../../../Downloads/swarm_matlab/OpenForm/RDF0.txt");
-    // double RDF0;
-    // fin >> RDF0;
-    // fin.close();
-
-    // fin.open("../../../../../Downloads/swarm_matlab/OpenForm/phi0.txt");
-    // double phi0;
-    // fin >> phi0;
-    // fin.close();
-    
-    // fin.open("../../../../../Downloads/swarm_matlab/OpenForm/delta_t.txt");
-    // double delta_t;
-    // fin >> delta_t;
-    // fin.close();
-
-    // XDFc.print("XDFc:");
-    // cout << "RDF0: " << RDF0 << endl;
-    // cout << "phi0: " << phi0 << endl;
-    // XA.print("XA: ");
-    // cout << "delta_t: " << delta_t << endl;
-
-    // mat XD_des, XD_des_dot, uDFc_trans;
-    // XD_des.print("XD_des");
-    // XD_des_dot.print("XD_des_dot:");
-    // uDFc_trans.print("uDFc_trans: ");
-
-    // defDesiredClosedForm(XDFc, RDF0, phi0, XA,NA,ND, 1, delta_t, &XD_des, &XD_des_dot, &uDFc_trans);
-    // XD_des.print("XD_des pointer");
-    // XD_des_dot.print("XD_des_dot pointer:");
-    // uDFc_trans.print("uDFc_trans pointer: ");
-
-
-    // mat X0;
-    // X0.load("../../../../../Downloads/swarm_matlab/OpenForm/X0.txt");
-    // U.load("../../../../../Downloads/swarm_matlab/OpenForm/U.txt");
-    // std::ifstream fin("../../../../../Downloads/swarm_matlab/OpenForm/dt.txt");
-    // double dt;
-    // fin >> dt;
-    // fin.close();
-
-    // X0.print("X0:");
-    // U.print("U");
-    // cout << "dt: " << dt << endl;
-    // cout << "C_d: " << C_d << endl;
-    // mat X1 = modifiedDIDynamics(X0,U, dt, C_d);
-    // X1.print("X1: ");
-    
+    // ros::shutdown();
 }

@@ -5,7 +5,7 @@
 
 using namespace arma;
 
-mat controlDefenderFormation4(mat XD, mat indDef, mat assign, mat XD_des, mat XD_des_dot, mat uDFc_trans, mat XA, int Na, int ND, int flagAvoidAcon){
+mat controlDefenderFormation4(mat XD, mat indDef, mat assign, mat XD_des, mat XD_des_dot, mat uDFc_trans, mat XA, int NA, int ND, int flagAvoidAcon){
     int na = assign.n_elem;
     int nid = indDef.n_elem;
     mat uD(2,ND+1,fill::zeros);

@@ -18,10 +18,13 @@ include_directories(/home/dasclab/SupportingLib/gurobi912/linux64/include)
  
 # add_executable(mainHD mainHerdDouble.cpp)
 # target_link_libraries(mainHD "/home/dasclab/SupportingLib/gurobi912/linux64/lib/libgurobi_c++.a" "/home/dasclab/SupportingLib/gurobi912/linux64/lib/libgurobi91.so" -O2 -larmadillo)
+
+add_executable(mainHD mainHerdDoubleNew.cpp)
+target_link_libraries(mainHD "/home/dasclab/SupportingLib/gurobi912/linux64/lib/libgurobi_c++.a" "/home/dasclab/SupportingLib/gurobi912/linux64/lib/libgurobi91.so" -O2 -larmadillo)
  
  
 # add_executable(mainHDExp mainHerdDoubleExperiment.cpp)
 # target_link_libraries(mainHDExp "/home/dasclab/SupportingLib/gurobi912/linux64/lib/libgurobi_c++.a" "/home/dasclab/SupportingLib/gurobi912/linux64/lib/libgurobi91.so" -O2 -larmadillo)
 
-add_executable(test test.cpp)
-target_link_libraries(test "/home/dasclab/SupportingLib/gurobi912/linux64/lib/libgurobi_c++.a" "/home/dasclab/SupportingLib/gurobi912/linux64/lib/libgurobi91.so" -O2 -larmadillo)
+# add_executable(test test.cpp)
+# target_link_libraries(test "/home/dasclab/SupportingLib/gurobi912/linux64/lib/libgurobi_c++.a" "/home/dasclab/SupportingLib/gurobi912/linux64/lib/libgurobi91.so" -O2 -larmadillo)

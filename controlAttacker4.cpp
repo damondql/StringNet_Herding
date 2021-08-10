@@ -24,7 +24,7 @@ struct control_attacker_t
 control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
                       int flagEnclose,int flagHerd,
                       mat XD, mat WA,
-                      mat WDString,int Na, int ND, int ti, int bound){
+                      mat WDString,int NA, int ND, int ti, int bound){
     // XA.print("XA: ");
     // XA_goal.print("XA_goal: ");
     // XA_goal_dot.print("XA_goal_dot: ");
@@ -43,8 +43,8 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
         vD = XD.submat(2,0,3,ND-1);
     }
     
-    arma::colvec rAcm = arma::sum(XA.submat(0,0,1,XA.n_cols-1),1)/Na;
-    arma::colvec vAcm = arma::sum(XA.submat(2,0,3,XA.n_cols-1),1)/Na;
+    arma::colvec rAcm = arma::sum(XA.submat(0,0,1,XA.n_cols-1),1)/NA;
+    arma::colvec vAcm = arma::sum(XA.submat(2,0,3,XA.n_cols-1),1)/NA;
     
     mat SigmaProdD(NA,1,fill::ones);
     double R_AO_min = INFINITY;

@@ -1,9 +1,47 @@
 #pragma once
 
 #include <math.h>
+#include "iostream"
+#include <math.h>
+#include <complex>
 #include <vector>
+#include <cmath>
+#include <algorithm>
 #include <armadillo>
 
+#include <string>
+#include <vector>
+#include <list>
+#include <deque>
+#include <iterator>
+#include "boost/bind.hpp"
+#include "boost/function.hpp"
+
+
+#include<ros/ros.h>
+#include<ros/console.h>
+//#include<mavros_msgs/SwarmCommands.h>
+#include <eigen_conversions/eigen_msg.h>
+#include<geometry_msgs/PoseStamped.h>
+#include<mavros_msgs/CommandBool.h>
+#include<mavros_msgs/SetMode.h>
+#include<mavros_msgs/State.h>
+#include<mavros_msgs/GlobalPositionTarget.h>
+#include<mavros_msgs/HomePosition.h>
+#include <mavros/mavros_plugin.h>
+#include <sensor_msgs/NavSatFix.h>
+#include <sensor_msgs/NavSatStatus.h>
+#include "std_msgs/String.h"
+#include <geographic_msgs/GeoPointStamped.h>
+#include <geographic_msgs/GeoPoseStamped.h>
+#include <geometry_msgs/TransformStamped.h>
+#include <GeographicLib/Geocentric.hpp>
+#include<string>
+#include <math.h>
+#include <cmath>
+#include <tf/transform_broadcaster.h>
+#include <tf/transform_datatypes.h>
+#include <tf/transform_listener.h>
 // Plotting
 /* SetPlotDefaults;
 set(groot,'defaulttextinterpreter','latex');
@@ -43,7 +81,7 @@ extern double R_m_AA, R_bar_AA, R_u_AA;
 extern double A_A_A, B_A_A, C_A_A, D_A_A;
 
 //Initialize the attackers
-#define NA      1   //number of attackers
+extern int NA, ND;    //number of attackers
 extern arma::vec v_maxA, u_maxA;
 extern double NA_sep;
 
@@ -129,15 +167,17 @@ extern arma::mat rSD_goal;
 
 void calControlLimits();
 void VectorFields_A();
-void initialAttackersVel();
+void initialAttackersVel(int NA);
 void cal();
-void InitializeAttackers();
-void defenders();
+void InitializeAttackers(int NA);
+void defenders(int NA, int ND);
 void FormationOri();
 void calVfieldA();
-void fillR();
+void fillR(int NA);
 void calVfield_formation();
-void calVfield_attackers();
-void calVfield_defenders();
+void calVfield_attackers(int NA);
+void calVfield_defenders(int ND);
 void rD_value();
-void calAllparametersExperiment();
+void calAllparametersExperiment(int NA, int ND, int flag_initial_position, 
+                                std::vector<geometry_msgs::PoseStamped>current_pos_list, 
+                                std::vector<double> initial_pos_from_launch);

@@ -5,7 +5,7 @@ using namespace arma;
 // using namespace std;
 
 
-void defDesiredOpenForm(mat XDFc,double RDF0,mat XA, double phi, double phi_dot,int Na,int ND, mat *XD_des, mat *XD_des_dot, double *phi_ddot, mat *uDFc_trans, int *flagAttInSight){
+void defDesiredOpenForm(mat XDFc,double RDF0,mat XA, double phi, double phi_dot,int NA,int ND, mat *XD_des, mat *XD_des_dot, double *phi_ddot, mat *uDFc_trans, int *flagAttInSight){
                         // mat *XD_des, mat *XD_des_dot, double *phi_ddot,
                         // mat *uDFc_trans, int *flagAttInSight) {
     double chi = 0.55;
