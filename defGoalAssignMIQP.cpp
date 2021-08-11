@@ -197,6 +197,129 @@ goal_assign defGoalAssignMIQP(mat optT, mat Pbar, int ND)
      return result;
 }
 
+goal_assign defGoalAssignMIQP_new(mat optT, mat Pbar, int ND)
+{
+     goal_assign result;
+     gurobi_result cal_result;
+  try {
+     GRBEnv* env = 0;
+     GRBVar* open = 0;
+
+     // Number of plants and warehouses
+     int ND = 3;
+
+     // Model
+     env = new GRBEnv();
+     GRBModel model = GRBModel(*env);
+     model.set(GRB_StringAttr_ModelName, "grbTest");
+
+     // Plant open decision variables: open[p] == 1 if plant p is open.
+     open = model.addVars(ND*ND, GRB_BINARY);
+
+     int p;
+     for (p = 0; p < ND*ND; ++p)
+     {
+          ostringstream vname;
+          vname << "var" << p;
+          open[p].set(GRB_StringAttr_VarName, vname.str());
+     }
+     
+     // Set objective
+     GRBQuadExpr obj = 0;
+     // obj += Pbar(0,0)*a*a + Pbar(0,1)*a*b + Pbar(0,2)*a*c + Pbar(0,3)*a*d + Pbar(0,4)*a*e + Pbar(0,5)*a*f + Pbar(0,6)*a*g + Pbar(0,7)*a*h + Pbar(0,8)*
+     for (int i = 0; i < Pbar.n_rows; i++)
+     {
+          for (int j = 0; j < Pbar.n_cols; j++)
+          {
+               obj += Pbar(i,j)* open[i] * open[j];
+          }
+     }
+
+     for (int i = 0; i < optT.n_rows; i++)
+     {
+          obj += optT(i,0) * open[i];
+     }
+
+     cout << "finish obj" << endl;
+
+     model.setObjective(obj);
+     cout << "start setting up matrix A" << endl;
+     mat A(2*ND,ND*ND,fill::zeros);
+     for (int i = 1; i <= ND; i++)
+     {
+          A.submat(i-1, ND*(i-1), i-1, ND*i-1) = ones<mat>(1,ND);
+          vec tempV = regspace(i, ND, ND*ND);
+          for (int j = 0; j < tempV.n_rows; j++)
+          {
+               A(ND+i-1, tempV(j)-1) = 1;
+          }
+          
+     }
+
+     cout << "finished setting up matrix A" << endl;
+     for (int p = 0; p < ND*2; p++)
+     {
+          GRBLinExpr ptot = 0;
+          for (int w = 0; w < ND*ND; ++w)
+          {
+          ptot += A(p,w)*open[w];
+          }
+          ostringstream cname;
+          cname << "Constriain" << p;
+          model.addConstr(ptot == 1, cname.str());
+     }
+     cout << "finished adding constrains" << endl;
+     model.optimize();
+    
+
+     cal_result.result.resize(ND*ND,1);
+     for (int i = 0; i < ND*ND; i++)
+     {
+          cal_result.result(i) = open[i].get(GRB_DoubleAttr_X);
+     }
+
+     cal_result.obj = model.get(GRB_DoubleAttr_ObjVal);
+
+     } catch(GRBException e) {
+     cout << "Error code = " << e.getErrorCode() << endl;
+     cout << e.getMessage() << endl;
+     } catch(...) {
+     cout << "Exception during optimization" << endl;
+     }
+     // cal_result.result.print("get result: ");
+     // cout << "obj: " << cal_result.obj << endl;
+     mat cost_mat;
+     cost_mat = optT.t()*cal_result.result + cal_result.result.t()*Pbar*cal_result.result;
+     result.cost = cost_mat(0,0);
+     // cost.print("cost: ");
+     mat cal_OptT;
+     cal_OptT.copy_size(cal_result.result);
+     for (int i = 0; i < cal_OptT.n_rows; i++)
+     {
+          cal_OptT(i,0) = optT(i,0) * cal_result.result(i,0);
+     }
+     // cal_OptT.print("cal_OptT:");
+     result.maxOptT = cal_OptT.max();
+     // cout << "maxOptT: " << maxOptT << endl;
+     uvec tempInd = find(cal_result.result == 1);
+     
+     tempInd += 1;
+     
+     result.assign.copy_size(tempInd);
+     for (int i = 0; i < result.assign.n_rows; i++)
+     {
+          result.assign(i) = tempInd(i)%ND;
+          if (result.assign(i) == 0)
+          {
+               result.assign(i) = ND;
+          }
+          
+     }
+     // assign.print("assign: ");
+
+     return result;
+}
+
 // int main() {
 //      int ND = 3;
 //      mat optT;

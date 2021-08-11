@@ -20,6 +20,7 @@
 #include <list>
 #include <deque>
 #include <iterator>
+#include <chrono>
 #include "boost/bind.hpp"
 #include "boost/function.hpp"
 
@@ -336,6 +337,7 @@ void control_loop(int NA, int ND, double z_h,
     cube WDString_mat(ND,ND, Niter);
     geometry_msgs::PoseStamped setpoint;
     setpoint.header.frame_id = "world";
+    auto start = std::chrono::high_resolution_clock::now();
     for (int ti = 0; ti < bound; ti++)
     {
         mat Psi(NA,1, fill::zeros);
@@ -776,9 +778,9 @@ void control_loop(int NA, int ND, double z_h,
 
             //std:advance(it,1);
         }
-        cout<<"messages broadcasted at ti = "<<ti<<endl;
+        // cout<<"messages broadcasted at ti = "<<ti<<endl;
         ros::spinOnce();
-        cout<<"Ros spin at ti = "<<ti<<endl; 
+        // cout<<"Ros spin at ti = "<<ti<<endl; 
         // rate.sleep();
 
 
@@ -894,11 +896,15 @@ void control_loop(int NA, int ND, double z_h,
         // control_A_result.uA.print("uA:");
         // control_A_result.uA0.print("uA0: ");
     }
+    auto stop = std::chrono::high_resolution_clock::now();
     
     // U.col(out_ti).print("U col out_ti: ");
     // U.col(out_ti-1).print("U col ti-1: ");
-
+    auto duration = duration_cast<microseconds>(stop - start);
     cout << "out ti : " << out_ti << endl;
+    cout << "go through the control loop for " << out_ti+1 << " times " << endl;
+    cout << "in total takes: " << duration.count() << " microseconds" << endl;
+    cout << "each loop takes: " << duration.count()/(out_ti+1) << " microseconds in average" << endl;
     U.col(out_ti) = U.col(out_ti-1);
     RefTraj.col(out_ti) = RefTraj.col(out_ti-1);
     SigmaProdD_arr.col(out_ti) = sigmaProd;

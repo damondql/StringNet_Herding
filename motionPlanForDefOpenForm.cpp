@@ -128,7 +128,7 @@ motionPlan motionPlanForDefOpenForm(mat XD, mat XD_des, int ND, int flagPlotPath
     // Pbar.load("../../../../../Downloads/swarm_matlab/motionPlan/Pbar.txt");
     // Pbar.print("Pbar: ");
     auto start = high_resolution_clock::now();
-    goal_assign goal = defGoalAssignMIQP(optT_vec, Pbar, ND);
+    goal_assign goal = defGoalAssignMIQP_new(optT_vec, Pbar, ND);
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
     motionPlan_resutl.tCompMIQP = duration.count();
