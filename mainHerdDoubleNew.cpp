@@ -127,9 +127,9 @@ void measurements(int NA, int ND) {
                   {0,pow(0.9/3,2),0,0},
                   {0,0,pow(0.12,2),0},
                   {0,0,0,pow(0.12,2)}};
-    YA = XA + arma::mvnrnd(arma::zeros(4,1), Cov_YA, NA);
+    // YA = XA + arma::mvnrnd(arma::zeros(4,1), Cov_YA, NA);
     // YA.load("../../../../../Downloads/swarm_matlab/controlD/YA.txt");
-    // YA = XA;
+    YA = XA;
     // XD0.load("../../../../../Downloads/swarm_matlab/controlD/XD0.txt");
     SD = arma::zeros(ND,1);
     SD_arr = arma::zeros(ND,Niter+1);
@@ -217,6 +217,7 @@ void getMotionPlan(int NA, int ND){
     motionP_result =  defInitDesiredPos(YA, XD0, NA, ND, RDF_open, v_maxA[0], 105);
     motionP_result.dDf.phi += M_PI;
     motionP_result.mP.startTime += ones<mat>(ND,1) * 25;
+    cout << "finish motionP_result" << endl;
     // XD.print("XD:");
     arma::mat tempM;
     tempM.reshape(XD.n_rows, XD.n_cols+1);
@@ -224,11 +225,11 @@ void getMotionPlan(int NA, int ND){
     tempM.submat(0,tempM.n_cols-1,motionP_result.dDf.rDFc0.n_rows-1, tempM.n_cols-1) = motionP_result.dDf.rDFc0;
     tempM.submat(motionP_result.dDf.rDFc0.n_rows,tempM.n_cols-1, tempM.n_rows-1,tempM.n_cols-1) = zeros<mat>(2,1);
     XD = tempM;
-    // XD.print("XD:");
+    XD.print("XD:");
     tempM.resize(X.n_rows,1);
-    tempM.submat(0,0,XA.n_rows-1,0) = XA.as_col();
-    tempM.submat(XA.n_rows,0,tempM.n_rows-1,0) = XD.as_col();
-    // tempM.print("tempM:");
+    tempM.submat(0,0,XA.n_cols*XA.n_rows-1,0) = XA.as_col();
+    tempM.submat(XA.n_cols*XA.n_rows,0,tempM.n_rows-1,0) = XD.as_col();
+    tempM.print("tempM:");
     X.col(0) = tempM;
     // X.submat(0,0,19,9).print("X sub:");
 
@@ -251,12 +252,13 @@ void calDistance(int ND){
         tempV(indx(i)-1) = indDef(i);
     }
     indDef = tempV;
-    
+    cout << "finish first for loop" << endl;
 
     //minimum distance between the defenders
     vec RDjDl(ND);
     vec arr_minRDD(ND-1);
     vec arr_minRAD(ND-1);
+    cout << "start sencond for loop" << endl;
     if (ND >1)
     {
         for (int j = 0; j < ND-1; j++)
@@ -266,7 +268,13 @@ void calDistance(int ND){
                 RDjDl(i) = norm(rD.col(j) - rD.col(i));
             }
             arr_minRDD(j) = RDjDl.subvec(j+1,RDjDl.n_rows-1).min();
-            arr_minRAD(j) = norm(rD.col(j) - rA);
+            mat tempM(rA.n_rows, rA.n_cols, fill::zeros);
+            for (int i = 0; i < rA.n_cols; i++)
+            {
+                tempM.col(i) = rD.col(j) - rA.col(i);
+            }
+            
+            arr_minRAD(j) = norm(tempM);
         }
         minRDD(0,0) = arr_minRDD.min();
         minRAD(0,0) = arr_minRAD.min();
@@ -751,13 +759,13 @@ void control_loop(int NA, int ND, double z_h,
         // X.col(ti+1).print("X col(ti+1) after modifed");
         // cout << "11111111111111" << endl;
         XA = reshape(X.submat(0,ti+1,4*NA-1,ti+1),4,NA);
-        YA = XA + arma::mvnrnd(arma::zeros(4,1), Cov_YA, NA);
-        // YA = XA;
+        // YA = XA + arma::mvnrnd(arma::zeros(4,1), Cov_YA, NA);
+        YA = XA;
         rA = XA.submat(0,0,1,XA.n_cols-1);
         vA = XA.submat(2,0,3,XA.n_cols-1);
         //  cout << "222222222222222222222" << endl;
-        XD = reshape(X.submat(4*NA,ti+1,4*(N+1)-1,ti+1),4,ND+1);
-        mat XDp = reshape(X.submat(4*NA,ti,4*(N+1)-1,ti),4,ND+1);
+        XD = reshape(X.submat(4*NA,ti+1,4*(NA+ND+1)-1,ti+1),4,ND+1);
+        mat XDp = reshape(X.submat(4*NA,ti,4*(NA+ND+1)-1,ti),4,ND+1);
         //  cout << "3333333333333333333333" << endl;
         rD = XD.submat(0,0,1,XD.n_cols-1);
         mat vD = XD.submat(2,0,3,XD.n_cols-1);
@@ -769,19 +777,19 @@ void control_loop(int NA, int ND, double z_h,
             setpoint.pose.position.y = X(4*j+1, ti+1);
             setpoint.pose.position.z = z_h;
             setpoint_pub_list[j].publish(setpoint);
-            //cout<<"message published"<<endl;
+            // cout<<"message published"<<endl;
             
             body_frame_quad[j].setOrigin(tf::Vector3(setpoint.pose.position.x, setpoint.pose.position.y, setpoint.pose.position.z));
-            //cout<<"message broadcasted"<<endl;
+            // cout<<"message broadcasted 1 "<<endl;
             broadcaster.sendTransform(tf::StampedTransform(body_frame_quad[j], ros::Time::now(), "world", "quad" + to_string(j+1)));
-            //cout<<"message broadcasted"<<endl;
+            // cout<<"message broadcasted 2"<<endl;
 
             //std:advance(it,1);
         }
         // cout<<"messages broadcasted at ti = "<<ti<<endl;
         ros::spinOnce();
         // cout<<"Ros spin at ti = "<<ti<<endl; 
-        // rate.sleep();
+        rate.sleep();
 
 
 
@@ -932,9 +940,10 @@ void control_loop(int NA, int ND, double z_h,
     minEAO = minEAO.submat(0,0,minEAO.n_rows-1, out_ti+1);
     SigmaProdD_arr = SigmaProdD_arr.submat(0,0,SigmaProdD_arr.n_rows-1, out_ti);
     // times.print("times");
-    X.save("../../../../../Downloads/swarm_matlab/cppResult/X.csv", csv_ascii);
-    rP.save("../../../../../Downloads/swarm_matlab/cppResult/rP.csv", csv_ascii);
-    rS.save("../../../../../Downloads/swarm_matlab/cppResult/rS.csv", csv_ascii);
+    // X.save("../../../../../Downloads/swarm_matlab/cppResult/X.csv", csv_ascii);
+    // rP.save("../../../../../Downloads/swarm_matlab/cppResult/rP.csv", csv_ascii);
+    // rS.save("../../../../../Downloads/swarm_matlab/cppResult/rS.csv", csv_ascii);
+    minRDD.save("/home/dasclab/Desktop/minRDD.csv", csv_ascii);
     // std::ofstream myfile;
     // myfile.open ("rho_S.csv");
     // myfile << rho_S;
@@ -945,8 +954,8 @@ void control_loop(int NA, int ND, double z_h,
     // cout << "rho_S: " << rho_S<< endl;
     // cout <<"rho_Acon: " << rho_Acon << endl;
     // cout << "rho_P: " << rho_P << endl;
-    times.save("../../../../../Downloads/swarm_matlab/cppResult/times.csv", csv_ascii);
-    WDString_mat.save("../../../../../Downloads/swarm_matlab/cppResult/WDString_mat.csv");
+    // times.save("../../../../../Downloads/swarm_matlab/cppResult/times.csv", csv_ascii);
+    // WDString_mat.save("../../../../../Downloads/swarm_matlab/cppResult/WDString_mat.csv");
     
 }
 
@@ -961,10 +970,7 @@ int main(int argc, char **argv) {
     tf::TransformBroadcaster broadcaster;
     tf::Transform quad_body_frame(tf::Transform::getIdentity());
     std::deque<tf::Transform> body_frame_quad;
-    for (int i = 0; i < N; i++)
-    {
-        body_frame_quad.push_back(tf::Transform::getIdentity());
-    }
+
     
     //M-Air Dimensions (The local common frame follows ENU convection) with the origin close to the small door near the pavilion 
     float X_max=21, X_min=-1, Y_max=-2.5, Y_min=-36;
@@ -992,6 +998,10 @@ int main(int argc, char **argv) {
     std::vector<double> initial_pos_from_launch(NA+ND);
     std::vector<double> initial_pos_from_launch_default(NA+ND); //which is the same as the code position ==> flag_initial_positon == 0
 
+    for (int i = 0; i < NA+ND; i++)
+    {
+        body_frame_quad.push_back(tf::Transform::getIdentity());
+    }
     initial_pos_from_launch_default = {6.1548,-33.0553,
                                 11.9907, 9.3724, 
                                 16.1838, -10.7580,
@@ -1046,8 +1056,11 @@ int main(int argc, char **argv) {
     AllocateMemory(NA,ND);
     measurements(NA,ND);
     initial_contorl(NA, ND);
+    // cout << "complete initial control" << endl;
     getMotionPlan(NA,ND);
+    // cout << "complete getMotionPlan" << endl;
     calDistance(ND);
+    // cout << "complete calDistance" << endl;
     control_loop(NA,ND,z_h,
                  state_sb_list,
                  curr_pos_list,
@@ -1056,6 +1069,6 @@ int main(int argc, char **argv) {
                  rate,
                  broadcaster,
                  body_frame_quad);
-
-    // ros::shutdown();
+    cout << "R_m_DD" << R_m_DD <<endl;
+    ros::shutdown();
 }

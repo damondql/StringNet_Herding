@@ -169,7 +169,7 @@ motionPlan motionPlanForDefOpenForm(mat XD, mat XD_des, int ND, int flagPlotPath
     /////   StartTimeAvoidCollision are       ////  
     /////   Skip here                         ////
     //////////////////////////////////////////////
-
+    // cout << "start constructing motionplan_result" << endl;
     mat startTime = zeros<mat>(ND,1);
     motionPlan_resutl.tCompMILP = 0; // since don't need to calculated, there is no assign intersections
 
@@ -184,7 +184,7 @@ motionPlan motionPlanForDefOpenForm(mat XD, mat XD_des, int ND, int flagPlotPath
     motionPlan_resutl.tComp = motionPlan_resutl.tCompMIQP + motionPlan_resutl.tCompMILP;
     motionPlan_resutl.XD = XD;
     motionPlan_resutl.XD_des = XD_des;
-    
+    // cout << "finish motionplan_result " << endl;
     return motionPlan_resutl;
 }
 

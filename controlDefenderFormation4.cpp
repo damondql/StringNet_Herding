@@ -52,12 +52,24 @@ mat controlDefenderFormation4(mat XD, mat indDef, mat assign, mat XD_des, mat XD
             vec potentialControl_result = potentialControl(0.1,XD.col(j),rvDproj,20,sigma_parameters(R_underbar,R_bar),R_m,R_underbar,R_bar, R_bar+10,kDOr,kDOv2, alphaDOv);
             uAcon = potentialControl_result.subvec(0,1);
         }
+        //To avoid other defenders
+        mat uDD(2,1,fill::zeros);
+        for (int i = 0; i < ND; i++)
+        {
+            double R_underbar = R_bar_DD;
+            double R_bar = R_u_DD;
+            if(i != j) {
+                vec potentialControl_result = potentialControl(0.1,XD.col(j),XD.col(i),20,sigma_parameters(R_underbar,R_bar),R_m_DD,R_underbar,R_bar, R_bar+10,kDDr,kDDv, alphaDDv);
+                uDD += potentialControl_result.subvec(0,1);
+            }
+        }
+        
 
         mat uDOv(2,1,fill::zeros);
         mat uDOr(2,1,fill::zeros);
         mat uD1,uD2;
         double norm_uD1, norm_uD2;
-        uD1=-kDDesr*(rD-XD_des.submat(0,j,1,j))-kDDesv*(vD-XD_des.submat(2,j,3,j)) + uAcon+uDOv+uDOr;
+        uD1=-kDDesr*(rD-XD_des.submat(0,j,1,j))-kDDesv*(vD-XD_des.submat(2,j,3,j)) + uAcon+uDOv+uDOr + uDD;
         norm_uD1=arma::norm(uD1);
         // cout << "norm_uD1: " << norm_uD1 << endl;
         uD2=-kDDesv*(vD-XD_des.submat(2,j,3,j))+C_d*vD*arma::norm(vD);

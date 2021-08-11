@@ -205,9 +205,6 @@ goal_assign defGoalAssignMIQP_new(mat optT, mat Pbar, int ND)
      GRBEnv* env = 0;
      GRBVar* open = 0;
 
-     // Number of plants and warehouses
-     int ND = 3;
-
      // Model
      env = new GRBEnv();
      GRBModel model = GRBModel(*env);
