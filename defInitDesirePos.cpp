@@ -84,15 +84,15 @@ DesiredPos defInitDesiredPos(mat XA0, mat XD, int NA, int ND, double RD0, double
         thetaAcm0 = thetaAcm0 + 2 * M_PI;
     }
     // cout <<"111111111111" <<endl;
-    rAcm.print("rAcm: ");
-    rP.print("rP: ");
+    // rAcm.print("rAcm: ");
+    // rP.print("rP: ");
     path_elem path_Acm = findShortestPath(rAcm, rP);
     double Qa = path_Acm.S(1);
     // cout << "Qa:" << Qa << endl;
     double q1 = 0;
     double q2 = Qa - rho_P;
-    cout << "rho_P: " << rho_P << endl;
-    cout <<  "q2: " << q2 << endl;
+    // cout << "rho_P: " << rho_P << endl;
+    // cout <<  "q2: " << q2 << endl;
     double f = 10000;
     int i = 0;
     double tComp = 0;
@@ -114,9 +114,9 @@ DesiredPos defInitDesiredPos(mat XA0, mat XD, int NA, int ND, double RD0, double
             rD_des.submat(0,j,1,j) = Acm0.rp + 0.5 * (ND-1) * RD0 * tempv - RD0 * tempv*(j);
             XD_des0.submat(0,j,1,j) = rD_des.submat(0,j,1,j);
         }
-        Acm0.rp.print("rDFc0:");
-        rD_des.print("rD_des:");
-        XD_des0.print("XD_des0:");
+        // Acm0.rp.print("rDFc0:");
+        // rD_des.print("rD_des:");
+        // XD_des0.print("XD_des0:");
         result.mP = motionPlanForDefOpenForm(XD, XD_des0, ND, 0, 1);
         tComp += result.mP.tComp;
         df = f - (result.mP.maxOptT - q/v_maxA + DeltaT_s);

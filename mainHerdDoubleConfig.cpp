@@ -23,7 +23,7 @@
 #include <chrono>
 #include "boost/bind.hpp"
 #include "boost/function.hpp"
-
+#include "readConfig.cpp"
 
 #include<ros/ros.h>
 #include<ros/console.h>
@@ -786,7 +786,7 @@ void control_loop(int NA, int ND, double z_h,
 
             //std:advance(it,1);
         }
-        cout<<"messages broadcasted at ti = "<<ti<<endl;
+        // cout<<"messages broadcasted at ti = "<<ti<<endl;
         ros::spinOnce();
         // cout<<"Ros spin at ti = "<<ti<<endl; 
         rate.sleep();
@@ -1049,6 +1049,12 @@ int main(int argc, char **argv) {
     {
         cout << "quad: " << quad_ids[i] << endl;
     }
+    
+    string cfg_name;
+    string cfg_name_default = "origin_config.cfg";
+    nh.param("configure_file", cfg_name, cfg_name_default);
+    readConfig(cfg_name);
+
     
     calAllparametersExperiment(NA,ND, flag_initial_position, current_pos_list, initial_pos_from_launch);
     AllocateMemory(NA,ND);
