@@ -3,7 +3,7 @@
 #include <iostream>
 #include <fstream>
 #include <istream>
-#include "AllParametersExperiment.cpp"
+#include "AllParameters.cpp"
 #include "lambdaInterSecCircLine.cpp"
 
 using namespace std;

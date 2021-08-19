@@ -51,11 +51,19 @@ struct motionPlan
     mat XD_des;
 };
 
-motionPlan motionPlanForDefOpenForm(mat XD, mat XD_des, int ND, int flagPlotPaths, int figNumber) {
+struct inputStartTime{
+    vec optT;
+    int NiSeg;
+    mat leadTime;
+    std::vector<std::vector<interSec_elem>> interSec;
+};
+
+
+motionPlan motionPlanForDefOpenForm(mat XD, mat XD_des, int ND) {
     // cout << "00000000000000000000" << endl;
     motionPlan motionPlan_resutl;
-    double umd = 0.8 * u_maxD(0);
-    double vmd = sqrt(umd/C_d);
+    // double umd = 0.8 * u_maxD(0);
+    // double vmd = sqrt(umd/C_d);
     std::vector<std::vector<path_elem>> Path(ND, std::vector<path_elem>(ND));
     std::vector<std::vector<pathVel_elem>> pathVel(ND, std::vector<pathVel_elem>(ND));
     mat optT(ND, ND, fill::zeros);
@@ -69,7 +77,7 @@ motionPlan motionPlanForDefOpenForm(mat XD, mat XD_des, int ND, int flagPlotPath
             // XD_des.submat(0,jj,1,jj).print("submat of XD_des");
             Path[jj][j] = findShortestPath(XD.submat(0,j,1,j), XD_des.submat(0,jj,1,jj));
             // cout << "1.1" << endl;
-            pathVel[jj][j] = findPathSpeeds(Path[jj][j], v_maxDC(j), umd, vmd);
+            pathVel[jj][j] = findPathSpeeds(Path[jj][j], v_maxDC(j), u_maxD(j), v_maxD(j));
             // cout << "1.2" << endl;
             optT(jj, j) = pathVel[jj][j].T(1); // obs free, T  is only size 2
             // cout << "1.3" << endl;
@@ -169,6 +177,27 @@ motionPlan motionPlanForDefOpenForm(mat XD, mat XD_des, int ND, int flagPlotPath
     /////   StartTimeAvoidCollision are       ////  
     /////   Skip here                         ////
     //////////////////////////////////////////////
+    // int NiSeg = 0;
+
+    // for (int j = 1; j <= ND; j++)
+    // {
+    //     for (int jj = j+1; jj <= ND; jj++)
+    //     {
+    //         if(assignedinterSec[j-1][jj-1].flag0 == 0)
+    //         {
+    //             NiSeg++;
+    //             vec S11 = assignedinterSec[j-1][jj-1].Si11;
+    //             vec S12 = assignedinterSec[j-1][jj-1].Si12;
+    //         }
+    //     }
+        
+    // }
+    
+
+
+
+
+
 
     mat startTime = zeros<mat>(ND,1);
     motionPlan_resutl.tCompMILP = 0; // since don't need to calculated, there is no assign intersections

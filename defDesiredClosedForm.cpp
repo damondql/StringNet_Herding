@@ -1,4 +1,4 @@
-#include "AllParametersExperiment.hpp"
+#include "AllParameters.hpp"
 #include <armadillo>
 
 using namespace arma;

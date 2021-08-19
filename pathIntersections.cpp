@@ -1,5 +1,5 @@
 #include "findShortestPath.cpp"
-#include "AllParametersExperiment.hpp"
+#include "AllParameters.hpp"
 #include "interSecLineLine.cpp"
 
 struct interSec_elem

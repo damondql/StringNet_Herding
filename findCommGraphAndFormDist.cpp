@@ -34,7 +34,8 @@ CommGraph findCommGraphAndFormDist(double N, double shapeld, double R0) {
     } else if (shapeld == 1) {
       result.Rij_tilde = zeros<mat>(N,N);
         if (N > 1) {
-            result.W = zeros<mat> (N,N);
+            result.W = ones<mat> (N,N);
+            result.Rij_tilde = 2000 * ones<mat>(N,N);
             int NC = N;
             double Rij0 = R0 * sqrt(2 * (1-cos(2*M_PI / NC)));
             double Rij1 = Rij0 * sqrt(2* (1-cos(M_PI - 2*M_PI/NC)));
@@ -48,9 +49,7 @@ CommGraph findCommGraphAndFormDist(double N, double shapeld, double R0) {
             }
             for (int i = 0; i < NC; i++)
             {
-                result.W(i,temp(i+1)) = 1;
-                result.W(i,temp(i+2)) = 1;
-                result.W(i,temp(i+NC-1)) = 1;
+                result.W(i,i) = 0;
                 result.Rij_tilde(i,temp(0,i+1)) = Rij0;
                 result.Rij_tilde(i,temp(0,i+NC-1)) = Rij0;
                 result.Rij_tilde(i,temp(0,temp(i+2))) = Rij1;

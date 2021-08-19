@@ -1,8 +1,23 @@
 #pragma once
 
 #include <math.h>
+#include "iostream"
+#include <math.h>
+#include <complex>
 #include <vector>
+#include <cmath>
+#include <algorithm>
 #include <armadillo>
+
+#include <string>
+#include <vector>
+#include <list>
+#include <deque>
+#include <iterator>
+#include "boost/bind.hpp"
+#include "boost/function.hpp"
+
+
 // Plotting
 /* SetPlotDefaults;
 set(groot,'defaulttextinterpreter','latex');
@@ -20,8 +35,8 @@ extern double rho_P;    //Radius of the protected area
 
 
 //Initial Positions of the protected and safe area
-extern arma::vec rP (2);
-extern arma::vec rS (2);
+extern arma::vec rP;
+extern arma::mat rS;
 extern double rho_S;
 
 // Attackers
@@ -42,22 +57,22 @@ extern double R_m_AA, R_bar_AA, R_u_AA;
 extern double A_A_A, B_A_A, C_A_A, D_A_A;
 
 //Initialize the attackers
-#define NA      8   //number of attackers
-extern double v_maxA[NA], u_maxA[NA];
+extern int NA, ND;    //number of attackers
+extern arma::vec v_maxA, u_maxA;
 extern double NA_sep;
 
 extern int axS[2];
-extern int rDmin;
+extern double rDmin;
 
 extern double RA0, rho_Acon;
-extern double Rii00[NA], Rik00[NA];
-extern std::vector<double> Rjk00;
+extern arma::vec Rii00, Rik00;
+extern arma::vec Rjk00;
 
 extern int dRA0;
 extern double rho_sn;
 
 // Defenders
-extern std::vector<double> v_maxD,v_maxDC,u_maxD,u_maxD1,u_maxD2,u_maxDr1,u_maxDr2;
+extern arma::vec v_maxD,v_maxDC,u_maxD,u_maxD1,u_maxD2,u_maxDr1,u_maxDr2;
 extern double rho_safe,dthetai,alphaD_v;
 extern double rhoAD_safe,rhoD_safe;
 extern double umd1,umd2,umdf_s1,umdf_s2,umd,umdf_h1,vmd,vmdc,vmdf_s,umd_e1,umd_e2;
@@ -95,7 +110,7 @@ extern double kDDesr, kDDesv;
 extern arma::cube rVO;
 
 //For formation orientation
-extern std::vector<double> R_bar_AcOc, R_u_AcOc, A_Ac_Oc, B_Ac_Oc, C_Ac_Oc, D_Ac_Oc;
+extern arma::vec R_bar_AcOc, R_u_AcOc, A_Ac_Oc, B_Ac_Oc, C_Ac_Oc, D_Ac_Oc;
 
 //Parameters for the vector fields for the attacker corresponding to the
 //defenders
@@ -105,20 +120,38 @@ extern double global,A_A_D,B_A_D,C_A_D,D_A_D;
 extern double R_m_AD2,R_bar_AD2,R_u_AD2;
 extern double A_A_D2,B_A_D2,C_A_D2,D_A_D2;
 
-extern std::vector<double> Rij0,Rjj0;
+extern arma::vec Rij0,Rjj0;
+extern double RAD_max;
 extern  double nO, A, B, C, D, aO, bO, E_bar_O, E_m_O, E_u_O, GO;
 
 std::vector<double> w, h, w_bar, h_bar;
 
 //Parameters for the vector fields for the attacker corresponding to the
 //obstacles
-extern std::vector<std::vector<double>> R_m_AO, R_bar_AO, R_u_AO, R_v_AO;
-extern std::vector<std::vector<double>> A_A_O, B_A_O, C_A_O, D_A_O;
-extern std::vector<std::vector<double>> A_bar_A_O, B_bar_A_O, C_bar_A_O, D_bar_A_O;
+extern arma::mat R_m_AO, R_bar_AO, R_u_AO, R_v_AO;
+extern arma::mat A_A_O, B_A_O, C_A_O, D_A_O;
+extern arma::mat A_bar_A_O, B_bar_A_O, C_bar_A_O, D_bar_A_O;
 
-extern std::vector<std::vector<double>> A_D_O, B_D_O, C_D_O, D_D_O;
-extern std::vector<std::vector<double>> R_m_DO, R_bar_DO, R_u_DO;
+extern arma::mat A_D_O, B_D_O, C_D_O, D_D_O;
+extern arma::mat R_m_DO, R_bar_DO, R_u_DO;
 extern double R_m_DD, R_m_DDO, R_m2_DD, R_u_DD, R_bar_DD;
 extern double A_D_D, B_D_D, C_D_D, D_D_D;
 
-extern std::vector<std::vector<double>> rSD_goal;
+extern arma::mat rSD_goal;
+
+
+
+void calControlLimits();
+void VectorFields_A();
+void initialAttackersVel(int NA);
+void cal();
+void InitializeAttackers(int NA);
+void defenders(int NA, int ND);
+void FormationOri();
+void calVfieldA();
+void fillR(int NA);
+void calVfield_formation();
+void calVfield_attackers(int NA);
+void calVfield_defenders(int ND);
+void InitializeDefenders();
+void calAllparametersExperiment(int NA, int ND);

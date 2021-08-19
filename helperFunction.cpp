@@ -119,6 +119,20 @@ vec projectionOnLine(vec r, vec r1, vec r2) {
     return result;
 }
 
+double rhoA_con_fun(double x, int NA, int ND, double R_DD_string, double rhoD_safe, double R_m_DD){
+    double coeff = 0.9;
+    double MinPts = 4;
+    double epsilon_clust=coeff*R_DD_string/2*(1/tan(M_PI/ND))*floor(MinPts/2)/(NA-1);//%(MinPts/(NA-1))*2*R_DD_string/sqrt(2-2*cos(2*pi/ND));
+    // mat Mahalanobis_Mat=arma::eye(2);
+    return 2*epsilon_clust/MinPts*(x-1)-rhoD_safe-R_m_DD;
+}
+
+double rho_sn_fun(double x, double R_DD_string){
+    double coeff = 0.9;
+    return  coeff*R_DD_string/sqrt(2-2*cos(2*M_PI/x));
+}
+
+
 // int main(){
 //     mat XA,XD, sigma_p;
 //     XA.load("../AttackerStep328/XA.txt");

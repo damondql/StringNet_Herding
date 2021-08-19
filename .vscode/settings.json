@@ -60,6 +60,9 @@
         "thread": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "bit": "cpp"
+        "bit": "cpp",
+        "*.h++": "cpp",
+        "typeindex": "cpp",
+        "variant": "cpp"
     }
 }

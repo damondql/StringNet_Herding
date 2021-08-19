@@ -216,7 +216,6 @@ goal_assign defGoalAssignMIQP_new(mat optT, mat Pbar, int ND)
      GRBVar* open = 0;
 
      // Number of plants and warehouses
-     int ND = 3;
 
      // Model
      env = new GRBEnv();
@@ -295,7 +294,7 @@ goal_assign defGoalAssignMIQP_new(mat optT, mat Pbar, int ND)
      } catch(...) {
      cout << "Exception during optimization" << endl;
      }
-     // cal_result.result.print("get result: ");
+     cal_result.result.print("get result: ");
      // cout << "obj: " << cal_result.obj << endl;
      mat cost_mat;
      cost_mat = optT.t()*cal_result.result + cal_result.result.t()*Pbar*cal_result.result;
@@ -332,16 +331,10 @@ goal_assign defGoalAssignMIQP_new(mat optT, mat Pbar, int ND)
 
 int main() {
      mat Pbar, optT;
-     Pbar.load("../defV/Pbar.txt");
-     optT.load("../defV/optT.txt");
-
-     goal_assign a =  defGoalAssignMIQP(optT,Pbar, 3);
-     goal_assign b= defGoalAssignMIQP_new(optT, Pbar,3);
-     a.assign.print("a, assign: ");
-     cout << "a, cost: " << a.cost << endl;
-     cout << "a, maxOptT: " << a.maxOptT << endl;
-
-     b.assign.print("b, assign: ");
-     cout << "b, cost: " << b.cost << endl;
-     cout << "b, maxOptT: " << b.maxOptT << endl;
+     Pbar.load("../../../../../Downloads/swarm_matlab/defV/Pbar.txt");
+     optT.load("../../../../../Downloads/swarm_matlab/defV/optT.txt");
+     Pbar.print("Pbar: ");
+     optT.print("optT: ");
+     goal_assign a = defGoalAssignMIQP_new(optT, Pbar, 6);
+     a.assign.print("assign: ");
 }

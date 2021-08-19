@@ -206,7 +206,7 @@ goal_assign defGoalAssignMIQP_new(mat optT, mat Pbar, int ND)
      GRBVar* open = 0;
 
      // Number of plants and warehouses
-     int ND = 3;
+     // int ND = 3;
 
      // Model
      env = new GRBEnv();
@@ -240,10 +240,10 @@ goal_assign defGoalAssignMIQP_new(mat optT, mat Pbar, int ND)
           obj += optT(i,0) * open[i];
      }
 
-     cout << "finish obj" << endl;
+     // cout << "finish obj" << endl;
 
      model.setObjective(obj);
-     cout << "start setting up matrix A" << endl;
+     // cout << "start setting up matrix A" << endl;
      mat A(2*ND,ND*ND,fill::zeros);
      for (int i = 1; i <= ND; i++)
      {
@@ -256,7 +256,7 @@ goal_assign defGoalAssignMIQP_new(mat optT, mat Pbar, int ND)
           
      }
 
-     cout << "finished setting up matrix A" << endl;
+     // cout << "finished setting up matrix A" << endl;
      for (int p = 0; p < ND*2; p++)
      {
           GRBLinExpr ptot = 0;
@@ -268,7 +268,7 @@ goal_assign defGoalAssignMIQP_new(mat optT, mat Pbar, int ND)
           cname << "Constriain" << p;
           model.addConstr(ptot == 1, cname.str());
      }
-     cout << "finished adding constrains" << endl;
+     // cout << "finished adding constrains" << endl;
      model.optimize();
     
 
@@ -321,18 +321,18 @@ goal_assign defGoalAssignMIQP_new(mat optT, mat Pbar, int ND)
 }
 
 // int main() {
-//      int ND = 3;
+//      int ND = 18;
 //      mat optT;
-//      optT.load("../../../../../Downloads/swarm_matlab/defV/optT.txt");
+//      optT.load("../../../../../Downloads/multi swarm/GoalV/optT.txt");
 //      mat Pbar;
-//      Pbar.load("../../../../../Downloads/swarm_matlab/defV/Pbar.txt");
-//      optT.print("optT: ");
-//      Pbar.print("Pbar: ");
-//      auto start = high_resolution_clock::now();
-//      goal_assign a = defGoalAssignMIQP(optT, Pbar, ND);
-//      auto stop = high_resolution_clock::now();
-//      auto duration = duration_cast<microseconds>(stop - start);
-//      cout << "It takes micro-s: " << duration.count() <<endl;
+//      Pbar.load("../../../../../Downloads/multi swarm/GoalV/Pbar.txt");
+//      // optT.print("optT: ");
+//      // Pbar.print("Pbar: ");
+//      // auto start = high_resolution_clock::now();
+//      goal_assign a = defGoalAssignMIQP_new(optT, Pbar, ND);
+//      // auto stop = high_resolution_clock::now();
+//      // auto duration = duration_cast<microseconds>(stop - start);
+//      // cout << "It takes micro-s: " << duration.count() <<endl;
 //      a.assign.print("assign: ");
 //      cout << "cost: " << a.cost << endl;
 //      cout << "maxOptT: " << a.maxOptT << endl;

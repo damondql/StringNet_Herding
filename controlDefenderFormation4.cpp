@@ -1,5 +1,5 @@
 #pragma once
-#include "AllParametersExperiment.hpp"
+#include "AllParameters.hpp"
 #include "helperFunction.cpp"
 #include <armadillo>
 

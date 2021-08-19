@@ -1,5 +1,5 @@
 #include <armadillo>
-#include "AllParametersExperiment.cpp"
+#include "AllParameters.cpp"
 using namespace arma;
 
 vec lambdaInterSecCircLine(vec rc, double rhoc, vec r1, double mL, double cL, double drx, double dry) {
