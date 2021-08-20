@@ -1,3 +1,4 @@
+#pragma once
 #include "findShortestPath.cpp"
 #include "AllParameters.hpp"
 #include "interSecLineLine.cpp"

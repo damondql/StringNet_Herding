@@ -93,7 +93,7 @@ double RPA, epsilon, RAD, RA0_des, Rii0, Rii1;
 double RDF_open = 0;
 double R_DD_string, RDF_closed;
 // Initial string chain
-int flagHerd = 0;
+
 int flagDForm = 0;
 double epsilon_clust;
 mat WDString;
@@ -167,20 +167,23 @@ void initial_contorl(int NA, int ND) {
     epsilon_clust=coeff*R_DD_string/2*(1/tan(M_PI/ND))*floor(MinPts/2)/(NA-1);
 
     epsilon_clust *= 1.3;
-    rhoA_con.print("rhoA_con: ");
-    rhoA_con_A.print("rhoA_con_A: ");
-    rho_SN.print("rho_SN: ");
-    cout  << "RDF_closed: " << RDF_closed << endl;
-    cout << "RDF_open: " <<RDF_open << endl;
-    cout << "epsilon_clust: " <<epsilon_clust << endl;
+    // rhoA_con.print("rhoA_con: ");
+    // rhoA_con_A.print("rhoA_con_A: ");
+    // rho_SN.print("rho_SN: ");
+    // cout  << "RDF_closed: " << RDF_closed << endl;
+    // cout << "RDF_open: " <<RDF_open << endl;
+    // cout << "epsilon_clust: " <<epsilon_clust << endl;
 }
 
 DesiredPos motionP_result;
-
+field<mat> XDFc;
+vec assignment;
 void getMotionPlan(int NA, int ND){
-    motionP_result =  defInitDesiredPos(YA, XD0, NA, ND, RDF_open, v_maxA[0], 105);
+    XDFc.set_size(ND);
+    motionP_result =  defInitDesiredPos(YA, XD0, NA, ND, RDF_open, rhoA_con(0),v_maxA[0], 50);
+    cout << "got motion plan result " << endl;
     motionP_result.dDf.phi += M_PI;
-    motionP_result.mP.startTime += ones<mat>(ND,1) * 25;
+    // motionP_result.mP.startTime += ones<mat>(ND,1) * 25;
     // XD.print("XD:");
     arma::mat tempM;
     tempM.reshape(XD.n_rows, XD.n_cols+1);
@@ -190,83 +193,127 @@ void getMotionPlan(int NA, int ND){
     XD = tempM;
     // XD.print("XD:");
     tempM.resize(X.n_rows,1);
-    tempM.submat(0,0,XA.n_rows-1,0) = XA.as_col();
-    tempM.submat(XA.n_rows,0,tempM.n_rows-1,0) = XD.as_col();
+    tempM.submat(0,0,NA*XA.n_rows-1,0) = XA.as_col();
+    tempM.submat(NA*XA.n_rows,0,tempM.n_rows-1,0) = XD.as_col();
     // tempM.print("tempM:");
     X.col(0) = tempM;
+    XDFc(0) = join_cols(motionP_result.dDf.rDFc0, zeros<mat>(2,1));
+    vec tempV = regspace(1,1,ND);
+    assignment.copy_size(tempV);
+    for (int i = 0; i < tempV.n_elem; i++)
+    {
+        assignment(motionP_result.mP.assign(i)-1) = tempV(i);
+    }
+    // assignment.print("assignment:");
     // X.submat(0,0,19,9).print("X sub:");
+}
+
+vec indDef;
+void calDistance(int NA, int ND){
+    //Defenders indices for the formation
+    // indDef = regspace(1,ND+1);
+    // int na = motionP_result.mP.assign.n_elem;
+    // int nid = indDef.n_elem;
+    // vec tempV(indDef.n_elem);
+    // int indx_num = na + regspace(na+1,nid).n_elem;
+    // vec indx(indx_num);
+    // indx.subvec(0,na-1) = motionP_result.mP.assign;
+    // indx.subvec(na,indx_num-1) = regspace(na+1,nid);
+    
+    // for (int i = 0; i < tempV.n_elem; i++)
+    // {
+    //     tempV(indx(i)-1) = indDef(i);
+    // }
+    // indDef = tempV;
+    
+
+    //minimum distance between the defenders
+    vec RDjDl(ND);
+    vec arr_minRDD(ND-1);
+    if (ND >1)
+    {
+        for (int j = 0; j < ND-1; j++)
+        {
+            for (int i = j+1 ; i < ND; i++)
+            {
+                RDjDl(i) = norm(rD.col(j) - rD.col(i));
+            }
+            arr_minRDD(j) = RDjDl.subvec(j+1,RDjDl.n_rows-1).min();
+        }
+        minRDD(0,0) = arr_minRDD.min();
+        // minRAD(0,0) = arr_minRAD.min();
+        // arr_minRDD.print("arr_minRDD: ");
+    }
+
+    mat arr_minRAD(NA, ND);
+    for (int i = 0; i < NA; i++)
+    {
+        for (int j = i+1; j < ND; j++)
+        {
+            // cout <<"i: " << i << " j: " << j << endl;
+            arr_minRAD(i,j) = norm(rD.col(j) - rA.col(i));
+        }
+        
+    }
+    minRAD(0,0) = arr_minRAD.min();
+    
+    // minRAD.print("minRAD: ");
+    vec RAiAl(NA);
+    vec arr_minRAA(NA-1);
+    for (int i = 0; i < NA-1; i++)
+    {
+        for (int l = i+1; l<NA;l++)
+        {
+            RAiAl(l) = arma::norm(rA.col(i)-rA.col(l));
+        }
+        arr_minRAA(i) = RAiAl.subvec(i+1, RAiAl.n_rows-1).min();
+    }
+    minRAA(0,0) = arr_minRAA.min();
+    // arr_minRAA.print("arr_minRAA: ");
+    
+
+
+    
 
 }
 
-// vec indDef;
-// void calDistance(int ND){
-//     //Defenders indices for the formation
-//     indDef = regspace(1,ND+1);
-//     int na = motionP_result.mP.assign.n_elem;
-//     int nid = indDef.n_elem;
-//     vec tempV(indDef.n_elem);
-//     int indx_num = na + regspace(na+1,nid).n_elem;
-//     vec indx(indx_num);
-//     indx.subvec(0,na-1) = motionP_result.mP.assign;
-//     indx.subvec(na,indx_num-1) = regspace(na+1,nid);
+double dpsiAi0=0.02;
+double vA_ref_max=4;
+extern double dpsi_var;
+int flagDefReachOpen=0;
+vec flagDefReachClosed(1,fill::zeros);
+int flagDefConnect=0;
+int flagAttInSight=0;
+mat defReachCount;
+mat flagAttInObs;
+mat FlagDefInObs;
+mat betaAv0;
+mat betaDv0;
+mat mDv0;
+mat cDv0;
+mat mAv0;
+mat cAv0;
+mat speedA0;
+mat assignment; // needs to be initialized later
+int distTol=3;
+int countDDes=0;
+
+mat NClusterAD;
+mat ClusterIdAD;
+mat clusterIdAD;
+vec flagClusterAEnclosed;
+vec flagAEnclosed;
+vec flagToSplitDefender;
+vec flagGather;
+vec flagSeek;
+vec flagEnclose;
+vec flagHerd;
+
+int flagAttackerStayTogether=1;
+int splitCout = 0;
+
+void control_loop(int NA, int ND){
     
-//     for (int i = 0; i < tempV.n_elem; i++)
-//     {
-//         tempV(indx(i)-1) = indDef(i);
-//     }
-//     indDef = tempV;
-    
-
-//     //minimum distance between the defenders
-//     vec RDjDl(ND);
-//     vec arr_minRDD(ND-1);
-//     vec arr_minRAD(ND-1);
-//     if (ND >1)
-//     {
-//         for (int j = 0; j < ND-1; j++)
-//         {
-//             for (int i = j+1 ; i < ND; i++)
-//             {
-//                 RDjDl(i) = norm(rD.col(j) - rD.col(i));
-//             }
-//             arr_minRDD(j) = RDjDl.subvec(j+1,RDjDl.n_rows-1).min();
-//             arr_minRAD(j) = norm(rD.col(j) - rA);
-//         }
-//         minRDD(0,0) = arr_minRDD.min();
-//         minRAD(0,0) = arr_minRAD.min();
-        
-//     }
-    
-
-// }
-
-// double dpsiAi0=0.02;
-// double vA_ref_max=4;
-// extern double dpsi_var;
-// int flagDefReachOpen=0;
-// int flagDefReachClosed=0;
-// int flagDefConnect=0;
-// int flagAttInSight=0;
-// mat defReachCount;
-// mat flagAttInObs;
-// mat FlagDefInObs;
-// mat betaAv0;
-// mat betaDv0;
-// mat mDv0;
-// mat cDv0;
-// mat mAv0;
-// mat cAv0;
-// mat speedA0;
-// mat assignment; // needs to be initialized later
-// int distTol=3;
-// int countDDes=0;
-
-// int flagGather=1;
-// int flagSeek=0;
-// int flagEnclose=0;
-// int flagAttackerStayTogether=1;
-
-// void control_loop(int NA, int ND){
 //     assignment = regspace(1,1,ND);
 //     defReachCount.resize(ND,1);
 //     flagAttInObs.resize(NA,NO);
@@ -876,7 +923,7 @@ void getMotionPlan(int NA, int ND){
 //     times.save("../../../../../Downloads/swarm_matlab/cppResult/times.csv", csv_ascii);
 //     WDString_mat.save("../../../../../Downloads/swarm_matlab/cppResult/WDString_mat.csv");
     
-// }
+}
 
 
 
@@ -890,8 +937,8 @@ int main() {
     AllocateMemory(NA,ND);
     measurements(NA,ND);
     initial_contorl(NA, ND);
-    // getMotionPlan(NA,ND);
-    // calDistance(ND);
+    getMotionPlan(NA,ND);
+    calDistance(NA,ND);
     // control_loop(NA,ND);
 
 

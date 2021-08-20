@@ -6,6 +6,7 @@
 #include "findPathSpeeds.cpp"
 #include "pathIntersections.cpp"
 #include "defGoalAssignMIQP.cpp"
+#include "leadTimeToAvoidCollision.cpp"
 using namespace std;
 using namespace arma;
 using namespace std::chrono;
@@ -51,12 +52,19 @@ struct motionPlan
     mat XD_des;
 };
 
-struct inputStartTime{
+// struct leadTime_elem{
+//     double T1;
+//     double T2;
+// };
+
+struct inputStartTime_elem{
     vec optT;
     int NiSeg;
-    mat leadTime;
+    field<vec> leadTime;
     std::vector<std::vector<interSec_elem>> interSec;
 };
+
+
 
 
 motionPlan motionPlanForDefOpenForm(mat XD, mat XD_des, int ND) {
@@ -178,19 +186,23 @@ motionPlan motionPlanForDefOpenForm(mat XD, mat XD_des, int ND) {
     /////   Skip here                         ////
     //////////////////////////////////////////////
     // int NiSeg = 0;
-
+    // inputStartTime_elem inputStartTime;
+    // inputStartTime.leadTime.set_size(ND, ND);
+    
     // for (int j = 1; j <= ND; j++)
     // {
     //     for (int jj = j+1; jj <= ND; jj++)
     //     {
-    //         if(assignedinterSec[j-1][jj-1].flag0 == 0)
+    //         if(assignedinterSec[j-1][jj-1].flag0 == 1)
     //         {
     //             NiSeg++;
-    //             vec S11 = assignedinterSec[j-1][jj-1].Si11;
-    //             vec S12 = assignedinterSec[j-1][jj-1].Si12;
+    //             vec tempV(2);
+    //             tempV(0) = leadTimeToAvoidCollision(assignedPath[j-1], assignedPath[jj-1], assignedPathVel[j-1], assignedPathVel[jj-1], assignedinterSec[j-1][jj-1],1);
+    //             tempV(1) = leadTimeToAvoidCollision(assignedPath[j-1], assignedPath[jj-1], assignedPathVel[j-1], assignedPathVel[jj-1], assignedinterSec[j-1][jj-1],2);
+    //             inputStartTime.leadTime(j-1,jj-1) = tempV;
+
     //         }
     //     }
-        
     // }
     
 

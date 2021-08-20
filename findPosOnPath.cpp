@@ -11,7 +11,6 @@ mat findPosOnPath(vec T, path_elem path, pathVel_elem pathVel){
     double v_maxDC_=pathVel.v_maxDC;
     double s_bar1=pathVel.s_bar1;
     double s_bar2=pathVel.s_bar2;
-    double v_bar=pathVel.v_bar;
     double T_bar1=pathVel.T_bar1;
     double T_bar2=pathVel.T_bar2;
 
