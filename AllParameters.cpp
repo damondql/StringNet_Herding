@@ -111,6 +111,11 @@ mat rA_follow;
 double RA;
 double rho_S;
 double rho_Acon;
+arma::mat clusteridA;
+arma::field<vec> indAinClusterA(1);
+arma::mat indALeader;
+// arma::mat rA_follow;
+arma::mat leaderIDA;
 
 
 void InitializeAttackers(int NA) {
@@ -138,15 +143,13 @@ void InitializeAttackers(int NA) {
     // vA.print("vA: ");
     XA0 = join_cols(rA,vA);
     int NClusterA = 1;
-    arma::mat clusteridA;
-    arma::field<vec> indAinClusterA(1);
-    arma::mat indALeader;
-    arma::mat rA_follow;
+
+    
     clusteridA = arma::ones(NA,1);
     indALeader = arma::zeros(NA,1);
     rA_follow = arma::zeros(2,NA);
     indAinClusterA(0) = {9,1,2,3,4,5,6,7,8,10,11,12,13,14,15,16,17,18};
-    arma::mat leaderIDA;
+    
     vec NAinClusterA(NClusterA);
     arma::mat ind;
     // cout << "enter for loop" << endl;
