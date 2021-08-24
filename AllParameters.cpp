@@ -149,14 +149,14 @@ void InitializeAttackers(int NA) {
     indALeader = arma::zeros(NA,1);
     rA_follow = arma::zeros(2,NA);
     indAinClusterA(0) = {9,1,2,3,4,5,6,7,8,10,11,12,13,14,15,16,17,18};
-    
+    indAinClusterA(0) = indAinClusterA(0) - 1;
     vec NAinClusterA(NClusterA);
     arma::mat ind;
     // cout << "enter for loop" << endl;
     for (int i = 0; i < NClusterA; i++)
     {
         NAinClusterA(i) = indAinClusterA(i).n_elem;
-        indALeader(indAinClusterA(i)(0)-1) = 1; //ind of leader is 9, so ind in matrix is 8
+        indALeader(indAinClusterA(i)(0)) = 1; //ind of leader is 9, so ind in matrix is 8
         leaderIDA.resize(NAinClusterA(i),1);
         for (int j = 0; j < NAinClusterA(i); j++)
         {
@@ -164,13 +164,18 @@ void InitializeAttackers(int NA) {
             // cout << "LeadID: " << indAinClusterA(i)(0) <<endl;
         }
         ind = indAinClusterA(i).subvec(1,NAinClusterA(i)-1);
+        // ind.print("ind: ");
         for (int j = 0; j < ind.n_elem; j++)
         {
-            rA_follow.col(ind(j)-1) = rA.col(ind(j)-1) - rA.col(indAinClusterA(i)(0)-1);
+            rA_follow.col(ind(j)) = rA.col(ind(j)) - rA.col(indAinClusterA(i)(0));
         }
         
         
     }
+    // leaderIDA.print();
+    // rA_follow.print();
+    // indAinClusterA.print();
+    // indALeader.print("indAleader:");
 
     vec rAcm0 = arma::sum(XA0.submat(0,0,1,NA-1),1)/NA;
     vec vAcm0 = arma::sum(XA0.submat(2,0,3,NA-1),1)/NA;

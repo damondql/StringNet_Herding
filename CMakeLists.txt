@@ -57,3 +57,6 @@ find_library(LIBCONFIGPP_LOCATION libconfig++)
 
 # add_executable(AllParam AllParameters.cpp)
 #  target_link_libraries(AllParam -O2 -larmadillo)
+
+# add_executable(DBS DBSCAN.cpp)
+#  target_link_libraries(DBS -O2 -larmadillo)

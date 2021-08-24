@@ -12,6 +12,7 @@
 // #include "modifiedDIDynamics.cpp"
 // #include "findCoordOnPath.cpp"
 #include "helperFunction.cpp"
+#include "DBSCAN.cpp"
 #include <armadillo>
 #include <iostream>
 #include <fstream>
@@ -101,6 +102,7 @@ CommGraph attacker_graph;
 CommGraph defender_graph_close;
 CommGraph defender_graph_open;
 mat rhoA_con, rhoA_con_A, rho_SN;
+int MinPts;
 void initial_contorl(int NA, int ND) {
     uA = vA;
     RPA_arr = arma::zeros(1, Niter+1);
@@ -163,7 +165,7 @@ void initial_contorl(int NA, int ND) {
     RDF_open = sf_RDF_open * M_PI / 2 *rho_SN(0);
     RDF_closed=sf_RDF_closed*rho_SN(0);
     double coeff=0.9;
-    double MinPts=4;
+    MinPts=4;
     epsilon_clust=coeff*R_DD_string/2*(1/tan(M_PI/ND))*floor(MinPts/2)/(NA-1);
 
     epsilon_clust *= 1.3;
@@ -181,7 +183,7 @@ vec assignment;
 void getMotionPlan(int NA, int ND){
     XDFc.set_size(ND);
     motionP_result =  defInitDesiredPos(YA, XD0, NA, ND, RDF_open, rhoA_con(0),v_maxA[0], 50);
-    cout << "got motion plan result " << endl;
+    // cout << "got motion plan result " << endl;
     motionP_result.dDf.phi += M_PI;
     // motionP_result.mP.startTime += ones<mat>(ND,1) * 25;
     // XD.print("XD:");
@@ -204,7 +206,8 @@ void getMotionPlan(int NA, int ND){
     {
         assignment(motionP_result.mP.assign(i)-1) = tempV(i);
     }
-    // assignment.print("assignment:");
+    assignment = assignment - 1;
+    assignment.print("assignment:");
     // X.submat(0,0,19,9).print("X sub:");
 }
 
@@ -327,7 +330,7 @@ void control_loop(int NA, int ND){
     NClusterAD = zeros(Niter+1,1);
     ClusterIdAD = zeros(NA, Niter+1);
     NClusterAD(0) = 1;
-    clusterIdAD = ones<mat>(NA,1);
+    clusterIdAD = zeros<mat>(NA,1);
     flagClusterAEnclosed = zeros<vec>(2);
     flagAEnclosed = zeros<vec>(NA);
     flagToSplitDefender.resize(1);
@@ -335,7 +338,7 @@ void control_loop(int NA, int ND){
     NDinCluster = ND;
     NClusterD.resize(1);
     NClusterD(0) = 1;
-    assignSafeArea = ones<vec>(1);
+    assignSafeArea = zeros<vec>(1);
     flagSemiCircFormNotAchieved = 0;
     flagGather.resize(1);
     flagGather(0) = 1;
@@ -361,11 +364,13 @@ void control_loop(int NA, int ND){
     mat uDFc_trans;
     mat XDF_des;
     cube WDString_mat(ND,ND, Niter);
-
+    vec RDF_OPEN;
+    vec RDF_CLOSED;
     int bound = 1;
     int countAinS = 0;
     int countAinP = 0;
-    
+    std::vector<mat> rAcm_new;
+    std::vector<vec> indexOfNewClusterAD;
     cout<< "enter control loop" << endl;
     for (int ti = 0; ti < bound; ti++)
     {
@@ -380,7 +385,7 @@ void control_loop(int NA, int ND){
         {
             // cout << "clusterIdAD(ii): " << clusterIdAD(ii) << endl;
             // cout << "assignSafeArea(clusterIdAD(ii)-1): "<< assignSafeArea(clusterIdAD(ii)-1) << endl;
-            if( arma::norm(rA.col(ii) - rS.col(assignSafeArea(clusterIdAD(ii)-1) -1)) < rho_S )
+            if( arma::norm(rA.col(ii) - rS.col(assignSafeArea(clusterIdAD(ii)))) < rho_S )
             {
                 countAinS++;
             }
@@ -391,7 +396,7 @@ void control_loop(int NA, int ND){
             int countDinS = 0;
             for (int jj = 0; jj < ND; jj++)
             {
-                if( arma::norm(rD.col(jj) - rS.col(assignSafeArea(clusterIdAD(ii)-1) -1) )  < rho_S)
+                if( arma::norm(rD.col(jj) - rS.col(assignSafeArea(clusterIdAD(ii))) )  < rho_S)
                 {
                     countDinS++;
                 }
@@ -432,10 +437,10 @@ void control_loop(int NA, int ND){
         {
             if(indALeader(i) != 1)
             {
-                XA_goal.submat(0,i,1,i) = XA.submat(0,leaderIDA(i)-1,1,leaderIDA(i)-1)+rA_follow.submat(0,i,1,i);
-                XA_goal.submat(2,i,3,i) = XA.submat(2,leaderIDA(i)-1,3,leaderIDA(i)-1);
+                XA_goal.submat(0,i,1,i) = XA.submat(0,leaderIDA(i),1,leaderIDA(i))+rA_follow.submat(0,i,1,i);
+                XA_goal.submat(2,i,3,i) = XA.submat(2,leaderIDA(i),3,leaderIDA(i));
                 XA_goal_dot.submat(0,i,1,i) = XA_goal.submat(2,i,3,i);
-                XA_goal_dot.submat(2,i,3,i) = uA.submat(0,leaderIDA(i)-1,1,leaderIDA(i)-1)-C_d*arma::norm(XA.submat(2,leaderIDA(i)-1,3,leaderIDA(i)-1))*XA.submat(2,leaderIDA(i)-1,3,leaderIDA(i)-1);
+                XA_goal_dot.submat(2,i,3,i) = uA.submat(0,leaderIDA(i),1,leaderIDA(i))-C_d*arma::norm(XA.submat(2,leaderIDA(i),3,leaderIDA(i)))*XA.submat(2,leaderIDA(i),3,leaderIDA(i));
             }
         }
         // XA_goal.print("XA_goal: ");
@@ -444,8 +449,9 @@ void control_loop(int NA, int ND){
         std::vector<uvec> indAinClusterAD(NClusterAD(ti));
         for (int c = 0; c < NClusterAD(ti); c++)
         {
-            indAinClusterAD[c] = find(clusterIdAD == c+1);
+            indAinClusterAD[c] = find(clusterIdAD == c);
             indAinClusterAD[c].print("indAinClusterAD:");
+            rAcm.resize(2,c+1);
             rAcm.col(c) = arma::sum(XA.submat(0,indAinClusterAD[c](0),1,indAinClusterAD[c](indAinClusterAD[c].n_elem-1)) ,1) / indAinClusterAD[c].n_elem;
             for (int ii = 0; ii < indAinClusterAD[c].n_elem; ii++)
             {
@@ -459,7 +465,7 @@ void control_loop(int NA, int ND){
             clusterRad.print("clusterRad: ");
             
         }
-        // rAcm.print("rAcm:");
+        rAcm.print("rAcm:");
         ClusterRad(ti) = clusterRad;
 
         int flagSpliAttackers = 0;
@@ -467,13 +473,166 @@ void control_loop(int NA, int ND){
 
         for (int c = 0; c < NClusterAD(ti); c++)
         {
+            if(c == 0){
+                rAcm_new.clear(); //reset std::vector
+            }
             if(!flagClusterAEnclosed(c))
             {
                 flagSpliAttackers = 1;
                 if(flagSpliAttackers){
+                    vec clusterIdAD0 = DBSCAN(XA.submat(0,indAinClusterAD[c](0),1,indAinClusterAD[c](indAinClusterAD[c].n_elem-1)), epsilon, MinPts);
+                    int NNewClusterAD = clusterIdAD0.max();
+                    if(NNewClusterAD > 0)
+                    {
+                        flagToSplitDefender(c) = 1;
+                        splitCout++;
+                    }
+                    // indAinClusterAD.clear();
+                    std::vector<uvec> indAinClusterAD0;
+                    mat tempM(2, NNewClusterAD);
+                    for (int cc = 0; cc < NNewClusterAD; cc++)
+                    {
+                        indAinClusterAD0.push_back( indAinClusterAD[c](arma::find(clusterIdAD0 == cc)));
+                        tempM.col(cc) = arma::sum(XA.submat(0,indAinClusterAD0[c](0),1,indAinClusterAD0[c](indAinClusterAD0[c].n_elem-1)),1)/indAinClusterAD0[cc].n_elem;
+                    }
+                    rAcm_new.push_back(tempM);
                     
+                    uvec noiseId = arma::find(clusterIdAD0 == -1);
+                    for (int no1 = 0; no1 < noiseId.n_elem; no1++)
+                    {
+                        int no = noiseId(no1);
+                        double minDistNoiseClust = INFINITY;
+                        int noc;
+                        for (int cc = 0; cc < NNewClusterAD; cc++)
+                        {
+                            double disNoiseClust = arma::norm(XA.submat(0,no, 1,no) - rAcm_new[c].col(cc));
+                            if(disNoiseClust < minDistNoiseClust)
+                            {
+                                minDistNoiseClust = disNoiseClust;
+                                noc = cc;
+                            }
+                        }
+                        clusterIdAD0(no) = noc;
+                        indAinClusterAD[noc] = join_cols(indAinClusterAD0[noc], indAinClusterAD[c].subvec(no,no));
+                        
+                    }
+                    //create new clusters of the attackers
+                    vec tempV(NNewClusterAD,fill::zeros);
+                    assignSafeArea.resize(NNewClusterAD);
+                    for (int cc = 0; cc < NNewClusterAD-1; cc++)
+                    {
+                        int c1 = NClusterAD0 + cc;
+                        indAinClusterAD[c1] = indAinClusterAD0[cc+1];
+                        for (int i = 0; i < indAinClusterAD[c1].n_elem; i++)
+                        {
+                            clusterIdAD(indAinClusterAD[c1](i)) = c1;
+                        }
+                        tempV(cc+1) = c1;
+                        assignSafeArea(c1) = 0; //Initilization of the assigned safe area
+                    }
+                    indexOfNewClusterAD.push_back(tempV);
+
+                    indAinClusterAD[c] = indAinClusterAD0[0];
+                    for (int i = 0; i < indAinClusterAD[c].n_elem; i++)
+                    {
+                        clusterIdAD(indAinClusterAD[c](i)) = c;
+                    }
+                    indexOfNewClusterAD[c](0) = c;
+                    NClusterAD0 = NClusterAD0+NNewClusterAD-1;
+
                 }    
             }
+        }
+
+        NClusterAD(ti) = NClusterAD0; //Number of clusters at time ti after clustering
+        arma::vec NAinClusterAD(NClusterAD(ti));
+        if(flagSpliAttackers == 1)
+        {
+            RDF_OPEN.resize(NClusterAD(ti));
+            RDF_CLOSED.resize(NClusterAD(ti));
+            for (int c = 0; c < NClusterAD(ti); c++)
+            {
+                clusterRad(c) = 0;
+                indAinClusterAD[c] = arma::find(clusterIdAD == c);
+                rAcm.resize(2,c+1);
+                vAcm.resize(2,c+1);
+                rAcm.col(c) = arma::sum(XA.submat(0,indAinClusterAD[c](0),1,indAinClusterAD[c](indAinClusterAD[c].n_elem-1)),1)/indAinClusterAD[c].n_elem;
+                vAcm.col(c) = arma::sum(XA.submat(2,indAinClusterAD[c](0),3,indAinClusterAD[c](indAinClusterAD[c].n_elem-1)),1)/indAinClusterAD[c].n_elem;
+                NAinClusterAD(c) = indAinClusterAD[c].n_elem;
+                for (int ii = 0; ii < NAinClusterAD.n_elem; ii++)
+                {
+                    int i = indAinClusterAD[c](ii);
+                    double RAcA =arma::norm(rAcm.col(c) - XA.submat(0,i,1,i));
+                    if(RAcA > clusterRad(c))
+                    {
+                        clusterRad(c) = RAcA;
+                    }
+                }
+                rhoA_con.resize(c+1);
+                rho_SN.resize(c+1);
+                RDF_OPEN.resize(c+1);
+                RDF_CLOSED.resize(c+1);
+                rhoA_con(c) = rhoA_con_fun(NAinClusterAD(c), NA, ND, R_DD_string, rhoD_safe, R_m_DD);
+                rho_SN(c) = rhoA_con(c) + rhoD_safe+5;
+                RDF_OPEN(c) = 1.2*M_PI/2*rho_SN(c);
+                RDF_CLOSED(c) = 1.1*rho_SN(c);
+                flagClusterAEnclosed(c) = 0;
+            }
+        }
+
+        for (int c = 0; c < NClusterAD(ti); c++)
+        {
+            NAinClusterAD(c) = indAinClusterAD[c].n_elem;
+            rAcm.resize(2,c+1);
+            vAcm.resize(2,c+1);
+            rAcm.col(c) = arma::sum(XA.submat(0,indAinClusterAD[c](0),1,indAinClusterAD[c](indAinClusterAD[c].n_elem-1)),1)/ NAinClusterAD(c);
+            vAcm.col(c) = arma::sum(XA.submat(2,indAinClusterAD[c](0),3,indAinClusterAD[c](indAinClusterAD[c].n_elem-1)),1)/ NAinClusterAD(c);
+        }
+
+        ClusterIdAD.col(ti) = clusterIdAD.as_col();
+        std::vector<vec> indDes;
+        std::vector<vec> assign;
+        if(flagGather(0) == 1)
+        {
+            NClusterD(ti) = 1;
+            indDes.push_back(regspace(0,1,ND-1));
+            assign.push_back(assignment);
+            if(flagSpliAttackers == 1)
+            {
+                for (int cc = 1; cc < rAcm_new.size(); cc++)
+                {
+                    if(!rAcm_new[cc].is_empty())
+                    {
+                        rAcm_new[0].col(cc) = rAcm_new[cc].col(0);
+                        int indc1 = rAcm_new[0].row(0).n_elem;
+                        int indc2 = rAcm_new[cc].row(0).n_elem;
+                        if(indc2 > 1)
+                        {
+                            vec temp1 = regspace(indc1,1,indc1+indc2-2);
+                            vec temp2 = regspace(1,1,indc2-1);
+                            for (int i = 0; i < temp1.n_elem; i++)
+                            {
+                                rAcm_new[0].col(temp1(i)) = rAcm_new[cc].col(temp2(i));
+                                indexOfNewClusterAD[0](temp1(i) = indexOfNewClusterAD[cc](temp2(i));
+                            }
+                        }
+                    }
+                    
+                }
+                
+            }
+        } else 
+        {
+            NClusterD(ti) = NClusterD(ti-1);
+            int NClusterD0 = NClusterD(ti);
+            for (int c = 0; i < NclusterD(ti); i++)
+            {
+                if(flagToSplitDefender(c))
+                {
+
+                }
+            }
+            
         }
         
 
@@ -496,7 +655,8 @@ int main() {
     initial_contorl(NA, ND);
     getMotionPlan(NA,ND);
     calDistance(NA,ND);
-    control_loop(NA,ND);
+    // motionP_result.mP.assign.print("assign");
+    // control_loop(NA,ND);
 
 
 
