@@ -11,6 +11,7 @@
 // #include "defDesiredClosedForm.cpp"
 // #include "modifiedDIDynamics.cpp"
 // #include "findCoordOnPath.cpp"
+#include "assignDefenders2ClustersMIQCP.cpp"
 #include "helperFunction.cpp"
 #include "DBSCAN.cpp"
 #include <armadillo>
@@ -103,6 +104,8 @@ CommGraph defender_graph_close;
 CommGraph defender_graph_open;
 mat rhoA_con, rhoA_con_A, rho_SN;
 int MinPts;
+double sf_RDF_open;
+double sf_RDF_closed;
 void initial_contorl(int NA, int ND) {
     uA = vA;
     RPA_arr = arma::zeros(1, Niter+1);
@@ -160,8 +163,8 @@ void initial_contorl(int NA, int ND) {
     rhoA_con_A.insert_cols(rhoA_con_A.n_cols,tempV);
     tempV(0) = (rho_sn_fun(ND,R_DD_string));
     rho_SN.insert_cols(rho_SN.n_cols,tempV);
-    double sf_RDF_open=1.05;
-    double sf_RDF_closed=1.1;
+    sf_RDF_open=1.05;
+    sf_RDF_closed=1.1;
     RDF_open = sf_RDF_open * M_PI / 2 *rho_SN(0);
     RDF_closed=sf_RDF_closed*rho_SN(0);
     double coeff=0.9;
@@ -181,7 +184,7 @@ DesiredPos motionP_result;
 field<mat> XDFc;
 vec assignment;
 void getMotionPlan(int NA, int ND){
-    XDFc.set_size(ND);
+    XDFc.set_size(ND,1);
     motionP_result =  defInitDesiredPos(YA, XD0, NA, ND, RDF_open, rhoA_con(0),v_maxA[0], 50);
     // cout << "got motion plan result " << endl;
     motionP_result.dDf.phi += M_PI;
@@ -286,7 +289,7 @@ extern double dpsi_var;
 int flagDefReachOpen=0;
 vec flagDefReachClosed(1,fill::zeros);
 int flagDefConnect=0;
-int flagAttInSight=0;
+vec flagAttInSight(1,fill::zeros);
 mat defReachCount;
 mat flagAttInObs;
 mat FlagDefInObs;
@@ -308,11 +311,11 @@ vec flagClusterAEnclosed;
 vec flagAEnclosed;
 vec flagToSplitDefender;
 
-int NDinCluster;
+vec NDinCluster(1);
 vec NClusterD;
 vec assignSafeArea;
 
-int flagSemiCircFormNotAchieved;
+vec flagSemiCircFormNotAchieved;
 vec flagGather;
 vec flagSeek;
 vec flagEnclose;
@@ -335,11 +338,11 @@ void control_loop(int NA, int ND){
     flagAEnclosed = zeros<vec>(NA);
     flagToSplitDefender.resize(1);
     flagToSplitDefender(0) = 0;
-    NDinCluster = ND;
+    NDinCluster(0) = ND;
     NClusterD.resize(1);
     NClusterD(0) = 1;
     assignSafeArea = zeros<vec>(1);
-    flagSemiCircFormNotAchieved = 0;
+    flagSemiCircFormNotAchieved(0) = 0;
     flagGather.resize(1);
     flagGather(0) = 1;
     flagSeek.resize(1);
@@ -372,6 +375,8 @@ void control_loop(int NA, int ND){
     std::vector<mat> rAcm_new;
     std::vector<vec> indexOfNewClusterAD;
     cout<< "enter control loop" << endl;
+    vec phi;
+    vec phi_dot;
     for (int ti = 0; ti < bound; ti++)
     {
         mat Psi = zeros<mat>(NA,1);
@@ -613,7 +618,7 @@ void control_loop(int NA, int ND){
                             for (int i = 0; i < temp1.n_elem; i++)
                             {
                                 rAcm_new[0].col(temp1(i)) = rAcm_new[cc].col(temp2(i));
-                                indexOfNewClusterAD[0](temp1(i) = indexOfNewClusterAD[cc](temp2(i));
+                                indexOfNewClusterAD[0](temp1(i))= indexOfNewClusterAD[cc](temp2(i));
                             }
                         }
                     }
@@ -625,14 +630,51 @@ void control_loop(int NA, int ND){
         {
             NClusterD(ti) = NClusterD(ti-1);
             int NClusterD0 = NClusterD(ti);
-            for (int c = 0; i < NclusterD(ti); i++)
+            for (int c = 0; c < NClusterD(ti); c++)
             {
                 if(flagToSplitDefender(c))
                 {
-
+                    vec tempV(indexOfNewClusterAD[c].n_elem);
+                    for (int i = 0; i < tempV.n_elem; i++)
+                    {
+                        tempV(i) = NAinClusterAD(indexOfNewClusterAD[c](i));
+                    }
+                    
+                    
+                    new_assign_elem new_assign_result = assignDefenders2ClustersMIQCP(rAcm_new[c], rD, indDes[c].n_elem, tempV, assign[c], indDes[c], R_DD_string);
+                    int NNewClusterD = new_assign_result.assign.size();
+                    for (int cc = 1; cc < NNewClusterD; cc++)
+                    {
+                        int c1 = NClusterAD0 + cc -1;
+                        flagGather(c1) = flagGather(c);
+                        flagSeek(c1) = flagSeek(c);
+                        flagEnclose(c1) = flagEnclose(c);
+                        flagHerd(c1) = flagHerd(c);
+                        flagAttInSight.resize(c1+1);
+                        flagAttInSight(c1) = flagAttInSight(c);
+                        NDinCluster.resize(c1+1);
+                        NDinCluster(c1) = new_assign_result.assign[cc].n_elem;
+                        indDes[c1] = new_assign_result.indDinSwarm[cc];
+                        assign[c1] = new_assign_result.assign[cc];
+                        double phi0 = atan2(rD(1, new_assign_result.assign[cc](NDinCluster(0))) - rD(1, new_assign_result.assign[cc](0)),rD(0, new_assign_result.assign[cc](NDinCluster(0))) - rD(0, new_assign_result.assign[cc](0))  );
+                        phi.resize(c1+1);
+                        phi_dot.resize(c1+1);
+                        phi(c1) = phi0+M_PI/2;
+                        phi_dot(c1) = 0;
+                        rho_SN(c1) = rhoA_con(c1) + rhoD_safe + 5;
+                        RDF_OPEN(c1) = sf_RDF_open * M_PI/2 * rho_SN(c1);
+                        RDF_CLOSED(c1) = sf_RDF_closed * rho_SN(c1);
+                        XDFc(c1) = (XD_des.col(new_assign_result.indDinSwarm[cc](0)) + XD_des.col(new_assign_result.indDinSwarm[cc](NDinCluster(c1))))/2;
+                        flagSemiCircFormNotAchieved.resize(c+1);
+                        flagSemiCircFormNotAchieved(c) = 0;
+                        flagDefReachClosed(c) = 0;
+                        NClusterD0 = NClusterD0+NNewClusterD-1;
+                        flagToSplitDefender(c) = 0;
+                    }
+                    
                 }
             }
-            
+            NClusterD(ti) = NClusterD0;
         }
         
 
