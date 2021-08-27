@@ -20,11 +20,10 @@ struct control_attacker_t
 };
 
 
-
-control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
+control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat leaderIDA,
                       int flagEnclose,int flagHerd,
-                      mat XD, mat WA,
-                      mat WDString,int NA, int ND, int ti, int bound){
+                      mat XD, mat WA, mat R_tilde_AA,
+                      mat WDString,int NA, int ND, mat clusteridA, field<mat>indAinClusterA, vec NAinClusterA, double rhoA_con,vec flagAEnclosed ,int ti, int bound){
     // XA.print("XA: ");
     // XA_goal.print("XA_goal: ");
     // XA_goal_dot.print("XA_goal_dot: ");
@@ -43,8 +42,18 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
         vD = XD.submat(2,0,3,ND-1);
     }
     
-    arma::colvec rAcm = arma::sum(XA.submat(0,0,1,XA.n_cols-1),1)/NA;
-    arma::colvec vAcm = arma::sum(XA.submat(2,0,3,XA.n_cols-1),1)/NA;
+    // arma::colvec rAcm = arma::sum(XA.submat(0,0,1,XA.n_cols-1),1)/NA;
+    // arma::colvec vAcm = arma::sum(XA.submat(2,0,3,XA.n_cols-1),1)/NA;
+    mat rAcm(2, NAinClusterA.n_elem);
+    mat vAcm(2, NAinClusterA.n_elem);
+    for (int c = 0; c < NAinClusterA.n_elem; c++)
+    {
+        rAcm.col(c) = arma::sum(XA.submat(0,indAinClusterA(c,0)(0),1,indAinClusterA(c,0).n_elem-1),1)/NAinClusterA(c);
+        vAcm.col(c) = arma::sum(XA.submat(2,indAinClusterA(c,0)(0),3,indAinClusterA(c,0).n_elem-1),1)/NAinClusterA(c); // typo in matlab file
+    }
+
+
+    
     
     mat SigmaProdD(NA,1,fill::ones);
     double R_AO_min = INFINITY;
@@ -88,6 +97,48 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
         vec uAFr = uAFv;
 
         uvec find_result = arma::find(WA.row(i) == 1);
+        double sigma;
+        vec nabla_ri_Vii;
+        //check formation controller
+        for (int j = 0; j < find_result.n_elem; j++)
+        {
+            int ii = find_result(j);
+            double Rii0 = R_tilde_AA(i,ii) - R_m_AA;
+            double Ri_ii = arma::norm(rA - XA.submat(0,ii, 1, ii));
+            if(Ri_ii < R_u_AA)
+            {
+                if(Ri_ii < R_bar_AA)
+                {
+                    sigma = 1;
+                } else if(Ri_ii > R_bar_AA && Ri_ii < R_u_AA)
+                {
+                    sigma = A_A_A*pow(Ri_ii,3)+B_A_A*pow(Ri_ii,2)+C_A_A*Ri_ii+D_A_A;
+                }
+            } else 
+            {
+                sigma = 0;
+            }
+            if(Ri_ii - R_m_AA > 1e-1)
+            {
+                nabla_ri_Vii = kAFr*WA(i,ii)*(rA-XA.submat(0,ii,1,ii))/Ri_ii/abs(Ri_ii-R_m_AA)*(pow((Ri_ii-R_m_AA),2)-pow(Rii0,2))/(pow((Ri_ii-R_m_AA),2)+pow(Rii0,2));
+            } else
+            {
+                nabla_ri_Vii=-kAFr*WA(i,ii)*(rA-XA.submat(0,ii,1,ii))/Ri_ii*largeP;
+            }
+            vec dv;
+            if(arma::norm(vA - XA.submat(2,ii,3,ii)) > 1e-16)
+            {
+                dv = kAFv*(vA-XA.submat(2,ii,3,ii))*pow(arma::norm(vA-XA.submat(2,ii,3,ii)),(alphaAFv-1));
+            } else
+            {
+                dv = zeros<vec>(2);
+            }
+            uAFv = uAFv - sigma*dv;
+            uAFr = uAFr - sigma*nabla_ri_Vii;
+        }
+
+
+
 
         //check for nearby defenders
         // cout << "111111111111111" << endl;
@@ -106,9 +157,14 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
             double R_m = 15*R_m_AD;
             double R_underbar = R_m+20;
             double R_bar = R_m + 25;
-            vec potentialControl_result = potentialControl(0.1, XA.col(i),XD.submat(0,0,XD.n_rows-1, ND-1),
-                                                           2*rho_c_A,sigma_parameters(R_underbar,R_bar),
-                                                           R_m,R_underbar,R_bar, R_bar+10,kADr,kADv, alphaADv);
+            mat sigma_param(4,1);
+            sigma_param(0) = A_A_D2;
+            sigma_param(1) = B_A_D2;
+            sigma_param(2) = C_A_D2;
+            sigma_param(3) = D_A_D2;
+            vec potentialControl_result = potentialControl(1e-5, XA.col(i),XD,
+                                                           rho_c_A,sigma_param,
+                                                           R_m_AD2,R_bar_AD2,R_u_AD2, 2*Rij0(0),kADr,kADv, alphaADv);
             uAD_pot = potentialControl_result.subvec(0,1);
             minRAD = potentialControl_result(3);
         } else {
@@ -119,7 +175,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,
             sig_para(2,0) = C_A_D;
             sig_para(3,0) = D_A_D;
             // XD.submat(0,0,XD.n_rows-1, ND-1).print("potential input:");
-            vec potentialControl_result = potentialControl(0.1, XA.col(i),XD.submat(0,0,XD.n_rows-1, ND-1),
+            vec potentialControl_result = potentialControl(1e-5, XA.col(i),XD,
                                                            rho_c_A,sig_para,
                                                            R_m_AD,R_bar_AD, R_u_AD, Rij0(0),kADr,kADv, alphaADv);
             // potentialControl_result.print("finish potential Control:");

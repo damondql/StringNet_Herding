@@ -677,7 +677,47 @@ void control_loop(int NA, int ND){
             NClusterD(ti) = NClusterD0;
         }
         
+        if(ti == 3000)
+        {
+            int NClusterA = 3;
+            clusteridA = {{2,2,2,2,2,1,1,1,1,1,1,3,3,3,3,3,3,3}};
+            clusteridA = clusteridA.t();
+            clusteridA = clusteridA - 1;
+            indAinClusterA.reset;
+            indAinClusterA.set_size(3,1);
+            mat tempM;
+            tempM = {{9,10,11,6,7,8}};
+            tempM = tempM.t();
+            tempM = tempM -1;
+            indAinClusterA(0) = tempM;
+            tempM = {{4,5,1,2,3}};
+            tempM = tempM.t();
+            tempM = tempM -1;
+            indAinClusterA(1) = tempM;
+            tempM = {{15,12,13,14,16,17,18}};
+            tempM = tempM.t();
+            tempM = tempM -1;
+            indAinClusterA(2) = tempM;
+            indALeader = zeros<mat>(NA,1);
+            rA_follow = zeros<mat>(2,NA);
+            for (int i = 0; i < NClusterA; i++)
+            {
+                NAinClusterA(i) = indAinClusterA.n_elem;
+                rhoA_con_A(i) = rhoA_con_fun(NAinClusterA(i), NA, ND, R_DD_string, rhoD_safe, R_m_DD);
+                indALeader(indAinClusterA(i,0)(0)) = 1;
+                for (int j = 0; j < indAinClusterA(i,0).n_elem; j++)
+                {
+                    leaderIDA(indAinClusterA(i,0)(j)) = indAinClusterA(i,0)(0);
+                }
+                vec ind = indAinClusterA(i,0).submat(1,0,indAinClusterA(i,0).n_elem-1,0);
+                for (int j = 0; j < ind.n_elem; j++)
+                {
+                    rA_follow.col(ind(j)) = rA.col(ind(j)) - rA.col(indAinClusterA(i,0)(0));
+                }
+            }
+        }
 
+        
 
     }
     

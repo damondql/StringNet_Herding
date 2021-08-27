@@ -116,7 +116,7 @@ arma::field<vec> indAinClusterA(1);
 arma::mat indALeader;
 // arma::mat rA_follow;
 arma::mat leaderIDA;
-
+vec NAinClusterA;
 
 void InitializeAttackers(int NA) {
     // cout << "start initialized attackers" << endl;
@@ -150,7 +150,7 @@ void InitializeAttackers(int NA) {
     rA_follow = arma::zeros(2,NA);
     indAinClusterA(0) = {9,1,2,3,4,5,6,7,8,10,11,12,13,14,15,16,17,18};
     indAinClusterA(0) = indAinClusterA(0) - 1;
-    vec NAinClusterA(NClusterA);
+    NAinClusterA.resize(NClusterA);
     arma::mat ind;
     // cout << "enter for loop" << endl;
     for (int i = 0; i < NClusterA; i++)
