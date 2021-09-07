@@ -23,7 +23,7 @@ struct control_attacker_t
 control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat leaderIDA,
                       int flagEnclose,int flagHerd,
                       mat XD, mat WA, mat R_tilde_AA,
-                      mat WDString,int NA, int ND, mat clusteridA, field<mat>indAinClusterA, vec NAinClusterA, double rhoA_con,vec flagAEnclosed ,int ti, int bound){
+                      mat WDString,int NA, int ND, mat clusteridA, field<mat>indAinClusterA, vec NAinClusterA, mat rhoA_con,vec flagAEnclosed ,int ti, int bound){
     // XA.print("XA: ");
     // XA_goal.print("XA_goal: ");
     // XA_goal_dot.print("XA_goal_dot: ");
@@ -147,16 +147,16 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
         double minRAD = INFINITY;
         vec uADv(2,fill::zeros);
         vec uADr(2,fill::zeros);
-
+        
         int countAPS = 0;
         vec uAD_pot(2);
         // cout << "22222222222222222222" << endl;
         if (i > NA - NA_sep)
         {
             // cout << "enter if " << endl;
-            double R_m = 15*R_m_AD;
-            double R_underbar = R_m+20;
-            double R_bar = R_m + 25;
+            // double R_m = 15*R_m_AD;
+            // double R_underbar = R_m+20;
+            // double R_bar = R_m + 25;
             mat sigma_param(4,1);
             sigma_param(0) = A_A_D2;
             sigma_param(1) = B_A_D2;
@@ -185,10 +185,119 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
         // uAD_pot.print("uAD_pot: ");
         // cout << "minRAD: " << minRAD << endl;
         // cout << "3333333333333333333" << endl;
-        if (ti == bound -1)
+        mat rAProjS;
+        mat vAProjS;
+        for(int j = 0; i < ND; j++)
         {
-            uAD_pot.print("in Control Attacker4 uAD_pot: ");
+            find_result = arma::find(WDString_temp.row(j) == 1);
+            if (!find_result.is_empty())
+            {
+                for (int ii = 0; ii < find_result.n_elem; ii++)
+                {
+                    int jj = find_result(ii);
+                    countAPS++;
+                    vec projection_resutl = projectionOnLine(rA, XD.submat(0,jj,1,jj), XD.submat(0,j,1,j));
+                    rAProjS.insert_cols(countAPS-1, projection_resutl.subvec(0,1));
+                    mat rTDD = XD.submat(0,j,1,j) - XD.submat(0,jj,1,jj);
+                    rTDD = rTDD / arma::norm(rTDD);
+                    mat tempM;
+                    tempM = rTDD.t() * vA;
+                    // cout << "666666666666666666666666" << endl;
+                    if (tempM(0,0) < 0)
+                    {
+                        rTDD = -rTDD;
+                    }
+                    mat vAProjS0, vAProjS1;
+                    // rTDD.print("rTDD: ");
+                    // vA_temp.print("vA_temp: ");
+                    tempM = rTDD.t() * vA;
+                    vAProjS0.insert_cols(countAPS, tempM(0,0) * rTDD);
+                    // cout<< "6.1" << endl;
+                    vec tempV;
+                    tempV = XD.submat(2,j,3,j) + 
+                               (XD.submat(2,jj,3,jj) - XD.submat(2,j,3,j)) 
+                               * arma::norm(rAProjS.submat(0,countAPS-1,1,countAPS-1) - XD.submat(0,j,1,j))
+                               / arma::norm(XD.submat(0,jj,1,jj) - XD.submat(0,j,1,j));
+                    vAProjS1.insert_cols(countAPS-1, tempV);
+                    tempV = vAProjS0.col(countAPS-1) + vAProjS1.col(countAPS-1);
+                    vAProjS.insert_cols(countAPS-1, tempV);
+                    WDString_temp(j,jj) = 0;
+                    WDString_temp(jj,j) = 0;
+                }
+            
         }
+
+        // Check for the nearby strings
+
+        mat uA_AProjS(2,1,fill::zeros);
+        if(countAPS > 0)
+        {
+            mat XAProjS = join_cols(rAProjS, vAProjS);
+            mat sig_para(4,1);
+            sig_para(0,0) = A_A_D;
+            sig_para(1,0) = B_A_D;
+            sig_para(2,0) = C_A_D;
+            sig_para(3,0) = D_A_D;
+            vec potentialControl_result = potentialControl(1e-5, XA.col(i), XAProjS, rho_c_A, sig_para, R_m_AD, R_bar_AD, R_u_AD, Rij0(0), kADr, kADv, alphaADv);
+            uA_AProjS = potentialControl_result.subvec(0,1);
+        }
+
+        mat uA_AProjC(2,1,fill::zeros);
+        int ci = clusteridA(i);
+        if(arma::norm(rA-rAcm.col(ci)) < rhoA_con(ci))
+        {
+            double thetaAAcm = atan2(rA(1) - rAcm(1, ci), rA(0) - rAcm(0, ci));
+            mat rAprojC(2,1);
+            mat tempM(2,1);
+            tempM(0) = cos(thetaAAcm);
+            tempM(1) = sin(thetaAAcm);
+            rAprojC = rAcm.col(ci) + rhoA_con(ci) * tempM;
+            mat rTP(2,1);
+            rTP(0) = cos(thetaAAcm + M_PI/2);
+            rTP(1) = sin(thetaAAcm + M_PI/2);
+            tempM = rTP.t()*vA;
+            if (tempM(0,0) < 0)
+            {
+                rTP = -rTP;
+            }
+            mat vAProjC = tempM(0,0) * rTP + vAcm.col(ci);
+            mat XAProjC = join_cols(rAprojC, vAProjC);
+            mat sig_para(4,1);
+            sig_para(0,0) = A_A_A;
+            sig_para(1,0) = B_A_A;
+            sig_para(2,0) = C_A_A;
+            sig_para(3,0) = D_A_A;
+            vec potentialControl_result = potentialControl(1e-5, XA.col(i), XAProjC, rho_c_A, sig_para, R_m_AA, R_bar_AA, R_u_AA, Rik00(0), kAOr2, kAOv2, alphaAOv);
+            uA_AProjC = potentialControl_result.subvec(0,1);
+        }
+
+
+        mat duA_goal;
+        if(i == leaderIDA(i))
+        {
+            duA_goal = XA_goal_dot.submat(2,i,3,i) - (kAPr * (rA-rA_goal)) + (kAPv * (vA-vA_goal));
+        } else 
+        {
+            duA_goal = XA_goal_dot.submat(2,i,3,i) - (kAPr2 * (rA-rA_goal)) + (kAPv2 * (vA-vA_goal));
+        }
+        double norm_duA_goal = norm(duA_goal);
+
+        if(norm_duA_goal > 1e-10)
+        {
+            uA.col(i) = min()
+        }
+
+
+
+
+
+
+
+
+        // if (ti == bound -1)
+        // {
+        //     uAD_pot.print("in Control Attacker4 uAD_pot: ");
+        // }
         
         double R_underbar = R_bar_AD;
         double R_bar = R_u_AD;
@@ -416,23 +525,23 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
             {
                 temp_M.col(ii) = XD.col(num(ii));
             }
-            if(ti == bound-1) {
-                cout << endl;
-                cout << "i==0 potentialControl input: " << endl;
-                XA.save("../AttackerStep328/XA.txt");
-                temp_M.print("XD(:,[2:ND])");
-                cout << "2*rho_c_A: " << 2*rho_c_A << endl;
-                sigma_parameters(R_underbar,R_bar).print("sigma_parameters: ");
-                cout << "R_m: " << R_m << endl;
-                cout << "R_underbar: " << R_underbar << endl;
-                cout << "R_bar+10: " << R_bar+10 << endl;
-                cout << "kADr: " << kADr << endl;
-                cout << "kADv: " << kADv << endl;
-                cout << "alphaADv: " << alphaADv << endl;
-                XA.save("../AttackerStep328/XA.txt");
-                temp_M.save("../AttackerStep328/XD.txt");
-                sigma_parameters(R_underbar,R_bar).save("../AttackerStep328/sigma_p.txt");
-            }
+            // if(ti == bound-1) {
+            //     cout << endl;
+            //     cout << "i==0 potentialControl input: " << endl;
+            //     XA.save("../AttackerStep328/XA.txt");
+            //     temp_M.print("XD(:,[2:ND])");
+            //     cout << "2*rho_c_A: " << 2*rho_c_A << endl;
+            //     sigma_parameters(R_underbar,R_bar).print("sigma_parameters: ");
+            //     cout << "R_m: " << R_m << endl;
+            //     cout << "R_underbar: " << R_underbar << endl;
+            //     cout << "R_bar+10: " << R_bar+10 << endl;
+            //     cout << "kADr: " << kADr << endl;
+            //     cout << "kADv: " << kADv << endl;
+            //     cout << "alphaADv: " << alphaADv << endl;
+            //     XA.save("../AttackerStep328/XA.txt");
+            //     temp_M.save("../AttackerStep328/XD.txt");
+            //     sigma_parameters(R_underbar,R_bar).save("../AttackerStep328/sigma_p.txt");
+            // }
             vec potentialControl_result = potentialControl(0.1, XA.col(i), temp_M, 
                                                            2*rho_c_A,sigma_parameters(R_underbar,R_bar),
                                                            R_m,R_underbar,R_bar, R_bar+10,kADr,kADv, alphaADv);

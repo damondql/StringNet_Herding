@@ -63,6 +63,7 @@
         "bit": "cpp",
         "*.h++": "cpp",
         "typeindex": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "armadillo": "cpp"
     }
 }
