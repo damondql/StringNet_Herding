@@ -64,6 +64,18 @@
         "*.h++": "cpp",
         "typeindex": "cpp",
         "variant": "cpp",
-        "armadillo": "cpp"
+        "armadillo": "cpp",
+        "csetjmp": "cpp",
+        "csignal": "cpp",
+        "any": "cpp",
+        "cfenv": "cpp",
+        "cuchar": "cpp",
+        "forward_list": "cpp",
+        "unordered_set": "cpp",
+        "regex": "cpp",
+        "future": "cpp",
+        "scoped_allocator": "cpp",
+        "valarray": "cpp",
+        "charconv": "cpp"
     }
 }

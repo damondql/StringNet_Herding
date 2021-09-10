@@ -3,6 +3,7 @@
 #include <armadillo>
 #include <math.h>
 #include "helperFunction.cpp"
+#include "inhull.cpp"
 // using namespace std;
 using namespace arma;
 
@@ -23,7 +24,7 @@ struct control_attacker_t
 control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat leaderIDA,
                       int flagEnclose,int flagHerd,
                       mat XD, mat WA, mat R_tilde_AA,
-                      mat WDString,int NA, int ND, mat clusteridA, field<mat>indAinClusterA, vec NAinClusterA, mat rhoA_con,vec flagAEnclosed ,int ti, int bound){
+                      mat WDString,int NA, int ND, mat clusteridA, field<mat>indAinClusterA, vec NAinClusterA, mat rhoA_con,vec flagAEnclosed , std::vector<vec> assign, int ti, int bound){
     // XA.print("XA: ");
     // XA_goal.print("XA_goal: ");
     // XA_goal_dot.print("XA_goal_dot: ");
@@ -224,6 +225,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
                     WDString_temp(j,jj) = 0;
                     WDString_temp(jj,j) = 0;
                 }
+            }
             
         }
 
@@ -284,310 +286,105 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
 
         if(norm_duA_goal > 1e-10)
         {
-            uA.col(i) = min()
-        }
-
-
-
-
-
-
-
-
-        // if (ti == bound -1)
-        // {
-        //     uAD_pot.print("in Control Attacker4 uAD_pot: ");
-        // }
-        
-        double R_underbar = R_bar_AD;
-        double R_bar = R_u_AD;
-        double R_m = R_m_AD;
-        vec rA_temp;
-        vec vA_temp;
-        if(flagHerd == 1)
-        {
-            rA_temp = rAcm;
-            vA_temp = vAcm;
-            R_underbar = R_bar_AD+rho_Acon;
-            R_bar = R_u_AD + rho_Acon;
-            R_m = R_m_AD + rho_Acon;
-            double distMin = INFINITY;
-            for (int j = 0; j < ND; j++)
-            {
-                double dist = arma::norm(rAcm - XD.submat(0,j,1,j));
-                if (dist < distMin)
-                {
-                    distMin = dist;
-                }
-                
-            }
-            mat rv_Acm(rAcm.n_rows+vAcm.n_rows, rAcm.n_cols);
-            rv_Acm.submat(0,0,rAcm.n_rows-1,0) = rAcm;
-            rv_Acm.submat(rAcm.n_rows,0,rv_Acm.n_rows-1,0) = vAcm;
-            vec potentialControl_result = potentialControl(0.1,rv_Acm, XD.submat(0,0,XD.n_rows-1,ND-1),
-                                                            rho_c_A,sigma_parameters(R_underbar,R_bar),
-                                                            R_m,R_underbar,R_bar, R_bar+10,kADr,kADv, alphaADv);
-            uAD_pot = potentialControl_result.subvec(0,1);
-        } else {
-            rA_temp = rA;
-            vA_temp = vA;
-        }
-        // rA_temp.print("rA_temp: ");
-        // vA_temp.print("vA_temp: ");
-        // cout << "444444444444444444444" << endl;
-        mat rAProjS;
-        mat vAProjS;
-        vec uAAProj(2,fill::zeros);
-        for (int j = 0; j < ND; j++)
-        {
-            find_result = arma::find(WDString_temp.row(j) == 1);
-            if (!find_result.is_empty())
-            {
-                for (int ii = 0; ii < find_result.n_elem; ii++)
-                {
-                    int jj = find_result(ii);
-                    countAPS++;
-                    // cout << "555555555555555555555555" << endl;
-                    vec projection_resutl = projectionOnLine(rA_temp, XD.submat(0,jj,1,jj), XD.submat(0,j,1,j));
-                    rAProjS.insert_cols(countAPS-1, projection_resutl.subvec(0,1));
-                    mat rTDD = XD.submat(0,j,1,j) - XD.submat(0,jj,1,jj);
-                    rTDD = rTDD / arma::norm(rTDD);
-                    mat tempM;
-                    tempM = rTDD.t() * vA_temp;
-                    // cout << "666666666666666666666666" << endl;
-                    if (tempM(0,0) < 0)
-                    {
-                        rTDD = -rTDD;
-                    }
-                    mat vAProjS0, vAProjS1;
-                    // rTDD.print("rTDD: ");
-                    // vA_temp.print("vA_temp: ");
-                    tempM = rTDD.t() * vA_temp;
-                    vAProjS0 = tempM(0,0) * rTDD;
-                    // cout<< "6.1" << endl;
-                    vAProjS1 = XD.submat(2,j,3,j) + 
-                               (XD.submat(2,jj,3,jj) - XD.submat(2,j,3,j)) 
-                               * arma::norm(rAProjS.submat(0,countAPS-1,1,countAPS-1) - XD.submat(0,j,1,j))
-                               / arma::norm(XD.submat(0,jj,1,jj) - XD.submat(0,j,1,j));
-                    // cout << "777777777777777777777777" << endl;
-                    if(ti == bound-1)
-                    {
-                        vAProjS0.print("vAProjS0: ");
-                        vAProjS1.print("vAProjS1: ");
-                    }
-                    mat cal_result;
-                    cal_result = vAProjS1 + vAProjS0;
-                    vAProjS.insert_cols(countAPS-1,cal_result);
-                    WDString_temp(j,jj) = 0;
-                    WDString_temp(jj,j) = 0;
-                }
-                
-            }
-            
-        }
-        if(ti == bound -1)
-        {
-            rAProjS.print("rAProjS: ");
-            vAProjS.print("vAProjS: ");
-        }
-        // cout << "88888888888888888888888" << endl;
-        if(flagHerd == 1) {
-            if (countAPS > 2)
-            {
-                vec dist;
-                dist.resize(countAPS);
-                for (int js = 0; js < countAPS; js++)
-                {
-                    dist(js) = arma::norm(rAcm - rAProjS.submat(0,js,1,js));
-                }
-                uvec ind = sort_index(dist);
-                mat copy_m;
-                copy_m = rAProjS;
-                rAProjS.reset();
-                rAProjS.insert_cols(rAProjS.n_cols,copy_m.col(ind(0)));
-                rAProjS.insert_cols(rAProjS.n_cols,copy_m.col(ind(1)));
-                copy_m = vAProjS;
-                vAProjS.insert_cols(vAProjS.n_cols,copy_m.col(ind(0)));
-                vAProjS.insert_cols(vAProjS.n_cols,copy_m.col(ind(1)));
-                countAPS = 2;
-            }
-        }
-        // cout << "999999999999999999999999999" << endl;
-        for (int js = 0; js < countAPS-1; js++)
-        {
-            mat rAvA_temp;
-            rAvA_temp = arma::join_cols(rA_temp, vA_temp);
-            mat rAvA_ProjS_temp;
-            // cout << "0.1" << endl;
-            rAvA_ProjS_temp = rAProjS.submat(0,js,1,js);
-            rAvA_ProjS_temp = arma::join_cols(rAvA_ProjS_temp, vAProjS.col(js));
-            // cout << "0.2" << endl;
-            vec potentialControl_result = potentialControl(0.1,rAvA_temp, rAvA_ProjS_temp, 
-                                                           2*rho_c_A,sigma_parameters(R_underbar,R_bar),
-                                                           R_m,R_underbar,R_bar, R_bar+10,kADr,kADv, alphaADv);
-            uAAProj = uAAProj + potentialControl_result.subvec(0,1);
-
-        }
-        if(ti == bound -1)
-        {
-            uAAProj.print("uAAProj");
-        }
-        // cout << "000000000000000000000000000000" << endl;
-        if (ti ==bound -1)
-        {
-            cout << "arma::norm(rA-rAcm): " << arma::norm(rAcm) << endl;
-            cout << "1.2 * rho_Acon: " << 1.2 * rho_Acon << endl;
-        }
-        if (arma::norm(rA-rAcm) < 1.2 * rho_Acon)
-        {
-            if (ti ==bound -1)
-            {
-                cout << "enter loop of norm rAcm < 1.2*rho_Acon:" << endl;
-            }
-            
-            double thetaAAcm = atan2(rA(1)-rAcm(1), rA(0)- rAcm(0));
-            vec temp_v = {cos(thetaAAcm), sin(thetaAAcm)};
-            mat rAProjC = rAcm+rho_Acon * temp_v;
-            vec rTP(2);
-            rTP(0) = cos(thetaAAcm + M_PI/2);
-            rTP(1) = sin(thetaAAcm + M_PI/2);
-            mat cal_result = rTP.t() * vA;
-            if (cal_result(0,0) < 0)
-            {
-                rTP = -rTP;
-            }
-            if (ti ==bound -1)
-            {
-                rTP.print("rTP: ");
-            }
-            mat tempM;
-            tempM = rTP.t()* vA;
-            mat vAProjC = tempM(0,0) * rTP + vAcm;
-            double Rik0 = Rik00(0);
-            double Ri_ik = arma::norm(rA - rAProjC);
-            if(Ri_ik - R_m_AA > tol) {
-                mat nabla_ri_ViP = kAOr2*(rA-rAProjC)/Ri_ik/abs(Ri_ik-R_m_AA)*(pow((Ri_ik-R_m_AA),2)-pow(Rik0,2))/(pow((Ri_ik-R_m_AA),2)+pow(Rik0,2));
-            } else {
-                mat nabla_ri_ViP = - kAOr2*(rA-rAProjC)*largeP;
-            }
-        }
-        // cout << "11111111111111111111111111111111" << endl;
-        mat duA_goal;
-        if(i == 0) 
-        {
-            duA_goal = XA_goal_dot.submat(2,i,3,i) - (kAPr*(rA-rA_goal)+kAPv*(vA-vA_goal));
+            uA.col(i) = min(.7*u_maxA(i),norm_duA_goal) * (duA_goal/norm_duA_goal)+uAFv+uAFr+uAOv+uAOr+uAD_pot+uA_AProjS+uA_AProjC+C_d*arma::norm(vA)*vA;
         } else
         {
-            duA_goal = XA_goal_dot.submat(2,i,3,i) - (10*kAPr*(rA-rA_goal)+10*kAPv*(vA-vA_goal));
+            uA.col(i) = uAFv+uAFr+uAOv+uAOr+uAD_pot+uA_AProjS+uA_AProjC+C_d*arma::norm(vA)*vA;
         }
-        double norm_duA_goal = arma::norm(duA_goal);
-        // cout << "norm_duA_goal: " << norm_duA_goal << endl;
-        if(ti == bound -1) 
-        {
-            cout << "norm_duA_goal: " << norm_duA_goal << endl;
-        }
-        if (norm_duA_goal > 1e-10 && flagHerd != 1)
-        {
-            
-            mat cal_result;
-            cal_result = duA_goal+uAFv+uAFr+uAOv+uAOr+uAD_pot+uAAProj+C_d*arma::norm(vA)*vA;
-            if(ti == bound -1) 
-            {
-                cout << "enter uA if loop " << endl;
-                cal_result.print("cal_result: ");
-            }
-            uA.insert_cols(uA.n_cols,cal_result);
-        } else 
-        {
-            
-            mat cal_result;
-            cal_result = uAFv+uAFr+uAOv+uAOr+uAD_pot+uAAProj+C_d*arma::norm(vA)*vA;
-            if(ti == bound -1) 
-            {
-                cout <<"enter uA else loop " << endl;
-                cal_result.print("cal_result: ");
-            }
-            uA.insert_cols(uA.n_cols,cal_result);
-        }
-        // cout << "22222222222222222222222222222222222" << endl;
-        uA0.insert_cols(uA0.n_cols,uA.col(i));
 
-        if(flagHerd != 1 && i == 0)
+        uA0.col(i) = uA.col(i);
+        double uA_bar;
+
+        for (int ca = 0; ca < clusteridA.max(); ca++)
         {
-            R_m=1.5*R_m_AD;
-            R_underbar=R_m+2;
-            R_bar=R_m+5;  
-            mat temp_M;
-            vec num;
-            num = regspace(1,1,ND-1);
-            temp_M.resize(XD.n_rows, num.n_elem);
-            for (int ii = 0; ii < num.n_elem; ii++)
+            if(clusteridA(i) == ca)
             {
-                temp_M.col(ii) = XD.col(num(ii));
+                uA_bar = u_maxA(i);
+                if (i == leaderIDA(i)){
+                    uA_bar = 0.7*u_maxA(i);
+                    double R_underbar = 3*R_bar_AD2;
+                    double R_bar = 3*R_u_AD2;
+                    double R_m;
+                    if(flagAEnclosed(i)){
+                        R_m = R_m_AD;
+                    } else
+                    {
+                        R_m = 5*R_m_AD2;
+                    }
+
+                    double norm_uA = arma::norm(uA.col(i));
+                    uAD_pot = zeros<vec>(2);
+                    if(flagAEnclosed(i)){
+                        vec potentialControl_result = potentialControl(1e-5, XA.col(i),XD, 4*rho_c_A, sigma_parameters(R_underbar, R_bar), R_m, R_underbar, R_bar, R_bar+10, kADr, kADv, alphaADv);
+                    } else
+                    {
+                        for (int c = 0; c < assign.size(); c++)
+                        {
+                            vector<Point> points;
+                            for (int i = 0; i < assign[c].n_elem; i++)
+                                {
+                                    Point tempP;
+                                    tempP.x = XD(0,assign[c](i));
+                                    tempP.y = XD(1,assign[c](i));
+                                    points.push_back(tempP);
+                                }
+                            vector<Point> ans = convex_hull(points);
+                            Point rDc_P = compute2DPolygonCentroid(ans);
+                            mat rDc(2,1);
+                            rDc(0,0) = rDc_P.x;
+                            rDc(1,0) = rDc_P.y;
+                            mat tempM(2, assign[c].n_elem);
+                            for(int i=0; i<assign[c].n_elem; i++){
+                                tempM.col(i) = XD.submat(2,assign[c](i),3,assign[c](i));
+                            }
+                            mat vDc = mean(tempM,1);
+                            double Rad = 0;
+                            for(int dj = 0; dj < ans.size(); dj++){
+                                mat tempM1(2,1);
+                                tempM1(0,0) = ans[dj].x;
+                                tempM1(1,0) = ans[dj].y;
+                                double dis = arma::norm(rDc - tempM1);
+                                if (dis > Rad)
+                                {
+                                    Rad = dis;
+                                }
+                            }
+                            R_m = Rad + R_m_AD2;
+                            R_underbar = R_m + R_bar_AD2;
+                            R_bar = R_m + R_bar_AD2 + 5;
+                            tempM = join_cols(rDc,vDc);
+                            vec potentialControl_result = potentialControl(1e-5, XA.col(i), tempM, 4*rho_c_A, sigma_parameters(R_underbar, R_bar), R_m, R_underbar, R_bar, R_bar+10, kADr, 0, alphaADv);
+                            uAD_pot = uAD_pot + potentialControl_result.subvec(0,1);
+                        }
+                        
+
+                    }
+                    uvec i1 = find(clusteridA == ca-1); //ca-1???
+                    if (!i1.is_empty()){
+                        vec potentialControl_result = potentialControl(1e-5, XA.col(i), XA.col(leaderIDA(i1(0))),4*rho_c_A, sigma_parameters(R_underbar, R_bar), 1.5*R_m, R_underbar, R_bar, R_bar+10, kADr, 0, alphaADv);
+                        uAD_pot = uAD_pot + potentialControl_result.subvec(0,1);
+                    }
+
+                    double norm_uAD_pot = arma::norm(uAD_pot);
+                    uA.col(i) = uA.col(i) + uAD_pot;
+                }
+                double norm_uA = arma::norm(uA.col(i));
+                if(norm_uA > uA_bar) {
+                    uA.col(i) = uA.col(i) * uA_bar / norm_uA;
+                }
+                break;
             }
-            // if(ti == bound-1) {
-            //     cout << endl;
-            //     cout << "i==0 potentialControl input: " << endl;
-            //     XA.save("../AttackerStep328/XA.txt");
-            //     temp_M.print("XD(:,[2:ND])");
-            //     cout << "2*rho_c_A: " << 2*rho_c_A << endl;
-            //     sigma_parameters(R_underbar,R_bar).print("sigma_parameters: ");
-            //     cout << "R_m: " << R_m << endl;
-            //     cout << "R_underbar: " << R_underbar << endl;
-            //     cout << "R_bar+10: " << R_bar+10 << endl;
-            //     cout << "kADr: " << kADr << endl;
-            //     cout << "kADv: " << kADv << endl;
-            //     cout << "alphaADv: " << alphaADv << endl;
-            //     XA.save("../AttackerStep328/XA.txt");
-            //     temp_M.save("../AttackerStep328/XD.txt");
-            //     sigma_parameters(R_underbar,R_bar).save("../AttackerStep328/sigma_p.txt");
-            // }
-            vec potentialControl_result = potentialControl(0.1, XA.col(i), temp_M, 
-                                                           2*rho_c_A,sigma_parameters(R_underbar,R_bar),
-                                                           R_m,R_underbar,R_bar, R_bar+10,kADr,kADv, alphaADv);
-            vec uAD_pot2;
             
-            uAD_pot2 = potentialControl_result.subvec(0,1);
-            if(ti == bound-1) {
-                uAD_pot2.print("uAD_pot2: ");
-            }
-            uA.col(i) = uA.col(i) + uAD_pot2;
+
         }
-        if(ti == bound -1) 
-        {
-            uA.print("uA add uAD_pot2: ");
-        }
-        double norm_uA = arma::norm(uA.col(i));
-        // cout << "333333333333333333333333333333" << endl;
-        double uMaxA;
-        if (flagEnclose == 1)
-        {
-            uMaxA = 0.9 * u_maxA(i);
-        } else 
-        {
-            uMaxA = u_maxA(i);
-        }
+
         
-        if (norm_uA > uMaxA) {
-            uA.col(i) = uA.col(i) * uMaxA / norm_uA;
-        }
-
-        vA_dot.insert_cols(i,uA.col(i));
-        vA_Des.insert_cols(i,zeros<vec>(2));
-        vA_Des_dot.insert_cols(i,zeros<vec>(2));
+        vA_dot.col(i) = uA.col(i);
+        vA_Des.col(i) = zeros<mat>(2,1);
+        vA_Des_dot.col(i) = zeros<mat>(2,1);
         SigmaProdD(i,0) = sigmaProdD;
-        // cout << "44444444444444444444444444444444" << endl;
-        // uA.print("uA: ");
-        // uA0.print("uA0:");
-        // cout << "R_AO_min: "<< R_AO_min << endl;
-        // cout << "R_AAProjS_min" << R_AAProjS_min << endl;
-        // vA_Des.print("vA_Des: ");
-        // vA_Des_dot.print("vA_Des_dot:");
-        // SigmaProdD.print("SigmaProdD");
-        // F_A.print("F_A: ");
-        // F_A_dot.print("F_A_dot: ");
-        
     }
+    
     control_attacker_t control_result;
     control_result.uA = uA;
     control_result.uA0 = uA0;
@@ -599,7 +396,10 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
     control_result.F_A_dot = F_A_dot;
     control_result.SigmaProdD = SigmaProdD;
     return control_result;
+}
 
+int main(){
+    return 0;
 }
 
 // int main() {

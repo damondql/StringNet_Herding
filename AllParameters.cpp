@@ -75,7 +75,7 @@ void initialAttackersVel(int NA){
     }
 }
 
-// double NA_sep = 0;
+double NA_sep = 0;
 
 int axS[2] = {1, 1};
 // // rDmin = rho_P+10
