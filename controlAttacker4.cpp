@@ -22,9 +22,8 @@ struct control_attacker_t
 
 
 control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat leaderIDA,
-                      int flagEnclose,int flagHerd,
                       mat XD, mat WA, mat R_tilde_AA,
-                      mat WDString,int NA, int ND, mat clusteridA, field<mat>indAinClusterA, vec NAinClusterA, mat rhoA_con,vec flagAEnclosed , std::vector<vec> assign, int ti, int bound){
+                      mat WDString,int NA, int ND, mat clusteridA, field<vec>indAinClusterA, vec NAinClusterA, mat rhoA_con,vec flagAEnclosed , std::vector<vec> assign, int ti, int bound){
     // XA.print("XA: ");
     // XA_goal.print("XA_goal: ");
     // XA_goal_dot.print("XA_goal_dot: ");
@@ -137,7 +136,8 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
             uAFv = uAFv - sigma*dv;
             uAFr = uAFr - sigma*nabla_ri_Vii;
         }
-
+        uAFv.print("uAFv: ");
+        uAFr.print("uAFr: ");
 
 
 
@@ -186,16 +186,21 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
         // uAD_pot.print("uAD_pot: ");
         // cout << "minRAD: " << minRAD << endl;
         // cout << "3333333333333333333" << endl;
+        uAD_pot.print("uAD_pot: ");
+        cout << "minRAD: " << minRAD << endl;
         mat rAProjS;
         mat vAProjS;
-        for(int j = 0; i < ND; j++)
+        
+        for(int j = 0; j < ND; j++)
         {
-            find_result = arma::find(WDString_temp.row(j) == 1);
-            if (!find_result.is_empty())
+            // cout << "j: " << j << endl;
+            uvec find_result2 = arma::find(WDString_temp.row(j) == 1);
+            // find_result2.print("find: ");
+            if (!find_result2.is_empty())
             {
-                for (int ii = 0; ii < find_result.n_elem; ii++)
+                for (int ii = 0; ii < find_result2.n_elem; ii++)
                 {
-                    int jj = find_result(ii);
+                    int jj = find_result2(ii);
                     countAPS++;
                     vec projection_resutl = projectionOnLine(rA, XD.submat(0,jj,1,jj), XD.submat(0,j,1,j));
                     rAProjS.insert_cols(countAPS-1, projection_resutl.subvec(0,1));
@@ -203,13 +208,13 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
                     rTDD = rTDD / arma::norm(rTDD);
                     mat tempM;
                     tempM = rTDD.t() * vA;
-                    // cout << "666666666666666666666666" << endl;
+                    cout << "3.1" << endl;
                     if (tempM(0,0) < 0)
                     {
                         rTDD = -rTDD;
                     }
                     mat vAProjS0, vAProjS1;
-                    // rTDD.print("rTDD: ");
+                    rTDD.print("rTDD: ");
                     // vA_temp.print("vA_temp: ");
                     tempM = rTDD.t() * vA;
                     vAProjS0.insert_cols(countAPS, tempM(0,0) * rTDD);
@@ -230,7 +235,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
         }
 
         // Check for the nearby strings
-
+        // cout << "44444444444444444444" << endl;
         mat uA_AProjS(2,1,fill::zeros);
         if(countAPS > 0)
         {
@@ -243,7 +248,8 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
             vec potentialControl_result = potentialControl(1e-5, XA.col(i), XAProjS, rho_c_A, sig_para, R_m_AD, R_bar_AD, R_u_AD, Rij0(0), kADr, kADv, alphaADv);
             uA_AProjS = potentialControl_result.subvec(0,1);
         }
-
+        uA_AProjS.print("uA_AProjS: ");
+        // cout << "555555555555555555555555" << endl;
         mat uA_AProjC(2,1,fill::zeros);
         int ci = clusteridA(i);
         if(arma::norm(rA-rAcm.col(ci)) < rhoA_con(ci))
@@ -272,29 +278,60 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
             vec potentialControl_result = potentialControl(1e-5, XA.col(i), XAProjC, rho_c_A, sig_para, R_m_AA, R_bar_AA, R_u_AA, Rik00(0), kAOr2, kAOv2, alphaAOv);
             uA_AProjC = potentialControl_result.subvec(0,1);
         }
-
-
+        uA_AProjS.print("uA_AProjC: ");
+        // cout << "666666666666666666666" << endl;
         mat duA_goal;
         if(i == leaderIDA(i))
         {
-            duA_goal = XA_goal_dot.submat(2,i,3,i) - (kAPr * (rA-rA_goal)) + (kAPv * (vA-vA_goal));
+            // cout << "if loop" << endl;
+            duA_goal = XA_goal_dot.submat(2,i,3,i) - (kAPr * (rA-rA_goal) + kAPv * (vA-vA_goal));
         } else 
         {
-            duA_goal = XA_goal_dot.submat(2,i,3,i) - (kAPr2 * (rA-rA_goal)) + (kAPv2 * (vA-vA_goal));
+            // cout << "else loop" << endl;
+            // XA_goal_dot.submat(2,i,3,i).print("XA_goal_dot:");
+            // cout << "kAPr2: " <<kAPr2  << endl;
+            // cout << "kAPv2: " <<kAPv2  << endl;
+            // rA.print("rA:");
+            // rA_goal.print("rA_goal:");
+            // vA.print("vA:");
+            // vA_goal.print("vA_goal: ");
+            // mat tempM;
+            // tempM = (kAPr2 * (rA-rA_goal));
+            // tempM.print(" kAPr2 * (rA-rA_goal)");
+            // tempM = (kAPv2 * (vA-vA_goal));
+            // tempM.print(" (kAPv2 * (vA-vA_goal)");
+            // tempM = XA_goal_dot.submat(2,i,3,i) - (kAPr2 * (rA-rA_goal)) + (kAPv2 * (vA-vA_goal));
+            // tempM.print("final result: ");
+            duA_goal = XA_goal_dot.submat(2,i,3,i) - (kAPr2 * (rA-rA_goal) + kAPv2 * (vA-vA_goal));
         }
+        duA_goal.print("duA_goal");
         double norm_duA_goal = norm(duA_goal);
-
+        // cout << "777777777777777777777" << endl;
+        cout << "norm_duA_goal: " << norm_duA_goal << endl;
         if(norm_duA_goal > 1e-10)
         {
-            uA.col(i) = min(.7*u_maxA(i),norm_duA_goal) * (duA_goal/norm_duA_goal)+uAFv+uAFr+uAOv+uAOr+uAD_pot+uA_AProjS+uA_AProjC+C_d*arma::norm(vA)*vA;
+            // cout << "u_maxA: " << u_maxA(i) << endl;
+            // duA_goal.print("duA_goal");
+            // uAFv.print("uAFv");
+            // uAFr.print("uAFr");
+            // uAOv.print("uAOv");
+            // uAOr.print("uAOr");
+            // uAD_pot.print("uAD_pot");
+            // uA_AProjS.print("uA_AProjS");
+            // cout << "C_d: " << C_d << endl;
+            // cout << "norm(vA): " << arma::norm(vA) << endl;
+            // vA.print("vA");
+            // cout << "i: " << i << endl;
+            uA.insert_cols(i, min(.7*u_maxA(i),norm_duA_goal) * (duA_goal/norm_duA_goal)+uAFv+uAFr+uAOv+uAOr+uAD_pot+uA_AProjS+uA_AProjC+C_d*arma::norm(vA)*vA);
         } else
         {
-            uA.col(i) = uAFv+uAFr+uAOv+uAOr+uAD_pot+uA_AProjS+uA_AProjC+C_d*arma::norm(vA)*vA;
+            uA.insert_cols(i, uAFv+uAFr+uAOv+uAOr+uAD_pot+uA_AProjS+uA_AProjC+C_d*arma::norm(vA)*vA);
         }
-
-        uA0.col(i) = uA.col(i);
+        uA.print("uA: ");
+        // cout << "88888888888888888888888" << endl;
+        uA0 = uA;
         double uA_bar;
-
+        
         for (int ca = 0; ca < clusteridA.max(); ca++)
         {
             if(clusteridA(i) == ca)
@@ -377,11 +414,11 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
             
 
         }
-
+        // cout << "9999999999999999999" << endl;
         
-        vA_dot.col(i) = uA.col(i);
-        vA_Des.col(i) = zeros<mat>(2,1);
-        vA_Des_dot.col(i) = zeros<mat>(2,1);
+        vA_dot.insert_cols(i, uA.col(i)) ;
+        vA_Des.insert_cols(i, zeros<mat>(2,1));
+        vA_Des_dot.insert_cols(i,zeros<mat>(2,1));
         SigmaProdD(i,0) = sigmaProdD;
     }
     
@@ -399,6 +436,37 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
 }
 
 int main(){
+    
+    calAllparametersExperiment(18,18);
+    
+    mat XA, XA_goal, XA_goal_dot, leaderIDA, XD, WA, R_tilde_AA, WDString, NAinClusterA, flagAEnclosed, rhoA_con;
+    vec assign1;
+    XA.load("/home/damon/Downloads/multi_swarm/controlA/XA.txt");
+    XA_goal.load("/home/damon/Downloads/multi_swarm/controlA/XA_goal.txt");
+    XA_goal_dot.load("/home/damon/Downloads/multi_swarm/controlA/XA_goal_dot.txt");
+    leaderIDA.load("/home/damon/Downloads/multi_swarm/controlA/leaderIdA.txt");
+    leaderIDA = leaderIDA -1;
+    // leaderIDA.print("leaderIDA:");
+    XD.load("/home/damon/Downloads/multi_swarm/controlA/XD.txt");
+    WA.load("/home/damon/Downloads/multi_swarm/controlA/WA.txt");
+    R_tilde_AA.load("/home/damon/Downloads/multi_swarm/controlA/R_tilde_AA.txt");
+    WDString.load("/home/damon/Downloads/multi_swarm/controlA/WDString.txt");
+    clusteridA.print("clusteridA");
+    // indAinClusterA.print("indAinClusterA:");
+    NAinClusterA.load("/home/damon/Downloads/multi_swarm/controlA/NAinClusterA.txt");
+    NAinClusterA.print("NAinClusterA:");
+    assign1.load("/home/damon/Downloads/multi_swarm/controlA/assign1.txt");
+    assign1 = assign1 - 1;
+    flagAEnclosed.load("/home/damon/Downloads/multi_swarm/controlA/flagAEnclosed.txt");
+    vector<vec> assign;
+    assign.push_back(assign1);
+    // assign[0].print("assign1:");
+    rhoA_con.load("/home/damon/Downloads/multi_swarm/controlA/rhoA_con.txt");
+    // WDString.print("WDString:");
+    // cout << "rows: " << WDString.n_rows << " cols: " << WDString.n_cols << endl;
+    control_attacker_t a = controlAttacker4(XA, XA_goal, XA_goal_dot, leaderIDA, XD, WA, R_tilde_AA, WDString, 18, 18, clusteridA, indAinClusterA, NAinClusterA, rhoA_con, flagAEnclosed, assign, 0,100);
+    a.uA.print("uA:");
+    a.uA0.print("uA0:");
     return 0;
 }
 

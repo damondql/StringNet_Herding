@@ -145,7 +145,7 @@ void InitializeAttackers(int NA) {
     int NClusterA = 1;
 
     
-    clusteridA = arma::ones(NA,1);
+    clusteridA = arma::zeros(NA,1);
     indALeader = arma::zeros(NA,1);
     rA_follow = arma::zeros(2,NA);
     indAinClusterA(0) = {9,1,2,3,4,5,6,7,8,10,11,12,13,14,15,16,17,18};
