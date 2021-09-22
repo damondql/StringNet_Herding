@@ -2,8 +2,8 @@
 // #include "symDerivative.cpp"
 #include "findCommGraphAndFormDist.cpp"
 #include "defInitDesirePos.cpp"
-// #include "controlAttacker4.cpp"
-// #include "controlDefender5.cpp"
+#include "controlAttacker4.cpp"
+#include "controlDefender5.cpp"
 // #include "defDesiredOpenForm.cpp"
 // #include "controlFiniteTimeTrajTracking.cpp"
 // #include "inhull.cpp"
@@ -325,6 +325,7 @@ int flagAttackerStayTogether=1;
 int splitCout = 0;
 
 field<vec> ClusterRad;
+
 
 void control_loop(int NA, int ND){
     flagDefReachClosed.resize(1);
@@ -676,6 +677,8 @@ void control_loop(int NA, int ND){
             }
             NClusterD(ti) = NClusterD0;
         }
+
+
         
         if(ti == 3000)
         {
@@ -683,7 +686,7 @@ void control_loop(int NA, int ND){
             clusteridA = {{2,2,2,2,2,1,1,1,1,1,1,3,3,3,3,3,3,3}};
             clusteridA = clusteridA.t();
             clusteridA = clusteridA - 1;
-            indAinClusterA.reset;
+            indAinClusterA.reset();
             indAinClusterA.set_size(3,1);
             mat tempM;
             tempM = {{9,10,11,6,7,8}};
@@ -717,7 +720,73 @@ void control_loop(int NA, int ND){
             }
         }
 
+        control_attacker_t control_attacker_result = controlAttacker4(XA, XA_goal, XA_goal_dot, leaderIDA, XD, attacker_graph.W, attacker_graph.Rij_tilde, WDString, NA, ND, clusteridA, indAinClusterA, NAinClusterA, rhoA_con, flagAEnclosed, assign, ti, bound);
         
+        uD = zeros<mat>(2, ND);
+        WDString = zeros<mat>(ND, ND);
+        rDcm.resize(2, NClusterD(ti));
+        for (int c = 0; c < NClusterD(ti); c++)
+        {
+            for(int jj = 0; jj < indDes[c].n_elem -1; jj++)
+            {
+                int j1 = assign[c](jj);
+                int j2 = assign[c](jj+1);
+                if (arma::norm(XD.submat(0,j1,1,j1) - XD.submat(0,j2,1,j2)) <= R_DD_string)
+                {
+                    WDString(j1, j2) = 1;
+                    WDString(j2, j1) = 1;
+                } else
+                {
+                    WDString(j1, j2) = 0;
+                    WDString(j2, j1) = 0;
+                }
+            }
+            vec indD = assign[c];
+            uvec indA = indAinClusterAD[c];
+
+            for(int ii = 0; ii < indD.n_elem; ii++)
+            {
+                rDcm.col(c) = rDcm.col(c) + XD.submat(0,indD(ii),1,indD(ii));
+            }
+            rDcm.col(c) = rDcm.col(c) / indD.n_elem;
+            
+            if(flagGather(c) == 1 &&  flagSeek(c) != 1 &&  flagEnclose(c) != c && flagHerd(c) != 1)
+            {
+                XD_des = motionP_result.dDf.XD_des0;
+                XD_des_dot = motionP_result.dDf.XD_des_dot0;
+                mat input_XD_des;
+                mat input_XD_des_dot;
+                for(int k = 0; k < indDes[c].n_elem; k++)
+                {
+                    input_XD_des.insert_cols(input_XD_des.n_cols,XD_des.col(indDes[c](k)));
+                    input_XD_des_dot.insert_cols(input_XD_des_dot.n_cols, XD_des_dot.col(indDes[c](k)));
+                }
+                uD = controlDefender5(XD, SD, indD, assign[c],input_XD_des, input_XD_des_dot, indDes[c], uD, motionP_result.mP, times(ti), ND);
+                
+                for (int j = 0; j < indD.n_elem; j++)
+                {
+                    if(arma::norm(XD.submat(0,indD(j),1,indD(j)) - XD_des.submat(0,indDes[c](j),1,indDes[c](j))) < 1e-3)
+                    {
+                        defReachCount(j) = 1;
+                        if(accu(defReachCount) >= ND)
+                        {
+                            flagSeek(c) = 1;
+                            flagGather(c) = 0;
+                            break;
+                        }
+                    }
+                }
+                
+            } else if (flagGather(c) != 1 && flagSeek(c) == 1 && flagEnclose(c) != 1 && flagHerd(c) != 1)
+            {
+
+            }
+
+
+
+        }
+        
+
 
     }
     
@@ -739,9 +808,26 @@ int main() {
     calDistance(NA,ND);
     // motionP_result.mP.assign.print("assign");
     // control_loop(NA,ND);
-
-
-
+    XD.load("/home/damon/Downloads/multi_swarm/controlD/XD.txt");
+    // XD.print("XD: ");
+    SD.load("/home/damon/Downloads/multi_swarm/controlD/SD.txt");
+    mat indD;
+    mat XD_des, XD_des_dot;
+    indD.load("/home/damon/Downloads/multi_swarm/controlD/indD.txt");
+    indD = indD-1;
+    XD_des.load("/home/damon/Downloads/multi_swarm/controlD/XD_des.txt");
+    XD_des_dot.load("/home/damon/Downloads/multi_swarm/controlD/XD_des_dot.txt");
+    mat indDes;
+    indDes.load("/home/damon/Downloads/multi_swarm/controlD/indDes.txt");
+    indDes = indDes -1;
+    mat uD;
+    uD.load("/home/damon/Downloads/multi_swarm/controlD/uD.txt");
+    // std::vector<vec> assign;
+    // assign.push_back(assignment);
+    
+    uD = controlDefender5(XD, SD, indD, assignment, XD_des, XD_des_dot, indDes, uD, motionP_result.mP, 0, ND);
+    uD.print("uD after control Defender");
+    // motionP_result.mP.assign.print("assign: ");
 //     AllocateMemory();
 //     measurements(2);
 //     initial_contorl();

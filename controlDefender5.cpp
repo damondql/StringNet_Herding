@@ -6,19 +6,19 @@
 using namespace std;
 using namespace arma;
 
-mat controlDefender5(mat XD, mat SD, vec indDef, mat assign, mat XD_des, mat XD_des_dot, motionPlan motionPlan_result,double t, int ND){
-    mat temp_M;
-    for (int i = 0; i < indDef.n_elem; i++)
-    {
-        temp_M.insert_cols(i,XD.col(indDef(i)-1));
-    }
-    XD = temp_M;
-    temp_M.reset();
-    for (int i = 0; i < motionPlan_result.assign.n_elem; i++)
-    {
-        temp_M.insert_cols(i, XD_des.col(motionPlan_result.assign(i)-1));
-    }
-    XD_des = temp_M;
+mat controlDefender5(mat XD, mat SD, vec indD, vec assign, mat XD_des, mat XD_des_dot, vec indDes, mat uD, motionPlan motionPlan_result, double t, int ND){
+    // mat temp_M;
+    // for (int i = 0; i < indDef.n_elem; i++)
+    // {
+    //     temp_M.insert_cols(i,XD.col(indDef(i)-1));
+    // }
+    // XD = temp_M;
+    // temp_M.reset();
+    // for (int i = 0; i < motionPlan_result.assign.n_elem; i++)
+    // {
+    //     temp_M.insert_cols(i, XD_des.col(motionPlan_result.assign(i)-1));
+    // }
+    // XD_des = temp_M;
     mat Rji0;
     Rji0 = 0.6 * R_bar_AD * ones<mat>(1,ND);
 
@@ -30,10 +30,12 @@ mat controlDefender5(mat XD, mat SD, vec indDef, mat assign, mat XD_des, mat XD_
     rD = XD.submat(0,0,1,XD.n_cols-1);
     vD = XD.submat(2,0,3,XD.n_cols-1);
 
-    mat uD(2,ND+1, fill::zeros);
-    for (int j = 0; j < ND; j++)
+    uD= zeros<mat>(2,ND);
+    for (int jj = 0; jj < ND; jj++)
     {
+        int j = indD(jj);
         // cout << "enter for loop" << endl;
+        cout << "j: " << j << endl;
         if (t >= motionPlan_result.startTime(j))
         {
             // cout << "t is greater than startTime" << endl;
@@ -50,7 +52,7 @@ mat controlDefender5(mat XD, mat SD, vec indDef, mat assign, mat XD_des, mat XD_
             uvec ind0 = find(S <= SD(j));
             int indS = ind0(ind0.n_elem-1);
             // ind0.print("ind0");
-            // cout << "indS: " << indS << endl;
+            cout << "indS: " << indS << endl;
             if (indS <= 0) //if indS <= length(P) which is 1 since obs free
             {
                 // cout << "cal ud in if loop" << endl;
