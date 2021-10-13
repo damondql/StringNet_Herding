@@ -1,30 +1,70 @@
 #pragma once
-#include "AllParameters.hpp"
+#include "AllParameters.cpp"
 #include "helperFunction.cpp"
 #include <armadillo>
 
 using namespace arma;
 
-mat controlDefenderFormation4(mat XD, mat indDef, mat assign, mat XD_des, mat XD_des_dot, mat uDFc_trans, mat XA, int NA, int ND, int flagAvoidAcon){
-    int na = assign.n_elem;
-    int nid = indDef.n_elem;
-    mat uD(2,ND+1,fill::zeros);
+mat controlDefenderFormation4(mat XD, mat indD, mat XD_des, mat XD_des_dot, mat uDFc_trans, mat XA, std::vector<uvec> indAinClusterAD, int flagAvoidAcon){
+    // int nid = indDef.n_elem;
+    int nd = indD.n_elem;
+    int na = XA.n_cols;
+    mat uD(2,nd,fill::zeros);
     mat tempM;
-    tempM = XD;
-    for (int i = 0; i < indDef.n_elem; i++)
-    {
-        XD.col(i) = tempM.col(indDef(i)-1);
-    }
-    mat rAcm = arma::sum(XA.submat(0,0,1,XA.n_cols-1),1)/NA;
-    mat vAcm = arma::sum(XA.submat(2,0,3,XA.n_cols-1),1)/NA;
-    for (int j = 0; j < ND; j++)
+    // tempM = XD;
+    // for (int i = 0; i < nd; i++)
+    // {
+    //     XD.col(i) = tempM.col(indD(i)-1);
+    // }
+    // mat rAcm = arma::sum(XA.submat(0,0,1,XA.n_cols-1),1)/NA;
+    // mat vAcm = arma::sum(XA.submat(2,0,3,XA.n_cols-1),1)/NA;
+    for (int j = 0; j < nd; j++)
     {
         mat rD = XD.submat(0,j,1,j);
+        mat rD_des = XD_des.submat(0,j,1,j);
         mat vD = XD.submat(2,j,3,j);
+        mat vD_des = XD_des.submat(2,j,3,j);
+        mat dr, dv;
+        if(arma::norm(rD - rD_des) > 1e-5)
+        {
+            dr=-kDFr2*(rD-rD_des)*pow(arma::norm(rD-rD_des),(alphaDFr-1));
+        } else
+        {
+            dr = zeros<mat>(2,1);
+        }
+
+        if(arma::norm(vD - vD_des) > 1e-5)
+        {
+            dv = -kDFv*(vD-vD_des)*pow(arma::norm(vD-vD_des),(alphaDFv-1));
+        } else
+        {
+            dv = zeros<mat>(2,1);
+        }
+
+        // check for nearby defenders
+        std::vector<int> ind0;
+        for(int i = 0; i < XD.n_cols; i++)
+        {
+            if (i != indD(j))
+            {
+                ind0.push_back(i);
+            }
+        }
+        mat XD_sub;
+        for(int i = 0; i < ind0.size(); i++){
+            XD_sub.insert_cols(XD_sub.n_cols, XD.col(ind0[i]));
+        }
+        mat sigma_para(1,4);
+        sigma_para(0, 0) = A_D_D;
+        sigma_para(0, 1) = B_D_D;
+        sigma_para(0, 2) = C_D_D;
+        sigma_para(0, 3) = D_D_D;
+        vec uD_D = potentialControl(1e-5 ,XD.col(indD(j)), XD_sub, R_u_DD, sigma_para, R_m_DD, R_bar_DD, R_u_DD, Rjj0(j), kDDr, kDDv, alphaDDv);
 
         mat uAcon(2,1,fill::zeros);
         if (flagAvoidAcon)
         {
+            
             double thetaDAcm = atan2(rD(1)-rAcm(1),rD(0)-rAcm(0));
             tempM.resize(2,1);
             tempM(0,0) = cos(thetaDAcm);

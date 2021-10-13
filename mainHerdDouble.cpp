@@ -4,12 +4,12 @@
 #include "defInitDesirePos.cpp"
 #include "controlAttacker4.cpp"
 #include "controlDefender5.cpp"
-// #include "defDesiredOpenForm.cpp"
+#include "defDesiredOpenForm.cpp"
 // #include "controlFiniteTimeTrajTracking.cpp"
 // #include "inhull.cpp"
 // #include "controlDefenderFormation4.cpp"
 // #include "defDesiredClosedForm.cpp"
-// #include "modifiedDIDynamics.cpp"
+#include "modifiedDIDynamics.cpp"
 // #include "findCoordOnPath.cpp"
 #include "assignDefenders2ClustersMIQCP.cpp"
 #include "helperFunction.cpp"
@@ -181,10 +181,10 @@ void initial_contorl(int NA, int ND) {
 }
 
 DesiredPos motionP_result;
-field<mat> XDFc;
+std::vector<mat> XDFc;
 vec assignment;
 void getMotionPlan(int NA, int ND){
-    XDFc.set_size(ND,1);
+    XDFc.resize(ND);
     motionP_result =  defInitDesiredPos(YA, XD0, NA, ND, RDF_open, rhoA_con(0),v_maxA[0], 50);
     // cout << "got motion plan result " << endl;
     motionP_result.dDf.phi += M_PI;
@@ -202,7 +202,7 @@ void getMotionPlan(int NA, int ND){
     // tempM.submat(NA*XA.n_rows,0,tempM.n_rows-1,0) = XD.as_col();
     // tempM.print("tempM:");
     X.col(0) = join_cols(XA.as_col(), XD.as_col());
-    XDFc(0) = join_cols(motionP_result.dDf.rDFc0, zeros<mat>(2,1));
+    XDFc[0] = join_cols(motionP_result.dDf.rDFc0, zeros<mat>(2,1));
     vec tempV = regspace(1,1,ND);
     assignment.copy_size(tempV);
     for (int i = 0; i < tempV.n_elem; i++)
@@ -665,7 +665,7 @@ void control_loop(int NA, int ND){
                         rho_SN(c1) = rhoA_con(c1) + rhoD_safe + 5;
                         RDF_OPEN(c1) = sf_RDF_open * M_PI/2 * rho_SN(c1);
                         RDF_CLOSED(c1) = sf_RDF_closed * rho_SN(c1);
-                        XDFc(c1) = (XD_des.col(new_assign_result.indDinSwarm[cc](0)) + XD_des.col(new_assign_result.indDinSwarm[cc](NDinCluster(c1))))/2;
+                        XDFc[c1] = (XD_des.col(new_assign_result.indDinSwarm[cc](0)) + XD_des.col(new_assign_result.indDinSwarm[cc](NDinCluster(c1))))/2;
                         flagSemiCircFormNotAchieved.resize(c+1);
                         flagSemiCircFormNotAchieved(c) = 0;
                         flagDefReachClosed(c) = 0;
@@ -779,7 +779,17 @@ void control_loop(int NA, int ND){
                 
             } else if (flagGather(c) != 1 && flagSeek(c) == 1 && flagEnclose(c) != 1 && flagHerd(c) != 1)
             {
-
+                uvec j1 = find(assign[c] == 1);
+                uvec jND = find(assign[c] == ND);
+                OpenForm OpenForm_result = defDesiredOpenForm(XDFc, c, &XD_des, &XD_des_dot, RDF_OPEN, rho_SN, indDes, NDinCluster(c), NClusterD(ti), YA, rAcm, vAcm, rhoA_con, NClusterAD(ti), c, phi(c), phi_dot(c), NA, ND, 0);
+                XDFc[c] = modifiedDIDynamics(XDFc[c], uDFc_trans, dt, C_d);
+                phi(c) += OpenForm_result.phi_dot * dt;
+                if phi(c) > 2*M_PI
+                {
+                    phi(c) = phi(c) - 2*M_PI;
+                }
+                phi_dot(c) += dt * OpenForm_result.phi_ddot(c);
+                
             }
 
 
@@ -808,25 +818,69 @@ int main() {
     calDistance(NA,ND);
     // motionP_result.mP.assign.print("assign");
     // control_loop(NA,ND);
-    XD.load("/home/damon/Downloads/multi_swarm/controlD/XD.txt");
-    // XD.print("XD: ");
-    SD.load("/home/damon/Downloads/multi_swarm/controlD/SD.txt");
-    mat indD;
-    mat XD_des, XD_des_dot;
-    indD.load("/home/damon/Downloads/multi_swarm/controlD/indD.txt");
-    indD = indD-1;
-    XD_des.load("/home/damon/Downloads/multi_swarm/controlD/XD_des.txt");
-    XD_des_dot.load("/home/damon/Downloads/multi_swarm/controlD/XD_des_dot.txt");
-    mat indDes;
-    indDes.load("/home/damon/Downloads/multi_swarm/controlD/indDes.txt");
-    indDes = indDes -1;
-    mat uD;
-    uD.load("/home/damon/Downloads/multi_swarm/controlD/uD.txt");
-    // std::vector<vec> assign;
-    // assign.push_back(assignment);
+    // XD.load("/home/damon/Downloads/multi_swarm/controlD/XD.txt");
+    // // XD.print("XD: ");
+    // SD.load("/home/damon/Downloads/multi_swarm/controlD/SD.txt");
+    // mat indD;
+    // mat XD_des, XD_des_dot;
+    // indD.load("/home/damon/Downloads/multi_swarm/controlD/indD.txt");
+    // indD = indD-1;
+    // XD_des.load("/home/damon/Downloads/multi_swarm/controlD/XD_des.txt");
+    // XD_des_dot.load("/home/damon/Downloads/multi_swarm/controlD/XD_des_dot.txt");
+    // mat indDes;
+    // indDes.load("/home/damon/Downloads/multi_swarm/controlD/indDes.txt");
+    // indDes = indDes -1;
+    // mat uD;
+    // uD.load("/home/damon/Downloads/multi_swarm/controlD/uD.txt");
+    // // std::vector<vec> assign;
+    // // assign.push_back(assignment);
     
-    uD = controlDefender5(XD, SD, indD, assignment, XD_des, XD_des_dot, indDes, uD, motionP_result.mP, 0, ND);
-    uD.print("uD after control Defender");
+    // uD = controlDefender5(XD, SD, indD, assignment, XD_des, XD_des_dot, indDes, uD, motionP_result.mP, 0, ND);
+    // uD.print("uD after control Defender");
+
+    mat tempM(4,1,fill::zeros);
+    tempM(0) = 385.153071102075;
+    tempM(1) = -176.086389266759;
+    XDFc.reset();
+    XDFc.set_size(3,1);
+    XDFc(0) = tempM;
+    tempM(0) = 443.375146160435;
+    tempM(1) = 37.3666215895702;
+    XDFc(1) = tempM;
+    tempM(0) = 512.183053047588;
+    tempM(1) = 289.629270783414;
+    XDFc(2) = tempM;
+    XDFc.print("XDFc: ");
+    int clusterDNum = 1;
+    mat XD_des, XD_des_dot, RDF_OPEN;
+    XD_des.load();
+    XD_des_dot.load();
+    RDF_OPEN.load();
+    rho_SN.load();
+    std::vector<vec> indDes;
+    vec tempV = {14,15,16,17,18};
+    tempV = tempV - 1;
+    indDes.push_back(tempV);
+    tempV = {8,9,10,11,12,13};
+    tempV = tempV - 1;
+    indDes.push_back(tempV);
+    tempV = {1,2,3,4,5,6,7};
+    tempV = tempV - 1;
+    indDes.push_back(tempV);
+    int NDinCluster = 5;
+    int NClusterD = 3;
+    XA.load();
+    rAcm.load();
+    vAcm.load();
+    rhoA_con.load();
+    int NClusterAD = 3;
+
+    
+
+
+
+
+
     // motionP_result.mP.assign.print("assign: ");
 //     AllocateMemory();
 //     measurements(2);
