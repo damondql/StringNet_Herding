@@ -22,11 +22,13 @@ double C_d = 0.2;
 double vma = 6;
 double uma;
 double rhoA_safe;
+int NS;
 
 void calControlLimits() {
     rP = {0,200};
     rS = {{1000, -1000, -1000,  1000},
           {1000,  1000, -1000, -1000}};
+    NS = rS.n_cols;
     rS = 1.5*rS;
     if (C_d != 0)
     {

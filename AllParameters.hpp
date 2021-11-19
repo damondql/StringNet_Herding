@@ -37,6 +37,7 @@ extern double rho_P;    //Radius of the protected area
 //Initial Positions of the protected and safe area
 extern arma::vec rP;
 extern arma::mat rS;
+extern int NS;
 extern double rho_S;
 
 // Attackers
@@ -57,7 +58,7 @@ extern double R_m_AA, R_bar_AA, R_u_AA;
 extern double A_A_A, B_A_A, C_A_A, D_A_A;
 
 //Initialize the attackers
-extern int NA, ND;    //number of attackers
+extern int NA, ND;    //number of attackers and defenders
 extern arma::vec v_maxA, u_maxA;
 extern double NA_sep;
 
