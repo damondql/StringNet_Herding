@@ -69,3 +69,6 @@ find_library(LIBCONFIGPP_LOCATION libconfig++)
 
 # add_executable(test defDesiredOpenForm.cpp)
 #  target_link_libraries(test -O2 -larmadillo)
+
+# add_executable(dbs DBSCAN.cpp)
+#  target_link_libraries(dbs -O2 -larmadillo)

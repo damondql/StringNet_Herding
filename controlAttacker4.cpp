@@ -154,7 +154,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
 
 
         //check for nearby defenders
-        // cout << "111111111111111" << endl;
+        // cout << "111111111111111conA" << endl;
         double sigmaSumD = 0;
         double sigmaProdD = 1;
         double minRAD = INFINITY;
@@ -163,7 +163,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
         
         int countAPS = 0;
         vec uAD_pot(2);
-        // cout << "22222222222222222222" << endl;
+        // cout << "22222222222222222222conA" << endl;
         if (i > NA - NA_sep)
         {
             // cout << "enter if " << endl;
@@ -197,7 +197,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
         }
         // uAD_pot.print("uAD_pot: ");
         // cout << "minRAD: " << minRAD << endl;
-        // cout << "3333333333333333333" << endl;
+        // cout << "3333333333333333333conA" << endl;
         // uAD_pot.print("uAD_pot: ");
         // cout << "minRAD: " << minRAD << endl;
         mat rAProjS;
@@ -251,7 +251,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
         }
         // rAProjS.print("rAProjS: ");
         // vAProjS.print("vAProjS: ");
-        // cout << "44444444444444444444" << endl;
+        // cout << "44444444444444444444conA" << endl;
         
         // Check for the nearby strings
         mat uA_AProjS(2,1,fill::zeros);
@@ -267,7 +267,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
             uA_AProjS = potentialControl_result.subvec(0,1);
         }
         // uA_AProjS.print("uA_AProjS: ");
-        // cout << "555555555555555555555555" << endl;
+        // cout << "555555555555555555555555conA" << endl;
         mat uA_AProjC(2,1,fill::zeros);
         int ci = clusteridA(i);
         // cout << "ci: " << ci << endl;
@@ -305,7 +305,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
             uA_AProjC = potentialControl_result.subvec(0,1);
         }
         // uA_AProjS.print("uA_AProjC: ");
-        // cout << "666666666666666666666" << endl;
+        // cout << "666666666666666666666conA" << endl;
         mat duA_goal;
         if(i == leaderIDA(i))
         {
@@ -332,7 +332,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
         }
         // duA_goal.print("duA_goal");
         double norm_duA_goal = norm(duA_goal);
-        // cout << "777777777777777777777" << endl;
+        // cout << "777777777777777777777conA" << endl;
         // cout << "norm_duA_goal: " << norm_duA_goal << endl;
         if(norm_duA_goal > 1e-10)
         {
@@ -354,7 +354,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
             uA.insert_cols(i, uAFv+uAFr+uAOv+uAOr+uAD_pot+uA_AProjS+uA_AProjC+C_d*arma::norm(vA)*vA);
         }
         // uA.print("uA: ");
-        // cout << "88888888888888888888888" << endl;
+        // cout << "88888888888888888888888conA" << endl;
         uA0.col(i) = uA.col(i);
         double uA_bar;
         
@@ -441,7 +441,7 @@ control_attacker_t controlAttacker4(mat XA, mat XA_goal, mat XA_goal_dot,mat lea
             
 
         }
-        // cout << "9999999999999999999" << endl;
+        // cout << "9999999999999999999conA" << endl;
         
         vA_dot.insert_cols(i, uA.col(i)) ;
         vA_Des.insert_cols(i, zeros<mat>(2,1));

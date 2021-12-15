@@ -35,7 +35,7 @@ mat controlDefender5(mat XD, mat SD, vec indD, vec assign, mat XD_des, mat XD_de
     {
         int j = indD(jj);
         // cout << "enter for loop" << endl;
-        cout << "j: " << j << endl;
+        // cout << "j: " << j << endl;
         if (t >= motionPlan_result.startTime(j))
         {
             // cout << "t is greater than startTime" << endl;
@@ -52,7 +52,7 @@ mat controlDefender5(mat XD, mat SD, vec indD, vec assign, mat XD_des, mat XD_de
             uvec ind0 = find(S <= SD(j));
             int indS = ind0(ind0.n_elem-1);
             // ind0.print("ind0");
-            cout << "indS: " << indS << endl;
+            // cout << "indS: " << indS << endl;
             if (indS <= 0) //if indS <= length(P) which is 1 since obs free
             {
                 // cout << "cal ud in if loop" << endl;

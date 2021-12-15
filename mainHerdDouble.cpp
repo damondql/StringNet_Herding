@@ -10,7 +10,7 @@
 #include "controlDefenderFormation4.cpp"
 #include "defDesiredClosedForm.cpp"
 #include "modifiedDIDynamics.cpp"
-// #include "findCoordOnPath.cpp"
+#include "findCoordOnPath.cpp"
 #include "assignDefenders2ClustersMIQCP.cpp"
 #include "helperFunction.cpp"
 #include "DBSCAN.cpp"
@@ -121,7 +121,7 @@ void initial_contorl(int NA, int ND) {
     vA_dot_arr=arma::zeros<mat>(2*NA,Niter+1);
     FA_dot_arr=arma::zeros<mat>(2*NA,Niter+1);
     XD_Des=arma::zeros<mat>(4*ND,Niter+1);
-    U=arma::zeros<mat>(2*(ND+NA+1),Niter+1);
+    U=arma::zeros<mat>(2*(ND+NA),Niter+1);
     times=arma::zeros<mat>(1,Niter+1);
     minEAO=arma::zeros<mat>(1,Niter+1);
     minEDO=minEAO;
@@ -215,8 +215,9 @@ void getMotionPlan(int NA, int ND){
 }
 
 vec indDef;
-vec RDjDl(ND);
+vec RDjDl;
 void calDistance(int NA, int ND){
+    RDjDl.resize(ND);
     //Defenders indices for the formation
     // indDef = regspace(1,ND+1);
     // int na = motionP_result.mP.assign.n_elem;
@@ -328,6 +329,7 @@ field<vec> ClusterRad;
 
 
 void control_loop(int NA, int ND){
+    cout<< "enter control loop" << endl;
     flagDefReachClosed.resize(1);
     flagDefReachClosed(0)=0;
     defReachCount = zeros<mat>(ND,1);
@@ -342,7 +344,9 @@ void control_loop(int NA, int ND){
     NDinCluster(0) = ND;
     NClusterD.resize(1);
     NClusterD(0) = 1;
+    // cout<< "111111111111111111111111" << endl;
     assignSafeArea = zeros<vec>(1);
+    flagSemiCircFormNotAchieved.resize(1);
     flagSemiCircFormNotAchieved(0) = 0;
     flagGather.resize(1);
     flagGather(0) = 1;
@@ -353,7 +357,7 @@ void control_loop(int NA, int ND){
     flagAttackerStayTogether = 1;
     splitCout = 0;
     ClusterRad.set_size(Niter,1);
-
+    // cout<< "222222222222222222222222" << endl;
     mat RefTraj(4*ND, Niter);
     mat SigmaProdD_arr;
     mat rAcm_arr;
@@ -361,7 +365,6 @@ void control_loop(int NA, int ND){
     mat sigmaProd;
     mat minRAAProjS(Niter,1);
     int out_ti;
-    // int bound = Niter;
     mat uD;
     mat XD_des;
     mat XD_des_dot;
@@ -370,17 +373,18 @@ void control_loop(int NA, int ND){
     cube WDString_mat(ND,ND, Niter);
     vec RDF_OPEN;
     vec RDF_CLOSED;
-    int bound = 1;
+    int bound = 10483;
     int countAinS = 0;
     int countAinP = 0;
     std::vector<mat> rAcm_new;
     std::vector<vec> indexOfNewClusterAD;
-    cout<< "enter control loop" << endl;
+    // cout<< "33333333333333333333333" << endl;
     vec phi;
     vec phi_dot;
     vec ti_e;
     for (int ti = 0; ti < bound; ti++)
     {
+        cout << "ti ===================== " << ti << endl;
         mat Psi = zeros<mat>(NA,1);
         mat Psi_dot = Psi;
         mat Psi_ddot = Psi;
@@ -440,6 +444,8 @@ void control_loop(int NA, int ND){
         // XA_goal.print("XA_goal:");
         mat XA_goal_dot = zeros<mat>(4,NA);
         // leaderIDA.print("leadIDA:");
+        uA.print("uA: ");
+        XA_goal.print("XA_goal");
         for (int i = 0; i < NA; i++)
         {
             if(indALeader(i) != 1)
@@ -458,7 +464,7 @@ void control_loop(int NA, int ND){
         {
             ti_e.resize(NClusterAD.n_elem);
             indAinClusterAD[c] = find(clusterIdAD == c);
-            indAinClusterAD[c].print("indAinClusterAD:");
+            // indAinClusterAD[c].print("indAinClusterAD:");
             rAcm.resize(2,c+1);
             rAcm.col(c) = arma::sum(XA.submat(0,indAinClusterAD[c](0),1,indAinClusterAD[c](indAinClusterAD[c].n_elem-1)) ,1) / indAinClusterAD[c].n_elem;
             for (int ii = 0; ii < indAinClusterAD[c].n_elem; ii++)
@@ -470,10 +476,10 @@ void control_loop(int NA, int ND){
                     clusterRad(c) = RAcA;
                 }
             }
-            clusterRad.print("clusterRad: ");
+            // clusterRad.print("clusterRad: ");
             
         }
-        rAcm.print("rAcm:");
+        // rAcm.print("rAcm:");
         ClusterRad(ti) = clusterRad;
 
         int flagSpliAttackers = 0;
@@ -481,92 +487,123 @@ void control_loop(int NA, int ND){
 
         for (int c = 0; c < NClusterAD(ti); c++)
         {
+            cout << "enter for loop" << endl;
             if(c == 0){
                 rAcm_new.clear(); //reset std::vector
             }
             if(!flagClusterAEnclosed(c))
             {
-                flagSpliAttackers = 1;
-                if(flagSpliAttackers){
-                    vec clusterIdAD0 = DBSCAN(XA.submat(0,indAinClusterAD[c](0),1,indAinClusterAD[c](indAinClusterAD[c].n_elem-1)), epsilon, MinPts);
-                    int NNewClusterAD = clusterIdAD0.max();
-                    if(NNewClusterAD > 0)
-                    {
-                        flagToSplitDefender(c) = 1;
-                        splitCout++;
-                    }
-                    // indAinClusterAD.clear();
-                    std::vector<uvec> indAinClusterAD0;
-                    mat tempM(2, NNewClusterAD);
-                    for (int cc = 0; cc < NNewClusterAD; cc++)
-                    {
-                        indAinClusterAD0.push_back( indAinClusterAD[c](arma::find(clusterIdAD0 == cc)));
-                        tempM.col(cc) = arma::sum(XA.submat(0,indAinClusterAD0[c](0),1,indAinClusterAD0[c](indAinClusterAD0[c].n_elem-1)),1)/indAinClusterAD0[cc].n_elem;
-                    }
-                    rAcm_new.push_back(tempM);
-                    
-                    uvec noiseId = arma::find(clusterIdAD0 == -1);
-                    for (int no1 = 0; no1 < noiseId.n_elem; no1++)
-                    {
-                        int no = noiseId(no1);
-                        double minDistNoiseClust = INFINITY;
-                        int noc;
+                if(clusterRad(c) > rhoA_con(c))
+                {
+                    flagSpliAttackers = 1;
+                    if(flagSpliAttackers){
+                        mat tempM1 = XA.submat(0,indAinClusterAD[c](0),1,indAinClusterAD[c](indAinClusterAD[c].n_elem-1));
+                        tempM1.print("XA.submat:");
+                        tempM1.save("../dbs/XA_submat.csv", csv_ascii);
+                        vec clusterIdAD0 = DBSCAN(XA.submat(0,indAinClusterAD[c](0),1,indAinClusterAD[c](indAinClusterAD[c].n_elem-1)), epsilon_clust, MinPts);
+                        clusterIdAD0.print("clusterIdAD0:");
+                        int NNewClusterAD = clusterIdAD0.max()+1;
+                        if(NNewClusterAD > 0)
+                        {
+                            flagToSplitDefender(c) = 1;
+                            splitCout++;
+                        }
+                        cout << "1.1" << endl;
+                        // indAinClusterAD.clear();
+                        std::vector<uvec> indAinClusterAD0;
+                        mat tempM(2, NNewClusterAD);
                         for (int cc = 0; cc < NNewClusterAD; cc++)
                         {
-                            double disNoiseClust = arma::norm(XA.submat(0,no, 1,no) - rAcm_new[c].col(cc));
-                            if(disNoiseClust < minDistNoiseClust)
-                            {
-                                minDistNoiseClust = disNoiseClust;
-                                noc = cc;
-                            }
+                            indAinClusterAD0.push_back( indAinClusterAD[c](arma::find(clusterIdAD0 == cc)));
+                            tempM.col(cc) = arma::sum(XA.submat(0,indAinClusterAD0[c](0),1,indAinClusterAD0[c](indAinClusterAD0[c].n_elem-1)),1)/indAinClusterAD0[cc].n_elem;
                         }
-                        clusterIdAD0(no) = noc;
-                        indAinClusterAD[noc] = join_cols(indAinClusterAD0[noc], indAinClusterAD[c].subvec(no,no));
-                        
-                    }
-                    //create new clusters of the attackers
-                    vec tempV(NNewClusterAD,fill::zeros);
-                    assignSafeArea.resize(NNewClusterAD);
-                    for (int cc = 0; cc < NNewClusterAD-1; cc++)
-                    {
-                        int c1 = NClusterAD0 + cc;
-                        indAinClusterAD[c1] = indAinClusterAD0[cc+1];
-                        for (int i = 0; i < indAinClusterAD[c1].n_elem; i++)
+                        rAcm_new.push_back(tempM);
+                        cout << "1.2" << endl;
+                        uvec noiseId = arma::find(clusterIdAD0 == -1);
+                        for (int no1 = 0; no1 < noiseId.n_elem; no1++)
                         {
-                            clusterIdAD(indAinClusterAD[c1](i)) = c1;
+                            int no = noiseId(no1);
+                            double minDistNoiseClust = INFINITY;
+                            int noc;
+                            for (int cc = 0; cc < NNewClusterAD; cc++)
+                            {
+                                double disNoiseClust = arma::norm(XA.submat(0,no, 1,no) - rAcm_new[c].col(cc));
+                                if(disNoiseClust < minDistNoiseClust)
+                                {
+                                    minDistNoiseClust = disNoiseClust;
+                                    noc = cc;
+                                }
+                            }
+                            clusterIdAD0(no) = noc;
+                            indAinClusterAD[noc] = join_cols(indAinClusterAD0[noc], indAinClusterAD[c].subvec(no,no));
+                            
                         }
-                        tempV(cc+1) = c1;
-                        assignSafeArea(c1) = 0; //Initilization of the assigned safe area
+                        //create new clusters of the attackers
+                        cout << "1.3" << endl;
+                        vec tempV(NNewClusterAD,fill::zeros);
+                        assignSafeArea.resize(NNewClusterAD);
+                        indAinClusterAD = indAinClusterAD0;
+                        for (int cc = 0; cc < NNewClusterAD-1; cc++)
+                        {
+                            int c1 = NClusterAD0 + cc;
+                            // cout << "cc: " << cc << endl;
+                            // cout << "c1: " << c1 << endl;
+                            // cout << "indAinClusterAD size: " << indAinClusterAD.size() << endl;
+                            // cout << "indAinClusterAD0 size: " << indAinClusterAD0.size() << endl;
+                            // // indAinClusterAD[c1].print("indAinClusterAD[c1]:");
+                            // // indAinClusterAD0[cc+1].print("indAinClusterAD0[cc+1]: ");
+                            // for(int a = 0; a < indAinClusterAD0.size(); a++) {
+                            //     indAinClusterAD0[a].print("indAinClusterAD0[a]: ");
+                            // }
+                            // indAinClusterAD[c1] = indAinClusterAD0[cc+1];
+                            // cout<<"get cc+1 " << endl;
+                            for (int i = 0; i < indAinClusterAD[c1].n_elem; i++)
+                            {
+                                clusterIdAD(indAinClusterAD[c1](i)) = c1;
+                            }
+                            tempV(cc+1) = c1;
+                            assignSafeArea(c1) = 0; //Initilization of the assigned safe area
+                        }
+                        indexOfNewClusterAD.push_back(tempV);
+                        cout << "1.4" << endl;
+                        cout << "indAinClusterAD size: " << indAinClusterAD.size() << endl;
+                        cout << "indAinClusterAD0 size: " << indAinClusterAD0.size() << endl;
+                        // cout << "ti: " << ti << endl;
+                        indAinClusterAD[c] = indAinClusterAD0[0];
+                        cout << "1.5" << endl;
+                        for (int i = 0; i < indAinClusterAD[c].n_elem; i++)
+                        {
+                            clusterIdAD(indAinClusterAD[c](i)) = c;
+                            cout << "1.6" << endl;
+                        }
+                        indexOfNewClusterAD[c](0) = c;
+                        cout << "1.7" << endl;
+                        NClusterAD0 = NClusterAD0+NNewClusterAD-1;
+                        cout << "1.8" << endl;
                     }
-                    indexOfNewClusterAD.push_back(tempV);
-
-                    indAinClusterAD[c] = indAinClusterAD0[0];
-                    for (int i = 0; i < indAinClusterAD[c].n_elem; i++)
-                    {
-                        clusterIdAD(indAinClusterAD[c](i)) = c;
-                    }
-                    indexOfNewClusterAD[c](0) = c;
-                    NClusterAD0 = NClusterAD0+NNewClusterAD-1;
-
                 }    
             }
         }
-
+        cout << "4444444444444444" << endl;
         NClusterAD(ti) = NClusterAD0; //Number of clusters at time ti after clustering
         arma::vec NAinClusterAD(NClusterAD(ti));
         if(flagSpliAttackers == 1)
         {
             RDF_OPEN.resize(NClusterAD(ti));
             RDF_CLOSED.resize(NClusterAD(ti));
+            cout << "4.1" << endl;
+            flagClusterAEnclosed = zeros<vec>(NClusterAD(ti));
+            clusterRad = zeros<vec>(NClusterAD(ti));
             for (int c = 0; c < NClusterAD(ti); c++)
             {
-                clusterRad(c) = 0;
+                // clusterRad(c) = 0;
                 indAinClusterAD[c] = arma::find(clusterIdAD == c);
                 rAcm.resize(2,c+1);
                 vAcm.resize(2,c+1);
                 rAcm.col(c) = arma::sum(XA.submat(0,indAinClusterAD[c](0),1,indAinClusterAD[c](indAinClusterAD[c].n_elem-1)),1)/indAinClusterAD[c].n_elem;
                 vAcm.col(c) = arma::sum(XA.submat(2,indAinClusterAD[c](0),3,indAinClusterAD[c](indAinClusterAD[c].n_elem-1)),1)/indAinClusterAD[c].n_elem;
                 NAinClusterAD(c) = indAinClusterAD[c].n_elem;
+                cout << "4.2" << endl;
                 for (int ii = 0; ii < NAinClusterAD.n_elem; ii++)
                 {
                     int i = indAinClusterAD[c](ii);
@@ -576,18 +613,22 @@ void control_loop(int NA, int ND){
                         clusterRad(c) = RAcA;
                     }
                 }
+                cout << "4.3" << endl;
                 rhoA_con.resize(c+1);
                 rho_SN.resize(c+1);
                 RDF_OPEN.resize(c+1);
                 RDF_CLOSED.resize(c+1);
                 rhoA_con(c) = rhoA_con_fun(NAinClusterAD(c), NA, ND, R_DD_string, rhoD_safe, R_m_DD);
+                cout << "4.4" << endl;
                 rho_SN(c) = rhoA_con(c) + rhoD_safe+5;
                 RDF_OPEN(c) = 1.2*M_PI/2*rho_SN(c);
                 RDF_CLOSED(c) = 1.1*rho_SN(c);
-                flagClusterAEnclosed(c) = 0;
+                cout << "flagClusterAEnclosed size: " << flagClusterAEnclosed.size() << endl;
+                cout << "c: " << c << endl;
+                // flagClusterAEnclosed(c) = 0;
             }
         }
-
+        cout << "5555555555555555555555" << endl;
         for (int c = 0; c < NClusterAD(ti); c++)
         {
             NAinClusterAD(c) = indAinClusterAD[c].n_elem;
@@ -596,12 +637,13 @@ void control_loop(int NA, int ND){
             rAcm.col(c) = arma::sum(XA.submat(0,indAinClusterAD[c](0),1,indAinClusterAD[c](indAinClusterAD[c].n_elem-1)),1)/ NAinClusterAD(c);
             vAcm.col(c) = arma::sum(XA.submat(2,indAinClusterAD[c](0),3,indAinClusterAD[c](indAinClusterAD[c].n_elem-1)),1)/ NAinClusterAD(c);
         }
-
+        cout << "666666666666666" << endl;
         ClusterIdAD.col(ti) = clusterIdAD.as_col();
         std::vector<vec> indDes;
         std::vector<vec> assign;
         if(flagGather(0) == 1)
         {
+            NClusterD.resize(ti+1);
             NClusterD(ti) = 1;
             indDes.push_back(regspace(0,1,ND-1));
             assign.push_back(assignment);
@@ -679,10 +721,10 @@ void control_loop(int NA, int ND){
             }
             NClusterD(ti) = NClusterD0;
         }
-
+        cout << "777777777777777" << endl;
 
         
-        if(ti == 3000)
+        if(ti == 3000-1)
         {
             int NClusterA = 3;
             clusteridA = {{2,2,2,2,2,1,1,1,1,1,1,3,3,3,3,3,3,3}};
@@ -705,25 +747,63 @@ void control_loop(int NA, int ND){
             indAinClusterA(2) = tempM;
             indALeader = zeros<mat>(NA,1);
             rA_follow = zeros<mat>(2,NA);
+            // cout << "attacker splitting initialized" << endl;
+            if(NAinClusterA.n_elem < NClusterA) 
+            {
+                NAinClusterA.resize(NClusterA);
+            }
+            if(rhoA_con_A.size() < NClusterA) 
+            {
+                rhoA_con_A.resize(NClusterA);
+            }
             for (int i = 0; i < NClusterA; i++)
             {
+                // cout << "i: " << i << endl;
+                // cout << "NAinClusterA: " <<NAinClusterA.size() << endl;
+                // cout <<"rhoA_con_A size: " << rhoA_con_A.size() << endl;
                 NAinClusterA(i) = indAinClusterA.n_elem;
                 rhoA_con_A(i) = rhoA_con_fun(NAinClusterA(i), NA, ND, R_DD_string, rhoD_safe, R_m_DD);
+                // cout << "rhoA_con_A: " << rhoA_con_A <<endl;
                 indALeader(indAinClusterA(i,0)(0)) = 1;
                 for (int j = 0; j < indAinClusterA(i,0).n_elem; j++)
                 {
                     leaderIDA(indAinClusterA(i,0)(j)) = indAinClusterA(i,0)(0);
                 }
+                // cout << "finished setting leader" << endl;
                 vec ind = indAinClusterA(i,0).submat(1,0,indAinClusterA(i,0).n_elem-1,0);
+                // cout << "initialized ind" << endl;
+                // ind.print("ind:");
+                // cout << "indAinClusterA(i,0)(0): " << indAinClusterA(i,0)(0) << endl;
                 for (int j = 0; j < ind.n_elem; j++)
                 {
                     rA_follow.col(ind(j)) = rA.col(ind(j)) - rA.col(indAinClusterA(i,0)(0));
                 }
+                // cout << "finished rA_follow" << endl;
             }
         }
-
-        control_attacker_t control_attacker_result = controlAttacker4(XA, XA_goal, XA_goal_dot, leaderIDA, XD, attacker_graph.W, attacker_graph.Rij_tilde, WDString, NA, ND, clusteridA, indAinClusterA, NAinClusterA, rhoA_con, flagAEnclosed, assign, ti, bound);
-        
+        if (ti == 2999) 
+        {
+            cout << "controlAttacker4:" << endl;
+            XA.print("XA: ");
+            XA_goal.print("XA_goal: ");
+            XA_goal_dot.print("XA_goal_dot:");
+            leaderIDA.print("leaderIDA");
+            XD.print("XD");
+            attacker_graph.W.print("attacker_graph.W");
+            attacker_graph.Rij_tilde.print("attacker_graph.Rij_tilde");
+            WDString.print("WDString: ");
+            clusteridA.print("clusteridA: ");
+            NAinClusterA.print("NAinClusterA: ");
+            rhoA_con_A.print("rhoA_con_A:");
+            for(int i = 0; i < assign.size(); i++) {
+                cout << "assign i: " << i << endl;
+                assign[i].print("assign:");
+            }
+        }
+        control_attacker_t control_attacker_result = controlAttacker4(XA, XA_goal, XA_goal_dot, leaderIDA, XD, attacker_graph.W, attacker_graph.Rij_tilde, WDString, NA, ND, clusteridA, indAinClusterA, NAinClusterA, rhoA_con_A, flagAEnclosed, assign, ti, bound);
+        control_attacker_result.uA.print("control_attacker_result uA:");
+        uA = control_attacker_result.uA;
+        cout << "8888888888888888888" << endl;
         uD = zeros<mat>(2, ND);
         WDString = zeros<mat>(ND, ND);
         rDcm.resize(2, NClusterD(ti));
@@ -751,9 +831,14 @@ void control_loop(int NA, int ND){
                 rDcm.col(c) = rDcm.col(c) + XD.submat(0,indD(ii),1,indD(ii));
             }
             rDcm.col(c) = rDcm.col(c) / indD.n_elem;
-            
-            if(flagGather(c) == 1 &&  flagSeek(c) != 1 &&  flagEnclose(c) != c && flagHerd(c) != 1)
+            cout << "9999999999999999999999" << endl;
+            // flagGather.print("flagGather: ");
+            // flagSeek.print("flagSeek: ");
+            // flagEnclose.print("flagEnclose: ");
+            // flagHerd.print("flagHerd: ");
+            if(flagGather(c) == 1 &&  flagSeek(c) != 1 &&  flagEnclose(c) != 1 && flagHerd(c) != 1)
             {
+                cout <<"gathering!" << endl;
                 XD_des = motionP_result.dDf.XD_des0;
                 XD_des_dot = motionP_result.dDf.XD_des_dot0;
                 mat input_XD_des;
@@ -765,11 +850,18 @@ void control_loop(int NA, int ND){
                 }
                 uD = controlDefender5(XD, SD, indD, assign[c],input_XD_des, input_XD_des_dot, indDes[c], uD, motionP_result.mP, times(ti), ND);
                 
+                if(ti == bound - 1) 
+                {
+                    XD.print("XD: ");
+                    XD_des.print("XD_des: ");
+                }
+
                 for (int j = 0; j < indD.n_elem; j++)
                 {
                     if(arma::norm(XD.submat(0,indD(j),1,indD(j)) - XD_des.submat(0,indDes[c](j),1,indDes[c](j))) < 1e-3)
                     {
                         defReachCount(j) = 1;
+                        defReachCount.print("reach count: ");
                         if(accu(defReachCount) >= ND)
                         {
                             flagSeek(c) = 1;
@@ -778,9 +870,10 @@ void control_loop(int NA, int ND){
                         }
                     }
                 }
-                
+                // cout << "end gathering" << endl;
             } else if (flagGather(c) != 1 && flagSeek(c) == 1 && flagEnclose(c) != 1 && flagHerd(c) != 1)
             {
+                cout<< "seeking!" << endl;
                 uvec j1 = find(assign[c] == 1);
                 uvec jND = find(assign[c] == ND);
                 OpenForm OpenForm_result = defDesiredOpenForm(XDFc, c, &XD_des, &XD_des_dot, RDF_OPEN, rho_SN, indDes, NDinCluster(c), NClusterD(ti), YA, rAcm, vAcm, rhoA_con, NClusterAD(ti), c, phi(c), phi_dot(c), NA, ND, 0);
@@ -810,6 +903,7 @@ void control_loop(int NA, int ND){
                 }
             } else if (flagGather(c) != 1 && flagSeek(c) != 1 && flagEnclose(c) == 1 && flagHerd(c) != 1)
             {
+                cout <<"closing!" << endl;
                 if (flagDForm != 1)
                 {
                     flagDForm = 1;
@@ -925,6 +1019,7 @@ void control_loop(int NA, int ND){
 
             } else if (flagGather(c) != 1 && flagSeek(c) != 1 && flagEnclose(c) != 1 && flagHerd(c) == 1)
             {
+                cout << "herding!" << endl;
                 int j1 = assign[c](0);
                 int jND = assign[c](NDinCluster(c)-1);
 
@@ -971,11 +1066,11 @@ void control_loop(int NA, int ND){
             }
 
         }
-
+        cout << "2.0" << endl;
         XD_Des.col(ti+1) = XD_des.as_col();
         WDString_mat.slice(ti) = WDString;
         vA_dot_arr.col(ti) = vA_dot.as_col();
-
+        cout << "2.1" << endl;
         for(int ii = 0; ii < NA; ii++)
         {
             if(arma::norm(rA.col(ii) - rP ) < rho_P)
@@ -983,7 +1078,7 @@ void control_loop(int NA, int ND){
                 uA.col(ii) = zeros<mat>(2,1);
             }
         }
-        
+        cout << "2.2" << endl;
         U.col(ti) = join_cols(uA.as_col(), uD.as_col());
         // double VA1_dot = 0;
         // for(int i = 0; i < NA; i++)
@@ -991,20 +1086,20 @@ void control_loop(int NA, int ND){
         //     mat tempM = vA.col(i).t() * uA.col(i);
         //     VA1_dot += tempM(0,0);
         // }
-
-        X.col(ti) = modifiedDIDynamics(XD.col(ti), U.col(ti));
+        cout << "2.3" << endl;
+        X.col(ti+1) = modifiedDIDynamics(X.col(ti), U.col(ti), dt, C_d);
         XA = reshape(X.submat(0,ti+1, 4*NA-1, ti+1), 4, NA);
         YA = XA;
         rA = XA.submat(0,0,1, XA.n_cols-1);
         vA = XA.submat(2,0,3, XA.n_cols-1);
-
+        cout << "2.4" << endl;
         XD = reshape(X.submat(4*NA, ti+1, 4*N-1, ti+1), 4, ND);
         mat XDp = reshape(X.submat(4*NA, ti, 4*N-1, ti), 4, ND);
         rD = XD.submat(0,0,1, XD.n_cols-1);
         mat vD = XD.submat(2,0,3, XD.n_cols-1);
 
         NClusterAD(ti+1) = NClusterAD(ti);
-
+        cout << "2.5" << endl;
         // Saturate the velocity if beyond the maximum
         for(int i = 0; i < NA; i++)
         {
@@ -1014,6 +1109,7 @@ void control_loop(int NA, int ND){
                 vA.col(i) = vA.col(i) * v_maxA(i) / norm_vA;
             }
         }
+        cout << "2.5.1" << endl;
         for (int j = 0; j < ND; j++)
         {
             double norm_vD = arma::norm(vD.col(j));
@@ -1022,13 +1118,16 @@ void control_loop(int NA, int ND){
                 vD.col(j) = vD.col(j) * v_maxD(j) / norm_vD;
             }
         }
-
+        cout << "2.5.2" << endl;
         XA = join_cols(rA, vA);
         XD = join_cols(rD, vD);
-
-        rDcm = arma::sum(XD.submat(0,0,1,ND), 1) / ND;
-        vDcm = arma::sum(XD.submat(2,0,3,ND), 1) / ND;
-
+        // XA.print("XA: ");
+        // XD.print("XD: ");
+        // cout << "2.5.3" << endl;
+        // cout << "XD shape: " << XD.n_rows << " ," << XD.n_cols << endl;
+        rDcm = arma::sum(XD.submat(0,0,1,ND-1), 1) / ND;
+        vDcm = arma::sum(XD.submat(2,0,3,ND-1), 1) / ND;
+        // cout << "2.6" << endl;
         for (int j = 0; j < ND; j++)
         {
             SD(j) = SD_arr(j, ti) + arma::norm(XD.submat(0,j,1,j) - XDp.submat(0,j,1,j));
@@ -1050,10 +1149,10 @@ void control_loop(int NA, int ND){
             }
             for (int i = 0; i < NA; i++)
             {
-                arr_minRAD(i, j) = arma::norm(rD.col(j) - rA.col(i))
+                arr_minRAD(i, j) = arma::norm(rD.col(j) - rA.col(i));
             }   
         }
-
+        cout << "2.7" << endl;
         if(!arr_minRDD.is_empty())
         {
             minRDD(ti+1) = arr_minRDD.min();
@@ -1064,7 +1163,7 @@ void control_loop(int NA, int ND){
             arr_minRAD(i,ND-1) = arma::norm(rD.col(ND-1)- rA.col(i));
         }
         minRAD(ti+1) = arr_minRAD.min();
-
+        cout << "2.8" << endl;
         mat RAiAl(1,NA);
         for (int i = 0; i < NA; i++)
         {
@@ -1072,37 +1171,40 @@ void control_loop(int NA, int ND){
             {
                 for (int ii = i+1; ii < NA; ii++)
                 {
-                    RAiAl = arma::norm(rA.col(i) - rA.col(ii));
+                    RAiAl.col(ii) = arma::norm(rA.col(i) - rA.col(ii));
                 }
                 arr_minRAA.resize(1,i+1);
                 mat tempM;
-                tempM = RDjDl.submat(0,i+1,0,RDjDl.n_cols-1);
-                arr_minRDD.col(i) = tempM.min();
+                tempM = RAiAl.submat(0,i+1,0,RAiAl.n_cols-1);
+                // cout <<"i: " << i << endl;
+                arr_minRAA.col(i) = tempM.min();
             }
         }
+        cout << "2.9" << endl; 
         if(!arr_minRAA.is_empty())
         {
             minRAA(ti+1) = arr_minRAA.min();
         }
 
-         if (NA > 1)
+        if (NA > 1)
         {
-            minEAO(ti)=(R_m_AA-rhoA_safe)/(control_A_result.R_AO_min);
+            minEAO(ti)=(R_m_AA-rhoA_safe)/(control_attacker_result.R_AO_min);
         }
 
-        minRAAProjS(ti)=(R_m_AD-rhoAD_safe)/control_A_result.R_AAProjS_min;
+        minRAAProjS(ti)=(R_m_AD-rhoAD_safe)/control_attacker_result.R_AAProjS_min;
         
         t=t+dt;
         times(ti+1)=t;
 
         out_ti = ti;
+        cout << "3.0" << endl;
 
     }
     if(out_ti == Niter)
     {
         out_ti++;
     }
-
+    cout << "deleting unnecessary elements" << endl;
     vA_dot_arr.col(out_ti) = vA_dot_arr.col(out_ti-1);
     FA_dot_arr.col(out_ti) = FA_dot_arr.col(out_ti-1);
     U.col(out_ti) = U.col(out_ti-1);
@@ -1139,216 +1241,218 @@ int main() {
     initial_contorl(NA, ND);
     getMotionPlan(NA,ND);
     calDistance(NA,ND);
-    // motionP_result.mP.assign.print("assign");
-    // control_loop(NA,ND);
-    // XD.load("/home/damon/Downloads/multi_swarm/controlD/XD.txt");
-    // // XD.print("XD: ");
-    // SD.load("/home/damon/Downloads/multi_swarm/controlD/SD.txt");
-    // mat indD;
-    // mat XD_des, XD_des_dot;
-    // indD.load("/home/damon/Downloads/multi_swarm/controlD/indD.txt");
-    // indD = indD-1;
-    // XD_des.load("/home/damon/Downloads/multi_swarm/controlD/XD_des.txt");
-    // XD_des_dot.load("/home/damon/Downloads/multi_swarm/controlD/XD_des_dot.txt");
-    // mat indDes;
-    // indDes.load("/home/damon/Downloads/multi_swarm/controlD/indDes.txt");
-    // indDes = indDes -1;
-    // mat uD;
-    // uD.load("/home/damon/Downloads/multi_swarm/controlD/uD.txt");
-    // // std::vector<vec> assign;
-    // // assign.push_back(assignment);
-    
-    // uD = controlDefender5(XD, SD, indD, assignment, XD_des, XD_des_dot, indDes, uD, motionP_result.mP, 0, ND);
-    // uD.print("uD after control Defender");
-
-    // mat tempM(4,1,fill::zeros);
-    // tempM(0) = 385.153071102075;
-    // tempM(1) = -176.086389266759;
-    // XDFc.reset();
-    // XDFc.set_size(3,1);
-    // XDFc(0) = tempM;
-    // tempM(0) = 443.375146160435;
-    // tempM(1) = 37.3666215895702;
-    // XDFc(1) = tempM;
-    // tempM(0) = 512.183053047588;
-    // tempM(1) = 289.629270783414;
-    // XDFc(2) = tempM;
-    // XDFc.print("XDFc: ");
-    // int clusterDNum = 1;
-    // mat XD_des, XD_des_dot, RDF_OPEN;
-    // XD_des.load();
-    // XD_des_dot.load();
-    // RDF_OPEN.load();
-    // rho_SN.load();
-    // std::vector<vec> indDes;
-    // vec tempV = {14,15,16,17,18};
-    // tempV = tempV - 1;
-    // indDes.push_back(tempV);
-    // tempV = {8,9,10,11,12,13};
-    // tempV = tempV - 1;
-    // indDes.push_back(tempV);
-    // tempV = {1,2,3,4,5,6,7};
-    // tempV = tempV - 1;
-    // indDes.push_back(tempV);
-    // int NDinCluster = 5;
-    // int NClusterD = 3;
-    // XA.load();
-    // rAcm.load();
-    // vAcm.load();
-    // rhoA_con.load();
-    // int NClusterAD = 3;
-
-    
-
-
-
-
-
-    // motionP_result.mP.assign.print("assign: ");
-//     AllocateMemory();
-//     measurements(2);
-//     initial_contorl();
-//     // arma::vec rAcm = {5.9807,-33.2064};
-//     // arma::vec rP = {14,-1};
-//     // path_elem p = findShortestPath(rAcm, rP);
-//     // p.rV.print("rV: ");
-//     // p.S.print("S: ");
-//     // double q = 16.0949;
-//     // CoorOnPath A = findCoordOnPath(q, p);
-//     // A.rp.print("rDFc0: ");
-//     // A.thetap.print("thetaAcom0: ");
-//     // v_maxD.print("v_maxD: ");
-//     // v_maxDC.print("v_maxDC: ");
-//     // u_maxD.print("u_maxD: ");
-//     // cout << "rho_P:" << rho_P << endl;
-//     // cout << "rho_safe:" << rho_safe << endl;
-//     // cout << "rho_sn:" << rho_sn << endl;
-//     // cout << "rho_Acon:" << rho_Acon << endl;
-//     // YA.print("YA:");
-    
-// //     XD0.print("XD0: ");
-//     // cout << "RDF_open:" << RDF_open << endl;
-//     // YA.load("../../../../../Downloads/swarm_matlab/controlD/YA.txt");
-//     // XD0.load("../../../../../Downloads/swarm_matlab/controlD/XD0.txt");
-//     getMoitonPlan();
-//     calDistance();
-//     checkFormation();
-    // mat XD_des = motionP_result.dDf.XD_des0;
-    // mat XD_des_dot = motionP_result.dDf.XD_des_dot0;
-    // std::ifstream fin("../../../../../Downloads/swarm_matlab/controlD/t.txt");
-    // double time;
-    // fin >> time;
-    // // time = 10;
-    // std::cout << "t: "<<time << std::endl;
-
-    // fin.close();
-    // XD.load("../../../../../Downloads/swarm_matlab/controlD/XD.txt");
-    // XD.print("XD: ");
-    // SD.load("../../../../../Downloads/swarm_matlab/controlD/SD.txt");
-    // SD.print("SD: ");
-    // // indDef.print("indDef: ");
-    // motionP_result.mP.assign.print("assign: ");
-    // XD_des.print("XD_des: ");
-    // XD_des_dot.print("XD_des_dot: ");
-    // mat uD = controlDefender5(XD,SD, regspace(1,1,4), motionP_result.mP.assign, XD_des, XD_des_dot, motionP_result.mP, time,3);
-    // uD.print("uD: ");
-    
-    // mat XDFc;
-    // XDFc.load("../../../../../Downloads/swarm_matlab/OpenForm/XDFc.txt");
-    // XA.load("../../../../../Downloads/swarm_matlab/OpenForm/XA.txt");
-    // XDFc.print("XDFc: ");
-    // XA.print("XA: ");
-    // std::ifstream fin("../../../../../Downloads/swarm_matlab/OpenForm/RDF0.txt");
-    // double RDF0;
-    // fin >> RDF0;
-    // std::cout << "RDF0: "<< RDF0 << std::endl;
-    // fin.close();
-
-    // fin.open("../../../../../Downloads/swarm_matlab/OpenForm/phi.txt");
-    // double phi;
-    // fin >> phi;
-    // std::cout << "phi: "<< phi << std::endl;
-    // fin.close();
-
-    // fin.open("../../../../../Downloads/swarm_matlab/OpenForm/phi_dot.txt");
-    // double phi_dot;
-    // fin >> phi_dot;
-    // std::cout << "phi_dot: "<< phi_dot << std::endl;
-    // fin.close();
-    // mat XD_des, XD_des_dot, uDFf_trans;
-    // double phi_ddot;
-    // defDesiredOpenForm(XDFc, RDF0, XA, phi, phi_dot, NA, ND, &XD_des, &XD_des_dot, &phi_ddot, &uDFf_trans, &flagAttInSight);
-    // XD_des.print("using pointer, XD_des:");
-    // XD_des_dot.print("using pointer, XD_des_dot: ");
-    // cout << "using pointer, phi_ddot: "<<phi_ddot << endl;
-    
-    // XD.load("../../../../../Downloads/swarm_matlab/controlDF/XD.txt");
-    // indDef.load("../../../../../Downloads/swarm_matlab/controlDF/indDef.txt");
-    // mat XD_des,XD_des_dot, uDFc_trans;
-    // XD_des.load("../../../../../Downloads/swarm_matlab/controlDF/XD_des.txt");
-    // XD_des_dot.load("../../../../../Downloads/swarm_matlab/controlDF/XD_des_dot.txt");
-    // uDFc_trans.load("../../../../../Downloads/swarm_matlab/controlDF/uDFc_trans.txt");
-    // XA.load("../../../../../Downloads/swarm_matlab/controlDF/XA.txt");
-    // XD.print("XD: ");
-    // indDef.print("indDef: ");
-    // XD_des.print("XD_des: ");
-    // XD_des_dot.print("XD_des_dot: ");
-    // uDFc_trans.print("uDFc_trans: ");
-    
-    // mat Abc = controlDefenderFormation4(XD, indDef, motionP_result.mP.assign, XD_des, XD_des_dot, uDFc_trans, XA, NA, 3, 1);
-    // // mat Abc = controlFiniteTimeTrajTracking(XD,indDef, XD_des, XD_des_dot,uDFc_trans, XA, ND, 1);
-    // Abc.print("Abc:");
-    // uD.print("uD: ");
-
-    // mat XDFc;
-    // XDFc.load("../../../../../Downloads/swarm_matlab/OpenForm/XDFc.txt");
-    // XA.load("../../../../../Downloads/swarm_matlab/OpenForm/XA.txt");
-
-    // std::ifstream fin("../../../../../Downloads/swarm_matlab/OpenForm/RDF0.txt");
-    // double RDF0;
-    // fin >> RDF0;
-    // fin.close();
-
-    // fin.open("../../../../../Downloads/swarm_matlab/OpenForm/phi0.txt");
-    // double phi0;
-    // fin >> phi0;
-    // fin.close();
-    
-    // fin.open("../../../../../Downloads/swarm_matlab/OpenForm/delta_t.txt");
-    // double delta_t;
-    // fin >> delta_t;
-    // fin.close();
-
-    // XDFc.print("XDFc:");
-    // cout << "RDF0: " << RDF0 << endl;
-    // cout << "phi0: " << phi0 << endl;
-    // XA.print("XA: ");
-    // cout << "delta_t: " << delta_t << endl;
-
-    // mat XD_des, XD_des_dot, uDFc_trans;
-    // XD_des.print("XD_des");
-    // XD_des_dot.print("XD_des_dot:");
-    // uDFc_trans.print("uDFc_trans: ");
-
-    // defDesiredClosedForm(XDFc, RDF0, phi0, XA,NA,ND, 1, delta_t, &XD_des, &XD_des_dot, &uDFc_trans);
-    // XD_des.print("XD_des pointer");
-    // XD_des_dot.print("XD_des_dot pointer:");
-    // uDFc_trans.print("uDFc_trans pointer: ");
-
-
-    // mat X0;
-    // X0.load("../../../../../Downloads/swarm_matlab/OpenForm/X0.txt");
-    // U.load("../../../../../Downloads/swarm_matlab/OpenForm/U.txt");
-    // std::ifstream fin("../../../../../Downloads/swarm_matlab/OpenForm/dt.txt");
-    // double dt;
-    // fin >> dt;
-    // fin.close();
-
-    // X0.print("X0:");
-    // U.print("U");
-    // cout << "dt: " << dt << endl;
-    // cout << "C_d: " << C_d << endl;
-    // mat X1 = modifiedDIDynamics(X0,U, dt, C_d);
-    // X1.print("X1: ");
-    
+    control_loop(NA,ND);
 }
+//     // motionP_result.mP.assign.print("assign");
+//     // control_loop(NA,ND);
+//     // XD.load("/home/damon/Downloads/multi_swarm/controlD/XD.txt");
+//     // // XD.print("XD: ");
+//     // SD.load("/home/damon/Downloads/multi_swarm/controlD/SD.txt");
+//     // mat indD;
+//     // mat XD_des, XD_des_dot;
+//     // indD.load("/home/damon/Downloads/multi_swarm/controlD/indD.txt");
+//     // indD = indD-1;
+//     // XD_des.load("/home/damon/Downloads/multi_swarm/controlD/XD_des.txt");
+//     // XD_des_dot.load("/home/damon/Downloads/multi_swarm/controlD/XD_des_dot.txt");
+//     // mat indDes;
+//     // indDes.load("/home/damon/Downloads/multi_swarm/controlD/indDes.txt");
+//     // indDes = indDes -1;
+//     // mat uD;
+//     // uD.load("/home/damon/Downloads/multi_swarm/controlD/uD.txt");
+//     // // std::vector<vec> assign;
+//     // // assign.push_back(assignment);
+    
+//     // uD = controlDefender5(XD, SD, indD, assignment, XD_des, XD_des_dot, indDes, uD, motionP_result.mP, 0, ND);
+//     // uD.print("uD after control Defender");
+
+//     // mat tempM(4,1,fill::zeros);
+//     // tempM(0) = 385.153071102075;
+//     // tempM(1) = -176.086389266759;
+//     // XDFc.reset();
+//     // XDFc.set_size(3,1);
+//     // XDFc(0) = tempM;
+//     // tempM(0) = 443.375146160435;
+//     // tempM(1) = 37.3666215895702;
+//     // XDFc(1) = tempM;
+//     // tempM(0) = 512.183053047588;
+//     // tempM(1) = 289.629270783414;
+//     // XDFc(2) = tempM;
+//     // XDFc.print("XDFc: ");
+//     // int clusterDNum = 1;
+//     // mat XD_des, XD_des_dot, RDF_OPEN;
+//     // XD_des.load();
+//     // XD_des_dot.load();
+//     // RDF_OPEN.load();
+//     // rho_SN.load();
+//     // std::vector<vec> indDes;
+//     // vec tempV = {14,15,16,17,18};
+//     // tempV = tempV - 1;
+//     // indDes.push_back(tempV);
+//     // tempV = {8,9,10,11,12,13};
+//     // tempV = tempV - 1;
+//     // indDes.push_back(tempV);
+//     // tempV = {1,2,3,4,5,6,7};
+//     // tempV = tempV - 1;
+//     // indDes.push_back(tempV);
+//     // int NDinCluster = 5;
+//     // int NClusterD = 3;
+//     // XA.load();
+//     // rAcm.load();
+//     // vAcm.load();
+//     // rhoA_con.load();
+//     // int NClusterAD = 3;
+
+    
+
+
+
+
+
+//     // motionP_result.mP.assign.print("assign: ");
+// //     AllocateMemory();
+// //     measurements(2);
+// //     initial_contorl();
+// //     // arma::vec rAcm = {5.9807,-33.2064};
+// //     // arma::vec rP = {14,-1};
+// //     // path_elem p = findShortestPath(rAcm, rP);
+// //     // p.rV.print("rV: ");
+// //     // p.S.print("S: ");
+// //     // double q = 16.0949;
+// //     // CoorOnPath A = findCoordOnPath(q, p);
+// //     // A.rp.print("rDFc0: ");
+// //     // A.thetap.print("thetaAcom0: ");
+// //     // v_maxD.print("v_maxD: ");
+// //     // v_maxDC.print("v_maxDC: ");
+// //     // u_maxD.print("u_maxD: ");
+// //     // cout << "rho_P:" << rho_P << endl;
+// //     // cout << "rho_safe:" << rho_safe << endl;
+// //     // cout << "rho_sn:" << rho_sn << endl;
+// //     // cout << "rho_Acon:" << rho_Acon << endl;
+// //     // YA.print("YA:");
+    
+// // //     XD0.print("XD0: ");
+// //     // cout << "RDF_open:" << RDF_open << endl;
+// //     // YA.load("../../../../../Downloads/swarm_matlab/controlD/YA.txt");
+// //     // XD0.load("../../../../../Downloads/swarm_matlab/controlD/XD0.txt");
+// //     getMoitonPlan();
+// //     calDistance();
+// //     checkFormation();
+//     // mat XD_des = motionP_result.dDf.XD_des0;
+//     // mat XD_des_dot = motionP_result.dDf.XD_des_dot0;
+//     // std::ifstream fin("../../../../../Downloads/swarm_matlab/controlD/t.txt");
+//     // double time;
+//     // fin >> time;
+//     // // time = 10;
+//     // std::cout << "t: "<<time << std::endl;
+
+//     // fin.close();
+//     // XD.load("../../../../../Downloads/swarm_matlab/controlD/XD.txt");
+//     // XD.print("XD: ");
+//     // SD.load("../../../../../Downloads/swarm_matlab/controlD/SD.txt");
+//     // SD.print("SD: ");
+//     // // indDef.print("indDef: ");
+//     // motionP_result.mP.assign.print("assign: ");
+//     // XD_des.print("XD_des: ");
+//     // XD_des_dot.print("XD_des_dot: ");
+//     // mat uD = controlDefender5(XD,SD, regspace(1,1,4), motionP_result.mP.assign, XD_des, XD_des_dot, motionP_result.mP, time,3);
+//     // uD.print("uD: ");
+    
+//     // mat XDFc;
+//     // XDFc.load("../../../../../Downloads/swarm_matlab/OpenForm/XDFc.txt");
+//     // XA.load("../../../../../Downloads/swarm_matlab/OpenForm/XA.txt");
+//     // XDFc.print("XDFc: ");
+//     // XA.print("XA: ");
+//     // std::ifstream fin("../../../../../Downloads/swarm_matlab/OpenForm/RDF0.txt");
+//     // double RDF0;
+//     // fin >> RDF0;
+//     // std::cout << "RDF0: "<< RDF0 << std::endl;
+//     // fin.close();
+
+//     // fin.open("../../../../../Downloads/swarm_matlab/OpenForm/phi.txt");
+//     // double phi;
+//     // fin >> phi;
+//     // std::cout << "phi: "<< phi << std::endl;
+//     // fin.close();
+
+//     // fin.open("../../../../../Downloads/swarm_matlab/OpenForm/phi_dot.txt");
+//     // double phi_dot;
+//     // fin >> phi_dot;
+//     // std::cout << "phi_dot: "<< phi_dot << std::endl;
+//     // fin.close();
+//     // mat XD_des, XD_des_dot, uDFf_trans;
+//     // double phi_ddot;
+//     // defDesiredOpenForm(XDFc, RDF0, XA, phi, phi_dot, NA, ND, &XD_des, &XD_des_dot, &phi_ddot, &uDFf_trans, &flagAttInSight);
+//     // XD_des.print("using pointer, XD_des:");
+//     // XD_des_dot.print("using pointer, XD_des_dot: ");
+//     // cout << "using pointer, phi_ddot: "<<phi_ddot << endl;
+    
+//     // XD.load("../../../../../Downloads/swarm_matlab/controlDF/XD.txt");
+//     // indDef.load("../../../../../Downloads/swarm_matlab/controlDF/indDef.txt");
+//     // mat XD_des,XD_des_dot, uDFc_trans;
+//     // XD_des.load("../../../../../Downloads/swarm_matlab/controlDF/XD_des.txt");
+//     // XD_des_dot.load("../../../../../Downloads/swarm_matlab/controlDF/XD_des_dot.txt");
+//     // uDFc_trans.load("../../../../../Downloads/swarm_matlab/controlDF/uDFc_trans.txt");
+//     // XA.load("../../../../../Downloads/swarm_matlab/controlDF/XA.txt");
+//     // XD.print("XD: ");
+//     // indDef.print("indDef: ");
+//     // XD_des.print("XD_des: ");
+//     // XD_des_dot.print("XD_des_dot: ");
+//     // uDFc_trans.print("uDFc_trans: ");
+    
+//     // mat Abc = controlDefenderFormation4(XD, indDef, motionP_result.mP.assign, XD_des, XD_des_dot, uDFc_trans, XA, NA, 3, 1);
+//     // // mat Abc = controlFiniteTimeTrajTracking(XD,indDef, XD_des, XD_des_dot,uDFc_trans, XA, ND, 1);
+//     // Abc.print("Abc:");
+//     // uD.print("uD: ");
+
+//     // mat XDFc;
+//     // XDFc.load("../../../../../Downloads/swarm_matlab/OpenForm/XDFc.txt");
+//     // XA.load("../../../../../Downloads/swarm_matlab/OpenForm/XA.txt");
+
+//     // std::ifstream fin("../../../../../Downloads/swarm_matlab/OpenForm/RDF0.txt");
+//     // double RDF0;
+//     // fin >> RDF0;
+//     // fin.close();
+
+//     // fin.open("../../../../../Downloads/swarm_matlab/OpenForm/phi0.txt");
+//     // double phi0;
+//     // fin >> phi0;
+//     // fin.close();
+    
+//     // fin.open("../../../../../Downloads/swarm_matlab/OpenForm/delta_t.txt");
+//     // double delta_t;
+//     // fin >> delta_t;
+//     // fin.close();
+
+//     // XDFc.print("XDFc:");
+//     // cout << "RDF0: " << RDF0 << endl;
+//     // cout << "phi0: " << phi0 << endl;
+//     // XA.print("XA: ");
+//     // cout << "delta_t: " << delta_t << endl;
+
+//     // mat XD_des, XD_des_dot, uDFc_trans;
+//     // XD_des.print("XD_des");
+//     // XD_des_dot.print("XD_des_dot:");
+//     // uDFc_trans.print("uDFc_trans: ");
+
+//     // defDesiredClosedForm(XDFc, RDF0, phi0, XA,NA,ND, 1, delta_t, &XD_des, &XD_des_dot, &uDFc_trans);
+//     // XD_des.print("XD_des pointer");
+//     // XD_des_dot.print("XD_des_dot pointer:");
+//     // uDFc_trans.print("uDFc_trans pointer: ");
+
+
+//     // mat X0;
+//     // X0.load("../../../../../Downloads/swarm_matlab/OpenForm/X0.txt");
+//     // U.load("../../../../../Downloads/swarm_matlab/OpenForm/U.txt");
+//     // std::ifstream fin("../../../../../Downloads/swarm_matlab/OpenForm/dt.txt");
+//     // double dt;
+//     // fin >> dt;
+//     // fin.close();
+
+//     // X0.print("X0:");
+//     // U.print("U");
+//     // cout << "dt: " << dt << endl;
+//     // cout << "C_d: " << C_d << endl;
+//     // mat X1 = modifiedDIDynamics(X0,U, dt, C_d);
+//     // X1.print("X1: ");
+    
+// }

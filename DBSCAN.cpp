@@ -71,8 +71,8 @@ vec DBSCAN(mat X, double epsilon, int MinPts)
 
 // int main(){
 //     mat X;
-//     X.load("/home/damon/Downloads/multi_swarm/dbs/X.txt");
-//     X = X.t();
+//     X.load("../dbs/XA_submat.csv");
+//     // X = X.t();
 //     X.print("X");
 //     double epsilon = 31.2254;
 //     vec a = DBSCAN(X,epsilon, 4);
