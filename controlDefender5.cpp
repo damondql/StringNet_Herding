@@ -70,6 +70,7 @@ mat controlDefender5(mat XD, mat SD, vec indD, vec assign, mat XD_des, mat XD_de
                         s_ddot=u_maxD(j);
                     }
                     // cout << "s_ddot" << s_ddot << endl;
+                    // cout << "calculating ud in if loop" << endl;
                     uD.col(j) = s_ddot*(rV.col(indS+1)-rV.col(indS))/norm(rV.col(indS+1)-rV.col(indS));
                 }
 
@@ -79,7 +80,7 @@ mat controlDefender5(mat XD, mat SD, vec indD, vec assign, mat XD_des, mat XD_de
                 // rD.print("rD: ");
                 // XD_des.print("XD_des: ");
                 // vD.print("vD: ");
-                uD.col(j) = -(rD.submat(0,j,1,j) - XD_des.submat(0,j,1,j)) - vD.submat(0,j,1,j);
+                uD.col(j) = -(rD.submat(0,j,1,j) - XD_des.submat(0,jj,1,jj)) - vD.submat(0,j,1,j);
             }
             
 

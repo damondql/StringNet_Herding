@@ -373,7 +373,7 @@ void control_loop(int NA, int ND){
     cube WDString_mat(ND,ND, Niter);
     vec RDF_OPEN;
     vec RDF_CLOSED;
-    int bound = 10483;
+    int bound = Niter;
     int countAinS = 0;
     int countAinP = 0;
     std::vector<mat> rAcm_new;
@@ -643,6 +643,7 @@ void control_loop(int NA, int ND){
         std::vector<vec> assign;
         if(flagGather(0) == 1)
         {
+            cout << "flag Gather(0) == 1 if loop" << endl;
             NClusterD.resize(ti+1);
             NClusterD(ti) = 1;
             indDes.push_back(regspace(0,1,ND-1));
@@ -673,6 +674,7 @@ void control_loop(int NA, int ND){
             }
         } else 
         {
+            cout << "flag Gather(0) == 1 else loop" << endl;
             NClusterD(ti) = NClusterD(ti-1);
             int NClusterD0 = NClusterD(ti);
             for (int c = 0; c < NClusterD(ti); c++)
@@ -685,7 +687,7 @@ void control_loop(int NA, int ND){
                         tempV(i) = NAinClusterAD(indexOfNewClusterAD[c](i));
                     }
                     
-                    
+                    cout << "before new assign result" << endl;
                     new_assign_elem new_assign_result = assignDefenders2ClustersMIQCP(rAcm_new[c], rD, indDes[c].n_elem, tempV, assign[c], indDes[c], R_DD_string);
                     int NNewClusterD = new_assign_result.assign.size();
                     for (int cc = 1; cc < NNewClusterD; cc++)
@@ -781,25 +783,25 @@ void control_loop(int NA, int ND){
                 // cout << "finished rA_follow" << endl;
             }
         }
-        if (ti == 2999) 
-        {
-            cout << "controlAttacker4:" << endl;
-            XA.print("XA: ");
-            XA_goal.print("XA_goal: ");
-            XA_goal_dot.print("XA_goal_dot:");
-            leaderIDA.print("leaderIDA");
-            XD.print("XD");
-            attacker_graph.W.print("attacker_graph.W");
-            attacker_graph.Rij_tilde.print("attacker_graph.Rij_tilde");
-            WDString.print("WDString: ");
-            clusteridA.print("clusteridA: ");
-            NAinClusterA.print("NAinClusterA: ");
-            rhoA_con_A.print("rhoA_con_A:");
-            for(int i = 0; i < assign.size(); i++) {
-                cout << "assign i: " << i << endl;
-                assign[i].print("assign:");
-            }
-        }
+        // if (ti == bound-1) 
+        // {
+        //     cout << "controlAttacker4:" << endl;
+        //     XA.print("XA: ");
+        //     XA_goal.print("XA_goal: ");
+        //     XA_goal_dot.print("XA_goal_dot:");
+        //     leaderIDA.print("leaderIDA");
+        //     XD.print("XD");
+        //     attacker_graph.W.print("attacker_graph.W");
+        //     attacker_graph.Rij_tilde.print("attacker_graph.Rij_tilde");
+        //     WDString.print("WDString: ");
+        //     clusteridA.print("clusteridA: ");
+        //     NAinClusterA.print("NAinClusterA: ");
+        //     rhoA_con_A.print("rhoA_con_A:");
+        //     for(int i = 0; i < assign.size(); i++) {
+        //         cout << "assign i: " << i << endl;
+        //         assign[i].print("assign:");
+        //     }
+        // }
         control_attacker_t control_attacker_result = controlAttacker4(XA, XA_goal, XA_goal_dot, leaderIDA, XD, attacker_graph.W, attacker_graph.Rij_tilde, WDString, NA, ND, clusteridA, indAinClusterA, NAinClusterA, rhoA_con_A, flagAEnclosed, assign, ti, bound);
         control_attacker_result.uA.print("control_attacker_result uA:");
         uA = control_attacker_result.uA;
@@ -849,15 +851,17 @@ void control_loop(int NA, int ND){
                     input_XD_des_dot.insert_cols(input_XD_des_dot.n_cols, XD_des_dot.col(indDes[c](k)));
                 }
                 uD = controlDefender5(XD, SD, indD, assign[c],input_XD_des, input_XD_des_dot, indDes[c], uD, motionP_result.mP, times(ti), ND);
-                
-                if(ti == bound - 1) 
-                {
-                    XD.print("XD: ");
-                    XD_des.print("XD_des: ");
-                }
-
+                uD.print("uD:");
+                // if(ti == bound - 1) 
+                // {
+                //     motionP_result.dDf.XD_des0.print("motionP_result XD_des0:");
+                //     XD.print("XD: ");
+                //     XD_des.print("XD_des: ");
+                // }
                 for (int j = 0; j < indD.n_elem; j++)
                 {
+                    // cout << "defender j: " << j << endl;
+                    // cout << "distance: " << arma::norm(XD.submat(0,indD(j),1,indD(j)) - XD_des.submat(0,indDes[c](j),1,indDes[c](j))) << endl;
                     if(arma::norm(XD.submat(0,indD(j),1,indD(j)) - XD_des.submat(0,indDes[c](j),1,indDes[c](j))) < 1e-3)
                     {
                         defReachCount(j) = 1;
@@ -1121,8 +1125,8 @@ void control_loop(int NA, int ND){
         cout << "2.5.2" << endl;
         XA = join_cols(rA, vA);
         XD = join_cols(rD, vD);
-        // XA.print("XA: ");
-        // XD.print("XD: ");
+        XA.print("XA: ");
+        XD.print("XD: ");
         // cout << "2.5.3" << endl;
         // cout << "XD shape: " << XD.n_rows << " ," << XD.n_cols << endl;
         rDcm = arma::sum(XD.submat(0,0,1,ND-1), 1) / ND;
@@ -1240,8 +1244,30 @@ int main() {
     measurements(NA,ND);
     initial_contorl(NA, ND);
     getMotionPlan(NA,ND);
+    // motionP_result.dDf.XD_des0.print("XD_des0");
     calDistance(NA,ND);
     control_loop(NA,ND);
+
+    // XD.load("/home/damon/Downloads/multi_swarm/controlD/XD.txt");
+    // SD.load("/home/damon/Downloads/multi_swarm/controlD/SD.txt");
+    // XD.print("XD: ");
+    // SD.print("XD: ");
+    // mat indD;
+    // mat XD_des, XD_des_dot;
+    // indD.load("/home/damon/Downloads/multi_swarm/controlD/indD.txt");
+    // indD = indD-1;
+    // XD_des.load("/home/damon/Downloads/multi_swarm/controlD/XD_des.txt");
+    // XD_des_dot.load("/home/damon/Downloads/multi_swarm/controlD/XD_des_dot.txt");
+    // mat indDes;
+    // indDes.load("/home/damon/Downloads/multi_swarm/controlD/indDes.txt");
+    // indDes = indDes -1;
+    // mat uD;
+    // uD.load("/home/damon/Downloads/multi_swarm/controlD/uD.txt");
+    // std::vector<vec> assign;
+    // assign.push_back(assignment);
+
+    // uD = controlDefender5(XD, SD, indD, assignment, XD_des, XD_des_dot, indDes, uD, motionP_result.mP, 0, ND);
+    // uD.print("uD after control Defender");
 }
 //     // motionP_result.mP.assign.print("assign");
 //     // control_loop(NA,ND);
