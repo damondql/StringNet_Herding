@@ -31,7 +31,7 @@ new_assign_elem assignDefenders2ClustersMIQCP(mat rAcm, mat rD, int ND, vec NAin
         }
         
     }
-    Dist.print("Dist:");
+    // Dist.print("Dist:");
     mat Dist_col = Dist.as_col();
     int N = Dist_col.n_elem;
 
@@ -52,7 +52,7 @@ new_assign_elem assignDefenders2ClustersMIQCP(mat rAcm, mat rD, int ND, vec NAin
         }
         b(j,0) = 1;
     }
-    cout << "finish first for loop" << endl;
+    // cout << "finish first for loop" << endl;
     for (int c = 0; c < NClusterAD; c++)
     {
         vec tempV = regspace(ND*(c),1,ND*(c+1)-1);
@@ -68,8 +68,8 @@ new_assign_elem assignDefenders2ClustersMIQCP(mat rAcm, mat rD, int ND, vec NAin
     // A.print("A: ");
     // b.print("b: ");
     
-    A.save("result_A.txt",raw_ascii);
-    b.save("result_b.txt",raw_ascii);
+    // A.save("result_A.txt",raw_ascii);
+    // b.save("result_b.txt",raw_ascii);
     mat result(NV,1);
     double cost;
     try {
@@ -174,7 +174,7 @@ new_assign_elem assignDefenders2ClustersMIQCP(mat rAcm, mat rD, int ND, vec NAin
         cout << "Exception during optimization" << endl;
     }
 
-    result.print("result: ");
+    // result.print("result: ");
     // Dist_col.print("obj:");
     mat cost_mat = Dist_col.t() * result;
     // double cost = cost_mat(0);
@@ -183,7 +183,7 @@ new_assign_elem assignDefenders2ClustersMIQCP(mat rAcm, mat rD, int ND, vec NAin
 
     uvec tempInd = find(result >= 0.9999);
     int tempSum = 0;
-    tempInd.print("tempInd:");
+    // tempInd.print("tempInd:");
     for (int c = 0; c < NClusterAD; c++)
     {
         if(c > 0)
@@ -203,7 +203,7 @@ new_assign_elem assignDefenders2ClustersMIQCP(mat rAcm, mat rD, int ND, vec NAin
         {
             tempV2(i) = assign0(tempV(i));
         }
-        // tempV2.print("assign: ");
+        tempV2.print("assign: ");
         assign_result.assign.push_back(tempV2);
         vec tempV3(tempV.n_elem);
         for (int i = 0; i < tempV2.n_elem; i++)
