@@ -7,6 +7,7 @@
 #include "defDesiredOpenForm.cpp"
 // #include "controlFiniteTimeTrajTracking.cpp"
 #include "inhull.cpp"
+#include "controlDefenderFormation.cpp"
 #include "controlDefenderFormation4.cpp"
 #include "defDesiredClosedForm.cpp"
 #include "modifiedDIDynamics.cpp"
@@ -372,7 +373,7 @@ void control_loop(int NA, int ND)
     cube WDString_mat(ND, ND, Niter);
     vec RDF_OPEN;
     vec RDF_CLOSED;
-    int bound = 10485;
+    int bound = 5000;
     int countAinS = 0;
     int countAinP = 0;
     std::vector<mat> rAcm_new;
@@ -518,7 +519,7 @@ void control_loop(int NA, int ND)
                         {
                             indAinClusterAD0.push_back(indAinClusterAD[c](arma::find(clusterIdAD0 == cc)));
                             mat tempXA(2, indAinClusterAD0[cc].n_elem);
-                            for(int XA_i = 0; XA_i < indAinClusterAD0[cc].n_elem; XA_i++) 
+                            for (int XA_i = 0; XA_i < indAinClusterAD0[cc].n_elem; XA_i++)
                             {
                                 tempXA.col(XA_i) = XA.submat(0, indAinClusterAD0[cc](XA_i), 1, indAinClusterAD0[cc](XA_i));
                             }
@@ -688,11 +689,11 @@ void control_loop(int NA, int ND)
         }
         else
         {
-            cout << "flag Gather(0) == 1 else loop" << endl;
+            // cout << "flag Gather(0) == 1 else loop" << endl;
             NClusterD.resize(ti + 1);
             NClusterD(ti) = NClusterD(ti - 1);
             int NClusterD0 = NClusterD(ti);
-            cout << "before for loop" << endl;
+            // cout << "before for loop" << endl;
             for (int c = 0; c < NClusterD(ti); c++)
             {
                 if (flagToSplitDefender(c))
@@ -703,29 +704,29 @@ void control_loop(int NA, int ND)
                         tempV(i) = NAinClusterAD(indexOfNewClusterAD[c](i));
                     }
 
-                    cout << "before new assign result" << endl;
-                    cout << "rAcm_new size: " << rAcm_new.size() << endl;
-                    rAcm_new[c].print("rAcm_new[c]");
-                    rD.print("rD");
-                    cout << "indDes size: " << indDes.size() << endl;
-                    cout << "indDes[c].n_elem: " << indDes[c].n_elem << endl;
-                    tempV.print("tempV");
-                    assign[c].print("assign");
-                    indDes[c].print("indDes[c]");
-                    cout << "R_DD_string" << R_DD_string << endl;
+                    // cout << "before new assign result" << endl;
+                    // cout << "rAcm_new size: " << rAcm_new.size() << endl;
+                    // rAcm_new[c].print("rAcm_new[c]");
+                    // rD.print("rD");
+                    // cout << "indDes size: " << indDes.size() << endl;
+                    // cout << "indDes[c].n_elem: " << indDes[c].n_elem << endl;
+                    // tempV.print("tempV");
+                    // assign[c].print("assign");
+                    // indDes[c].print("indDes[c]");
+                    // cout << "R_DD_string" << R_DD_string << endl;
                     new_assign_elem new_assign_result = assignDefenders2ClustersMIQCP(rAcm_new[c], rD, indDes[c].n_elem, tempV, assign[c], indDes[c], R_DD_string);
-                    cout << "got new assign result" << endl;
+                    // cout << "got new assign result" << endl;
                     int NNewClusterD = new_assign_result.assign.size();
                     for (int cc = 1; cc < NNewClusterD; cc++)
                     {
-                        cout << "into cc forloop" << endl;
+                        // cout << "into cc forloop" << endl;
                         int c1 = NClusterAD0 + cc - 3;
-                        cout << "c1: " << c1 << endl;
-                        flagGather.resize(c1+1);
-                        flagSeek.resize(c1+1);
-                        flagEnclose.resize(c1+1);
-                        flagHerd.resize(c1+1);
-                        cout << "flag resized!" << endl;
+                        // cout << "c1: " << c1 << endl;
+                        flagGather.resize(c1 + 1);
+                        flagSeek.resize(c1 + 1);
+                        flagEnclose.resize(c1 + 1);
+                        flagHerd.resize(c1 + 1);
+                        // cout << "flag resized!" << endl;
                         flagGather(c1) = flagGather(c);
                         flagSeek(c1) = flagSeek(c);
                         flagEnclose(c1) = flagEnclose(c);
@@ -733,26 +734,26 @@ void control_loop(int NA, int ND)
                         flagAttInSight.resize(c1 + 1);
                         flagAttInSight(c1) = flagAttInSight(c);
                         NDinCluster.resize(c1 + 1);
-                        NDinCluster(c1) = new_assign_result.assign[cc].n_elem; 
-                        cout << "flag vec set!" << endl;
+                        NDinCluster(c1) = new_assign_result.assign[cc].n_elem;
+                        // cout << "flag vec set!" << endl;
                         indDes.resize(c1 + 1);
                         assign.resize(c1 + 1);
                         indDes[c1] = new_assign_result.indDinSwarm[cc];
                         assign[c1] = new_assign_result.assign[cc];
-                        cout << "assign and indDes set!" << endl;
+                        // cout << "assign and indDes set!" << endl;
                         // cout << "NDinCluster(c1)" << NDinCluster(c1) << endl;
                         // cout << "new_assign_result.assign[cc](NDinCluster(c1): " << new_assign_result.assign[cc](NDinCluster(c1)-1) << endl;
                         // cout << "rD(1, new_assign_result.assign[cc](NDinCluster(c1)))" << rD(1, new_assign_result.assign[cc](NDinCluster(c1)-1)) << endl;
                         // cout << "rD(1, new_assign_result.assign[cc](0))" << rD(1, new_assign_result.assign[cc](0)) << endl;
                         // cout << "rD(0, new_assign_result.assign[cc](NDinCluster(c1)))" << rD(0, new_assign_result.assign[cc](NDinCluster(c1)-1)) << endl;
                         // cout << "rD(0, new_assign_result.assign[cc](0))" << rD(0, new_assign_result.assign[cc](0)) << endl;
-                        double phi0 = atan2(rD(1, new_assign_result.assign[cc](NDinCluster(c1)-1)) - rD(1, new_assign_result.assign[cc](0)), rD(0, new_assign_result.assign[cc](NDinCluster(c1)-1)) - rD(0, new_assign_result.assign[cc](0)));
-                        cout << "phi0: " << phi0 << endl; 
+                        double phi0 = atan2(rD(1, new_assign_result.assign[cc](NDinCluster(c1) - 1)) - rD(1, new_assign_result.assign[cc](0)), rD(0, new_assign_result.assign[cc](NDinCluster(c1) - 1)) - rD(0, new_assign_result.assign[cc](0)));
+                        // cout << "phi0: " << phi0 << endl;
                         phi.resize(c1 + 1);
                         phi_dot.resize(c1 + 1);
                         phi(c1) = phi0 + M_PI / 2;
                         phi_dot(c1) = 0;
-                        cout <<"finish phi_dot" << endl;
+                        // cout << "finish phi_dot" << endl;
                         rho_SN.resize(c1 + 1);
                         RDF_OPEN.resize(c1 + 1);
                         RDF_CLOSED.resize(c1 + 1);
@@ -761,15 +762,29 @@ void control_loop(int NA, int ND)
                         rho_SN(c1) = rhoA_con(c1) + rhoD_safe + 5;
                         RDF_OPEN(c1) = sf_RDF_open * M_PI / 2 * rho_SN(c1);
                         RDF_CLOSED(c1) = sf_RDF_closed * rho_SN(c1);
-                        XDFc[c1] = (XD_des.col(new_assign_result.indDinSwarm[cc](0)) + XD_des.col(new_assign_result.indDinSwarm[cc](NDinCluster(c1)-1))) / 2;
+                        XDFc[c1] = (XD_des.col(new_assign_result.indDinSwarm[cc](0)) + XD_des.col(new_assign_result.indDinSwarm[cc](NDinCluster(c1) - 1))) / 2;
                         flagSemiCircFormNotAchieved.resize(c1 + 1);
                         flagSemiCircFormNotAchieved(c1) = 0;
                         flagDefReachClosed.resize(c1 + 1);
                         flagDefReachClosed(c1) = 0;
-                        NClusterD0 = NClusterD0 + NNewClusterD - 1;
+                        // NClusterD0 = NClusterD0 + NNewClusterD - 1;
                         flagToSplitDefender.resize(c1 + 1);
                         flagToSplitDefender(c1) = 0;
                     }
+                    NDinCluster(c) = new_assign_result.assign[0].n_elem;
+                    indDes[c] = new_assign_result.indDinSwarm[0];
+                    assign[c] = new_assign_result.assign[0];
+                    double phi0 = atan2(rD(1, new_assign_result.assign[c](NDinCluster(c) - 1)) - rD(1, new_assign_result.assign[c](0)), rD(0, new_assign_result.assign[c](NDinCluster(c) - 1)) - rD(0, new_assign_result.assign[c](0)));
+                    phi(c) = phi0 + M_PI / 2;
+                    phi_dot(c) = 0;
+                    rho_SN(c) = rhoA_con(c) + rhoD_safe + 5;
+                    RDF_OPEN(c) = sf_RDF_open * M_PI / 2 * rho_SN(c);
+                    RDF_CLOSED(c) = sf_RDF_closed * rho_SN(c);
+                    XDFc[c] = (XD_des.col(new_assign_result.indDinSwarm[c](0)) + XD_des.col(new_assign_result.indDinSwarm[c](NDinCluster(c) - 1))) / 2;
+                    flagSemiCircFormNotAchieved(c) = 0;
+                    flagDefReachClosed(c) = 0;
+                    NClusterD0 = NNewClusterD;
+                    flagToSplitDefender(c) = 0;
                 }
             }
             NClusterD(ti) = NClusterD0;
@@ -833,25 +848,26 @@ void control_loop(int NA, int ND)
                 // cout << "finished rA_follow" << endl;
             }
         }
-        // if (ti == bound-1)
-        // {
-        //     cout << "controlAttacker4:" << endl;
-        //     XA.print("XA: ");
-        //     XA_goal.print("XA_goal: ");
-        //     XA_goal_dot.print("XA_goal_dot:");
-        //     leaderIDA.print("leaderIDA");
-        //     XD.print("XD");
-        //     attacker_graph.W.print("attacker_graph.W");
-        //     attacker_graph.Rij_tilde.print("attacker_graph.Rij_tilde");
-        //     WDString.print("WDString: ");
-        //     clusteridA.print("clusteridA: ");
-        //     NAinClusterA.print("NAinClusterA: ");
-        //     rhoA_con_A.print("rhoA_con_A:");
-        //     for(int i = 0; i < assign.size(); i++) {
-        //         cout << "assign i: " << i << endl;
-        //         assign[i].print("assign:");
-        //     }
-        // }
+        if (ti == bound - 1)
+        {
+            cout << "controlAttacker4:" << endl;
+            XA.print("XA: ");
+            XA_goal.print("XA_goal: ");
+            XA_goal_dot.print("XA_goal_dot:");
+            leaderIDA.print("leaderIDA");
+            XD.print("XD");
+            attacker_graph.W.print("attacker_graph.W");
+            attacker_graph.Rij_tilde.print("attacker_graph.Rij_tilde");
+            WDString.print("WDString: ");
+            clusteridA.print("clusteridA: ");
+            NAinClusterA.print("NAinClusterA: ");
+            rhoA_con_A.print("rhoA_con_A:");
+            for (int i = 0; i < assign.size(); i++)
+            {
+                cout << "assign i: " << i << endl;
+                assign[i].print("assign:");
+            }
+        }
         control_attacker_t control_attacker_result = controlAttacker4(XA, XA_goal, XA_goal_dot, leaderIDA, XD, attacker_graph.W, attacker_graph.Rij_tilde, WDString, NA, ND, clusteridA, indAinClusterA, NAinClusterA, rhoA_con_A, flagAEnclosed, assign, ti, bound);
         control_attacker_result.uA.print("control_attacker_result uA:");
         uA = control_attacker_result.uA;
@@ -901,7 +917,7 @@ void control_loop(int NA, int ND)
                     input_XD_des.insert_cols(input_XD_des.n_cols, XD_des.col(indDes[c](k)));
                     input_XD_des_dot.insert_cols(input_XD_des_dot.n_cols, XD_des_dot.col(indDes[c](k)));
                 }
-                uD = controlDefender5(XD, SD, indD, assign[c], input_XD_des, input_XD_des_dot, indDes[c], uD, motionP_result.mP, times(ti), ND);
+                uD = controlDefender5(XD, SD, indD, input_XD_des, input_XD_des_dot, indDes[c], uD, motionP_result.mP, times(ti), ND);
                 uD.print("uD:");
                 // if(ti == bound - 1)
                 // {
@@ -932,8 +948,40 @@ void control_loop(int NA, int ND)
                 cout << "seeking!" << endl;
                 uvec j1 = find(assign[c] == 1);
                 uvec jND = find(assign[c] == ND);
-                OpenForm OpenForm_result = defDesiredOpenForm(XDFc, c, &XD_des, &XD_des_dot, RDF_OPEN, rho_SN, indDes, NDinCluster(c), NClusterD(ti), YA, rAcm, vAcm, rhoA_con, NClusterAD(ti), c, phi(c), phi_dot(c), NA, ND, 0);
+                // cout << "enter defDesiredOpenForm" << endl;
+                // for(int p_i = 0; p_i < XDFc.size(); p_i++)
+                // {
+                //     XDFc[p_i].print("XDFc: ");
+                // }
+                // cout << "c: "<<c << endl;
+                // XD_des.print("XD_des");
+                // XD_des_dot.print("XD_des_dot");
+                // RDF_OPEN.print("RDF_OPEN");
+                // rho_SN.print("rho_SN");
+                // for(int p_i = 0; p_i < indDes.size(); p_i++)
+                // {
+                //     indDes[p_i].print("indDes: ");
+                // }
+                // cout << "NDinCluster(c): " << NDinCluster(c) << endl;
+                // cout << "NClusterD(ti): " <<NClusterD(ti) << endl;
+                // YA.print("YA");
+                // rAcm.print("rAcm");
+                // vAcm.print("vAcm");
+                // rhoA_con.print("rhoA_con");
+                // cout << "NClusterAD(ti): " << NClusterAD(ti) << endl;
+                // cout << "phi(c): " << phi(c) << endl;
+                // cout << "phi_dot(c): " << phi_dot(c) << endl;
+                OpenForm OpenForm_result = defDesiredOpenForm(XDFc, c + 1, &XD_des, &XD_des_dot, RDF_OPEN, rho_SN, indDes, NDinCluster(c), NClusterD(ti), YA, rAcm, vAcm, rhoA_con, NClusterAD(ti), c + 1, phi(c), phi_dot(c), NA, ND, 0);
+                uDFc_trans = OpenForm_result.uDFc_trans;
+                // cout << "seeking openform result!" << endl;
+                // cout << "OpenForm_result.phi_dot: " << OpenForm_result.phi_dot << endl;
+                // cout << "OpenForm_result.phi_ddot: " << OpenForm_result.phi_ddot << endl;
+                // XDFc[c].print("XDFc[c]: ");
+                // uDFc_trans.print("uDFc_trans: ");
+                // cout << "dt: " << dt << endl;
+                // cout << "C_d: " << C_d << endl;
                 XDFc[c] = modifiedDIDynamics(XDFc[c], uDFc_trans, dt, C_d);
+                // cout << "modified DIDynamics !" << endl;
                 phi(c) += OpenForm_result.phi_dot * dt;
                 if (phi(c) > 2 * M_PI)
                 {
@@ -944,11 +992,25 @@ void control_loop(int NA, int ND)
                 mat input_XD_des_dot;
                 for (int i = 0; i < indDes[c].n_elem; i++)
                 {
-                    input_XD_des.insert_cols(input_XD_des.n_cols, XD_des.col(i));
-                    input_XD_des_dot.insert_cols(input_XD_des_dot.n_cols, XD_des_dot.col(i));
+                    input_XD_des.insert_cols(input_XD_des.n_cols, XD_des.col(indDes[c](i)));
+                    input_XD_des_dot.insert_cols(input_XD_des_dot.n_cols, XD_des_dot.col(indDes[c](i)));
                 }
 
-                uD = controlDefenderFormation4(XD, indD, input_XD_des, input_XD_des_dot, rhoA_con, YA, indAinClusterAD, NClusterAD(ti), 1, NA, ND);
+                // cout << "input_XD_des set" << endl;
+                // XD.print("XD: ");
+                // indD.print("indD: ");
+                // input_XD_des.print("input_XD_des: ");
+                // input_XD_des_dot.print("input_XD_des_dot: ");
+                // rhoA_con.print("rhoA_con: ");
+                // YA.print("YA: ");
+                for (int p_i = 0; p_i < indAinClusterAD.size(); p_i++)
+                {
+                    indAinClusterAD[p_i].print("indAinClusterAD[p_i]");
+                }
+                cout << "NClusterAD(ti)" << NClusterAD(ti) << endl;
+
+                uD = controlDefenderFormation(XD, indD, input_XD_des, input_XD_des_dot, rhoA_con, YA, indAinClusterAD, NClusterAD(ti), 1, NA, ND, uD);
+                uD.print("seeking uD: ");
                 double ti_2 = ti;
                 mat tempM = rAcm.col(c).t() * rDcm.col(c);
                 if (((arma::norm(rAcm.col(c) - rDcm.col(c)) < (2.9 * rho_SN(c))) && flagAttInSight(c)) || ((arma::norm(rAcm.col(c) - rDcm.col(c)) < (3.5 * rho_SN(c))) && tempM(0, 0) > 0))
@@ -961,16 +1023,19 @@ void control_loop(int NA, int ND)
             else if (flagGather(c) != 1 && flagSeek(c) != 1 && flagEnclose(c) == 1 && flagHerd(c) != 1)
             {
                 cout << "closing!" << endl;
+                cout << "ti = " << ti << endl;
+                return;
                 if (flagDForm != 1)
                 {
                     flagDForm = 1;
                 }
-
+                cout << "set flagDForm to 1" << endl;
                 for (int jj = 0; jj < indDes[c].n_elem; jj++)
                 {
                     int j = indDes[c](jj);
                     double RD0 = RDF_CLOSED[c];
                     double thetaD;
+                    // cout << "j: " << j << endl;
                     if (flagSemiCircFormNotAchieved(c) == 0)
                     {
                         thetaD = phi(c) + M_PI / 2 + M_PI * (jj) / (NDinCluster(c) - 1);
@@ -979,17 +1044,22 @@ void control_loop(int NA, int ND)
                     {
                         thetaD = phi(c) + 2 * M_PI * (jj + 1) / NDinCluster(c) - M_PI / NDinCluster(c);
                     }
+                    // cout <<"thetaD: " << thetaD << endl;
                     mat tempM1(2, 1);
                     mat tempM2(2, 1);
                     tempM1(0, 0) = cos(thetaD);
                     tempM1(1, 0) = sin(thetaD);
                     tempM2 = rAcm.col(c) + RD0 * tempM1;
+                    // cout << "XD_des size: " << XD_des.n_rows << " x " << XD_des.n_cols << endl;
+                    // cout << "XD_des_dot size: " << XD_des_dot.n_rows << " x " << XD_des_dot.n_cols << endl;
+                    // vAcm.col(c).print("vAcm.col(c): ");
                     XD_des.col(j) = join_cols(tempM2, vAcm.col(c));
                     XD_des_dot.col(j) = zeros<mat>(4, 1);
                 }
+                cout << "finish for loop of XD_des and XD_des_dot" << endl;
                 // Check if the terminal defenders should be connected or not
-                int j1 = assign[c](1);               //Defender corresponding to first desired position
-                int jND = assign[c](NDinCluster(c)); //Defender corresponding to last desired position
+                int j1 = assign[c](0);                   //Defender corresponding to first desired position
+                int jND = assign[c](NDinCluster(c) - 1); //Defender corresponding to last desired position
 
                 int NAEnclosed = 0;
                 for (int ii = 0; ii < NAinClusterAD(c); ii++)
@@ -1010,7 +1080,7 @@ void control_loop(int NA, int ND)
                         flagAEnclosed(indAinClusterAD[c](ii)) = 1;
                     }
                 }
-
+                cout << "flagAEnclosed set!" << endl;
                 if (NAEnclosed == NAinClusterAD(c))
                 {
                     flagClusterAEnclosed(c) = 1;
@@ -1026,17 +1096,20 @@ void control_loop(int NA, int ND)
                     WDString(j1, jND) = 0;
                     WDString(jND, j1) = 0;
                 }
-
-                if ((arma::norm(XD.submat(0, j1, 1, j1) - XD_des.submat(0, indDes[c](0), 1, indDes[c](0))) < bd || arma::norm(XD.submat(0, jND, 1, jND) - XD_des.submat(0, indDes[c](NDinCluster(c)) - 1, 1, indDes[c](NDinCluster(c) - 1))) < bd) && flagSemiCircFormNotAchieved(c) == 0)
+                cout << "finish setting WDString" << endl;
+                if ((arma::norm(XD.submat(0, j1, 1, j1) - XD_des.submat(0, indDes[c](0), 1, indDes[c](0))) < bd || arma::norm(XD.submat(0, jND, 1, jND) - XD_des.submat(0, indDes[c](NDinCluster(c) - 1), 1, indDes[c](NDinCluster(c) - 1))) < bd) && flagSemiCircFormNotAchieved(c) == 0)
                 {
                     flagSemiCircFormNotAchieved(c) = 1;
                 }
-
+                cout << "finish setting flagSemiCircFormNotAchieved" << endl;
                 int countDefConnect = 0;
                 for (int j = 0; j < NDinCluster(c); j++)
                 {
-                    if (j >= NDinCluster(c))
+                    cout << "j: " << j << endl;
+                    if (j >= NDinCluster(c) - 1)
                     {
+                        cout << "if loop " << endl;
+                        cout << "WDString(indD(NDinCluster(c) - 1), indD(0): " << WDString(indD(NDinCluster(c) - 1), indD(0)) << endl;
                         if (WDString(indD(NDinCluster(c) - 1), indD(0)) == 1)
                         {
                             countDefConnect++;
@@ -1044,13 +1117,16 @@ void control_loop(int NA, int ND)
                     }
                     else
                     {
+                        cout << "else loop " << endl;
+                        indD.print("indD: ");
+                        cout << "WDString(indD(j), indD(j + 1): " << WDString(indD(j), indD(j + 1)) << endl;
                         if (WDString(indD(j), indD(j + 1)) == 1)
                         {
                             countDefConnect++;
                         }
                     }
                 }
-
+                cout << "finish seting coutDefConnect" << endl;
                 if (countDefConnect == NDinCluster(c))
                 {
                     flagHerd(c) = 1;
@@ -1058,13 +1134,14 @@ void control_loop(int NA, int ND)
                 }
                 mat XD_des_input;
                 mat XD_des_dot_input;
-                for (int input_i; input_i < indDes[c].n_elem; input_i++)
+                for (int input_i = 0; input_i < indDes[c].n_elem; input_i++)
                 {
                     XD_des_input.insert_cols(XD_des_input.n_cols, XD_des.col(indDes[c](input_i)));
                     XD_des_dot_input.insert_cols(XD_des_dot_input.n_cols, XD_des_dot.col(indDes[c](input_i)));
                 }
-                mat uD = controlDefenderFormation4(XD, indD, XD_des_input, XD_des_dot_input, rhoA_con, YA, indAinClusterAD, NClusterAD(ti), 1, NA, ND);
-
+                cout << "controlling Defender Formation 4" << endl;
+                uD = controlDefenderFormation4(XD, indD, XD_des_input, XD_des_dot_input, rhoA_con, YA, indAinClusterAD, NClusterAD(ti), 1, NA, ND, uD);
+                uD.print("closing uD: ");
                 ti_e(c) = ti;
                 XDF_des = XD_des;
                 XDFc[c] = join_cols(rAcm.col(c), vAcm.col(c));
@@ -1114,7 +1191,7 @@ void control_loop(int NA, int ND)
                         XD_des_input.insert_cols(XD_des_input.n_cols, XD_des.col(indDes[c](input_i)));
                         XD_des_dot_input.insert_cols(XD_des_dot_input.n_cols, XD_des_dot.col(indDes[c](input_i)));
                     }
-                    mat uD = controlDefenderFormation4(XD, indD, XD_des_input, XD_des_dot_input, rhoA_con, YA, indAinClusterAD, NClusterAD(ti), 0, NA, ND);
+                    uD = controlDefenderFormation4(XD, indD, XD_des_input, XD_des_dot_input, rhoA_con, YA, indAinClusterAD, NClusterAD(ti), 0, NA, ND, uD);
                 }
             }
         }
@@ -1132,12 +1209,12 @@ void control_loop(int NA, int ND)
         }
         cout << "2.2" << endl;
         U.col(ti) = join_cols(uA.as_col(), uD.as_col());
-        // double VA1_dot = 0;
-        // for(int i = 0; i < NA; i++)
-        // {
-        //     mat tempM = vA.col(i).t() * uA.col(i);
-        //     VA1_dot += tempM(0,0);
-        // }
+        double VA1_dot = 0;
+        for (int i = 0; i < NA; i++)
+        {
+            mat tempM = vA.col(i).t() * uA.col(i);
+            VA1_dot += tempM(0, 0);
+        }
         cout << "2.3" << endl;
         X.col(ti + 1) = modifiedDIDynamics(X.col(ti), U.col(ti), dt, C_d);
         XA = reshape(X.submat(0, ti + 1, 4 * NA - 1, ti + 1), 4, NA);
@@ -1290,6 +1367,24 @@ int main()
     // motionP_result.dDf.XD_des0.print("XD_des0");
     calDistance(NA, ND);
     control_loop(NA, ND);
+    // XD.load("/home/damon/Downloads/multi_swarm/controlD/XD.txt");
+    // SD.load("/home/damon/Downloads/multi_swarm/controlD/SD.txt");
+    // XD.print("XD: ");
+    // SD.print("SD: ");
+    // mat indD;
+    // mat XD_des, XD_des_dot;
+    // indD.load("/home/damon/Downloads/multi_swarm/controlD/indD.txt");
+    // indD = indD - 1;
+    // indD.print("indD:");
+    // XD_des.load("/home/damon/Downloads/multi_swarm/controlD/XD_des.txt");
+    // XD_des_dot.load("/home/damon/Downloads/multi_swarm/controlD/XD_des_dot.txt");
+    // // mat indD, XD_des, XD_des_dot;
+    // XD_des.print("XD_des: ");
+    // XD_des_dot.print("XD_des_dot:");
+    
+    // mat uD;
+
+
 
     // XD.load("/home/damon/Downloads/multi_swarm/controlD/XD.txt");
     // SD.load("/home/damon/Downloads/multi_swarm/controlD/SD.txt");
@@ -1302,14 +1397,16 @@ int main()
     // XD_des.load("/home/damon/Downloads/multi_swarm/controlD/XD_des.txt");
     // XD_des_dot.load("/home/damon/Downloads/multi_swarm/controlD/XD_des_dot.txt");
     // mat indDes;
+    // vec indDes;
     // indDes.load("/home/damon/Downloads/multi_swarm/controlD/indDes.txt");
-    // indDes = indDes -1;
-    // mat uD;
+    // indDes = indDes - 1;
+    // // mat uD;
+    // indDes.print("indDes:");
     // uD.load("/home/damon/Downloads/multi_swarm/controlD/uD.txt");
-    // std::vector<vec> assign;
-    // assign.push_back(assignment);
+    // // std::vector<vec> assign;
+    // // assign.push_back(assignment);
 
-    // uD = controlDefender5(XD, SD, indD, assignment, XD_des, XD_des_dot, indDes, uD, motionP_result.mP, 0, ND);
+    // uD = controlDefender5(XD, SD, indD, XD_des, XD_des_dot, indDes, uD,motionP_result.mP, 49.99, 18);
     // uD.print("uD after control Defender");
 }
 //     // motionP_result.mP.assign.print("assign");

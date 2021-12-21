@@ -426,6 +426,8 @@ double C_A_D2;
 double D_A_D2;
 
 void calVfieldA() {
+    alphaDFr = alphaDFv/(2-alphaDFv);
+    
     R_bar_AD1= 95*rho_A;  //65
     R_bar_AD2= 105*rho_A;  //75
     R_m_AD= 1*(rho_A+rho_D)+rhoAD_safe+2;

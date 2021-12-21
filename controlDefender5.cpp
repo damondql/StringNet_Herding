@@ -6,7 +6,7 @@
 using namespace std;
 using namespace arma;
 
-mat controlDefender5(mat XD, mat SD, vec indD, vec assign, mat XD_des, mat XD_des_dot, vec indDes, mat uD, motionPlan motionPlan_result, double t, int ND){
+mat controlDefender5(mat XD, mat SD, vec indD, mat XD_des, mat XD_des_dot, vec indDes, mat uD, motionPlan motionPlan_result, double t, int ND){
     // mat temp_M;
     // for (int i = 0; i < indDef.n_elem; i++)
     // {
@@ -93,3 +93,10 @@ mat controlDefender5(mat XD, mat SD, vec indD, vec assign, mat XD_des, mat XD_de
     return uD;
     
 }
+
+// int main()
+// {
+//     mat XD, SD, indD, assign, XD_des, XD_des_dot;
+//     std::vector<vec> indDes;
+//     mat uD
+// }

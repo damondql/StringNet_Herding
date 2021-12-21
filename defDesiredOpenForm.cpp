@@ -58,7 +58,7 @@ OpenForm defDesiredOpenForm(std::vector<mat> XDFc, int clusterDNum, mat *XD_des,
     // cout <<"asin(RDF0) / arma::norm(drc): " << asin(RDF0) / arma::norm(drc) << endl; 
     // cout << "fabs(asin(RDF0) / arma::norm(drc)): " << fabs(asin(RDF0) / arma::norm(drc)) << endl;
     // cout << "dphi: " << dphi << endl;
-    if (dphi<abs(asin((RDF0)/arma::norm(rDFc - rAcm.col(clusterADNum)))))
+    if (dphi<abs(asin((RDF0)/arma::norm(rDFc - rAcm.col(clusterADNum-1)))))
     {
         flagAttInSight1 = 1;
     } else {
@@ -338,5 +338,6 @@ OpenForm defDesiredOpenForm(std::vector<mat> XDFc, int clusterDNum, mat *XD_des,
 //     XD_des.print("XD_des");
 //     XD_des_dot.print("XD_des_dot: ");
 //     cout << "phi_ddot: " << result.phi_ddot << endl;
+//     result.uDFc_trans.print("uDFc_trans: ");
 //     return 1;
 // }

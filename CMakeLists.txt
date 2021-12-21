@@ -30,6 +30,10 @@ include_directories(/home/damon/softwares/libconfig-1.7.3/lib)
 find_library(LIBCONFIGPP_LOCATION libconfig++)
 
 
+add_executable(mainHD mainHerdDouble.cpp)
+target_link_libraries(mainHD "/opt/gurobi912/linux64/lib/libgurobi_c++.a" "/opt/gurobi912/linux64/lib/libgurobi91.so" -O2 -larmadillo)
+
+
 # add_executable( ifopt_test ifopt_test.cpp )
 # add_executable( test test.cpp )
 # add_executable(findShortestPath findShortestPath.cpp)
@@ -39,8 +43,6 @@ find_library(LIBCONFIGPP_LOCATION libconfig++)
 #  target_link_libraries(test1 -O2 -larmadillo)
 #  add_executable(test2 interSecLineLine.cpp)
 #  target_link_libraries(test2 -O2 -larmadillo)
- add_executable(mainHD mainHerdDouble.cpp)
- target_link_libraries(mainHD "/opt/gurobi912/linux64/lib/libgurobi_c++.a" "/opt/gurobi912/linux64/lib/libgurobi91.so" -O2 -larmadillo)
 #  add_executable(test3 defGoalAssignMIQP.cpp)
 #  target_link_libraries(test3 "/opt/gurobi912/linux64/lib/libgurobi_c++.a" "/opt/gurobi912/linux64/lib/libgurobi91.so" -O2 -larmadillo)
 # add_executable(test4 defInitDesirePos.cpp)
@@ -72,3 +74,6 @@ find_library(LIBCONFIGPP_LOCATION libconfig++)
 
 # add_executable(dbs DBSCAN.cpp)
 #  target_link_libraries(dbs -O2 -larmadillo)
+
+# add_executable(formation controlDefenderFormation.cpp)
+#  target_link_libraries(formation -O2 -larmadillo)
